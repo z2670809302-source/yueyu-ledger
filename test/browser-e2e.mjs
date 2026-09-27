@@ -297,6 +297,35 @@ try {
   const mobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/mobile.png", Buffer.from(mobile.data, "base64"));
 
+  const phoneSizes = [
+    { name: "small-320", width: 320, height: 568, scale: 2 },
+    { name: "standard-375", width: 375, height: 667, scale: 3 },
+    { name: "large-430", width: 430, height: 932, scale: 3 }
+  ];
+  for (const phone of phoneSizes) {
+    await call("Emulation.setDeviceMetricsOverride", { width: phone.width, height: phone.height, deviceScaleFactor: phone.scale, mobile: true });
+    const layout = await evaluate(`(() => {
+      const card = document.querySelector('.balance-sheet').getBoundingClientRect();
+      const nav = document.querySelector('.bottom-nav').getBoundingClientRect();
+      const amountCells = [...document.querySelectorAll('.balance-grid strong, .category-row strong')];
+      return {
+        viewportWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        cardFits: card.left >= 0 && card.right <= document.documentElement.clientWidth,
+        navFits: nav.left >= 0 && nav.right <= document.documentElement.clientWidth,
+        amountsFit: amountCells.every((cell) => cell.scrollWidth <= cell.clientWidth + 1)
+      };
+    })()`);
+    assert.equal(layout.viewportWidth, phone.width);
+    assert.equal(layout.scrollWidth, phone.width);
+    assert.equal(layout.cardFits, true);
+    assert.equal(layout.navFits, true);
+    assert.equal(layout.amountsFit, true);
+    const screenshot = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+    await writeFile(`.impeccable/review/${phone.name}.png`, Buffer.from(screenshot.data, "base64"));
+  }
+  await call("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
+
   await evaluate("document.querySelector('[data-category=\"daily\"]').click(); true");
   const detailMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/detail-mobile.png", Buffer.from(detailMobile.data, "base64"));

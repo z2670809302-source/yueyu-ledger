@@ -29,7 +29,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, label:has(input
 }
 ::selection { background: #d8ab78; color: #261b12; }
 
-.app-shell { width: min(100%, 760px); margin: 0 auto; padding: max(12px, env(safe-area-inset-top)) 18px calc(112px + env(safe-area-inset-bottom)); }
+.app-shell { width: min(100%, 760px); margin: 0 auto; padding: max(12px, env(safe-area-inset-top)) clamp(12px, 4.6vw, 22px) calc(112px + env(safe-area-inset-bottom)); }
 .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin: 0 0 12px; }
 .date-line { margin: 4px 0 0; color: var(--ink-soft); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: 0.74rem; letter-spacing: 0.04em; }
 h1, h2, p { margin-top: 0; }
@@ -47,18 +47,18 @@ h2 { margin-bottom: 3px; font-size: 1.16rem; letter-spacing: -0.02em; }
 .month-button strong { display: block; font-size: 1rem; }
 .month-button span { display: block; margin-top: 2px; color: var(--ink-soft); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: 0.72rem; }
 
-.balance-sheet { position: relative; overflow: hidden; padding: 17px 20px 15px; border-radius: var(--radius); background: var(--ink); color: #fdf7eb; box-shadow: var(--shadow); }
+.balance-sheet { position: relative; overflow: hidden; padding: clamp(15px, 4.4vw, 20px); border-radius: var(--radius); background: var(--ink); color: #fdf7eb; box-shadow: var(--shadow); }
 .balance-sheet::after { position: absolute; right: -25px; top: -58px; width: 128px; height: 128px; border: 1px solid rgba(255,255,255,.09); border-radius: 50%; content: ""; }
 .balance-heading { display: flex; justify-content: space-between; align-items: center; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: 0.8rem; color: #c8cfcc; }
 .text-button { padding: 4px 0; border: 0; background: transparent; color: var(--red); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
 .balance-sheet .text-button { color: #f0b9aa; }
 .balance-value { margin: 5px 0 14px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", sans-serif; font-size: clamp(2.2rem, 10vw, 4.25rem); font-weight: 650; line-height: 1; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
 .balance-rule { height: 1px; background: rgba(255,255,255,.16); }
-.balance-grid { display: grid; grid-template-columns: 50px minmax(0, 1fr) minmax(0, 1fr); align-items: center; row-gap: 8px; padding: 10px 0; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-variant-numeric: tabular-nums; }
+.balance-grid { display: grid; grid-template-columns: clamp(40px, 13vw, 54px) minmax(0, 1fr) minmax(0, 1fr); align-items: center; row-gap: 8px; padding: 10px 0; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-variant-numeric: tabular-nums; }
 .balance-grid .grid-heading { color: #abb4b0; font-size: .68rem; text-align: right; }
 .balance-grid .grid-label { color: #abb4b0; font-size: .72rem; }
-.balance-grid strong { font-size: .84rem; text-align: right; white-space: nowrap; }
-.balance-grid strong[id$="Remaining"] { color: #fdf7eb; font-size: .91rem; }
+.balance-grid strong { font-size: clamp(.72rem, 3.45vw, .9rem); text-align: right; white-space: nowrap; }
+.balance-grid strong[id$="Remaining"] { color: #fdf7eb; font-size: clamp(.78rem, 3.7vw, .96rem); }
 .balance-difference { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.16); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
 .balance-difference span { color: #abb4b0; font-size: .72rem; }
 .balance-difference strong { font-size: .91rem; font-variant-numeric: tabular-nums; }
@@ -69,14 +69,14 @@ h2 { margin-bottom: 3px; font-size: 1.16rem; letter-spacing: -0.02em; }
 .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 8px; }
 .section-heading p { margin-bottom: 0; color: var(--ink-soft); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: 0.76rem; }
 .ledger-table { overflow: hidden; padding: 6px 0; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--ink); }
-.ledger-row { display: grid; grid-template-columns: minmax(112px, 1.25fr) 1fr 1fr; align-items: center; width: 100%; min-height: 46px; border: 0; border-bottom: 1px solid var(--rule); background: transparent; text-align: right; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-variant-numeric: tabular-nums; }
+.ledger-row { display: grid; grid-template-columns: minmax(88px, 1.15fr) minmax(0, 1fr) minmax(0, 1fr); align-items: center; width: 100%; min-height: 46px; border: 0; border-bottom: 1px solid var(--rule); background: transparent; text-align: right; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-variant-numeric: tabular-nums; }
 .ledger-row:last-child { border-bottom: 0; }
 .ledger-row > :first-child { text-align: left; }
 .ledger-head { min-height: 32px; color: var(--ink-soft); font-size: 0.72rem; }
 .category-row { cursor: pointer; }
 .category-row:active { background: rgba(255,255,255,.38); }
 .category-row span { display: flex; align-items: center; gap: 9px; font-size: 0.88rem; }
-.category-row strong { font-size: 0.82rem; font-weight: 650; }
+.category-row strong { font-size: clamp(.7rem, 3.3vw, .84rem); font-weight: 650; white-space: nowrap; }
 .category-actual { display: grid; justify-items: end; gap: 2px; }
 .category-actual small { color: var(--red-dark); font-size: .75rem; font-weight: 650; }
 .direction-mark { width: 5px; height: 22px; border-radius: 3px; background: var(--red); }
@@ -175,6 +175,21 @@ select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; 
   .entry-dialog { margin-bottom: auto; border-radius: 18px; }
   .balance-sheet { padding: 30px; }
   .section-block { margin-top: 42px; }
+}
+
+@media (max-width: 359px) {
+  .topbar { gap: 8px; }
+  .offline-mark { font-size: .7rem; }
+  .month-switcher { grid-template-columns: 40px 1fr 40px; }
+  .icon-button { width: 40px; height: 40px; }
+  .balance-value { font-size: 2.2rem; }
+  .balance-grid { row-gap: 7px; }
+  .section-heading { gap: 10px; }
+  .section-heading p { font-size: .7rem; }
+  .ledger-row { min-height: 44px; }
+  .category-row span { gap: 7px; font-size: .8rem; }
+  .category-actual small { font-size: .66rem; }
+  .bottom-nav { padding-right: 28px; padding-left: 28px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
