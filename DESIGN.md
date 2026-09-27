@@ -32,6 +32,10 @@ typography:
     fontFamily: '-apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif'
     fontSize: "0.88rem"
     fontWeight: 400
+  control-input:
+    fontFamily: '-apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif'
+    fontSize: "1rem"
+    fontWeight: 400
   label:
     fontFamily: '-apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif'
     fontSize: "0.72rem"
@@ -79,7 +83,7 @@ components:
   input-standard:
     backgroundColor: "{colors.paper-light}"
     textColor: "{colors.ink}"
-    typography: "{typography.body}"
+    typography: "{typography.control-input}"
     rounded: "{rounded.field}"
     padding: "0 12px"
     height: "46px"
@@ -113,6 +117,7 @@ components:
 - 文楷只用于标题和月份，正文、控件与金额坚持系统无衬线体。
 - 移动端先行，固定底栏与中央圆形加号保证随手记一笔。
 - 首页保持月度摘要，分类明细按具体日期倒序展开。
+- 月度计划、余额实际支出与花呗递延额保持三种清楚可辨的数据状态。
 
 ## Colors
 
@@ -154,10 +159,13 @@ components:
 - **Headline**（700，大标题）：用于弹层等需要更强局部起点的标题。
 - **Title**（700，章节标题）：用于月度收支、明细和数据管理分区。
 - **Body**（400，常规正文）：用于分类、说明与表单内容；交互文字可提升到 650–750。
+- **Control Input**（400，1rem / 16px）：用于 iPhone 表单中的 `text`、`date`、`number` 和 `select` 控件，避免 Safari 聚焦时放大页面。
 - **Label**（700，小号并轻微加宽）：用于日期、列标题、状态和字段名。
 - **Numerals**（650，响应式超大金额，行高 1）：用于当前余额；所有财务数值启用 `tabular-nums` 以保持列对齐。
 
 **The Split-Voice Rule.** 文楷负责账本的声音，系统无衬线负责操作和计算；不要让文楷进入密集表格、表单或金额。
+
+**The No-Zoom Input Rule.** iPhone 表单的可聚焦 `text`、`date`、`number` 与 `select` 控件字号不得低于 16px。
 
 ## Layout
 
@@ -206,17 +214,33 @@ components:
 
 ### Inputs / Fields
 
-- **Standard Field:** 46px 最小高度、1px 规则线描边、10px 圆角、浅纸背景。
+- **Standard Field:** 46px 最小高度、1px 规则线描边、10px 圆角、浅纸背景；`text`、`date`、`number` 与 `select` 控件字号至少 16px。
 - **Amount Field:** 金额输入取消盒状边框，以 2px 墨线承托超大等宽数字。
 - **Focus:** 与按钮共享朱砂外框，避免仅靠颜色深浅表达焦点。
+
+### Monthly Plan Form
+
+预计是“月份 + 分类”唯一的一份月度计划，不属于按日流水。预计模式隐藏日期、备注和支付方式，以只读“计划月份”块替代日期控件；重新打开同月同分类时回填现有总额，保存即覆盖该计划，危险操作文案使用“清除”而不是“删除流水”。当月还款的预计可叠加上月花呗派生额，并在详情中说明这部分金额的来源。
+
+**The Monthly Plan Rule.** 预计只有月份和分类两个归属维度；不要为它伪造日级时间线或多条同类计划。
+
+### Payment Method Segmented
+
+实际支出中，除“当月还款”外的支出分类显示“余额支付 / 花呗”两段选择，并紧跟一句说明。默认选择余额支付；收入、预计和当月还款隐藏该控件并回到余额支付。分段控件沿用 12px 外框、9px 选中块和墨面反白状态。
+
+### Huabei Notice
+
+花呗是递延状态，不是新的强调色。首页分类实际列在主实际金额下以深朱砂小字显示“花呗 + 金额”；分类详情行使用“花呗 · 下月还款”标签，双列小计下方用规则线描边的通知解释去向。花呗消费不计入本月实际支出或当前余额，并自动加入下月“当月还款”的预计；下月还款详情在有派生额时显示“来自上月花呗消费”的来源说明。
+
+**The Deferred Huabei Rule.** 花呗金额只能作为次级递延信息出现；不得混入本月实际合计或余额。
 
 ### Navigation
 
 底部导航固定在视口底部，与内容同宽并封顶 760px。左右导航项用线性 SVG 图标和小号标签，默认褪墨，当前项为深朱砂；中央 58px 朱砂加号向上越出底栏，承担全局“记一笔”。从分类明细页触发时，加号预选当前分类；从首页触发时使用默认分类。底栏使用浅纸半透明面、14px 背景模糊和轻微上浮阴影。
 
-### Ruled Ledger Row
+### Category Actual Stack Row
 
-分类行采用三列右对齐数字结构与 46px 最小行高。第一列以 5×22px 的圆头竖记号编码方向：收入为深绿，支出为朱砂。整行是进入该分类明细页的唯一点击目标，按下只出现很淡的纸面提亮，不增加卡片或阴影。
+分类行采用三列右对齐数字结构与 46px 最小行高。第一列以 5×22px 的圆头竖记号编码方向：收入为深绿，支出为朱砂。实际列允许垂直堆叠一行主实际金额与一行较小的花呗递延金额。整行是进入该分类明细页的唯一点击目标，按下只出现很淡的纸面提亮，不增加卡片或阴影。
 
 ### Category Detail Header
 
@@ -224,7 +248,7 @@ components:
 
 ### Daily Detail Timeline
 
-流水以具体日期作为分组标题并按日期倒序排列；同日多条记录保留为连续规则行。每行左侧显示备注，次行标明“预计”或“实际”，右侧显示带收支符号的金额与进入箭头。顶部“记一笔”、全局加号和空状态“记第一笔”都必须预选当前分类。
+实际流水以具体日期作为分组标题并按日期倒序排列；同日多条记录保留为连续规则行。每行左侧显示备注，次行标明“实际”或“花呗 · 下月还款”，右侧显示带收支符号的金额与进入箭头。预计永远不出现在按日时间线中。顶部“记一笔”、全局加号和空状态“记第一笔”都必须预选当前分类。
 
 ## Do's and Don'ts
 
@@ -234,6 +258,9 @@ components:
 - **Do** 用规则线、对齐和等宽数字组织高密度财务信息。
 - **Do** 在 390px 宽度优先验证六个分类、固定导航与中央加号的关系。
 - **Do** 让分类整行进入独立明细，并在明细页按日期倒序保留同日多条记录。
+- **Do** 把同月同分类的预计回填、覆盖或清除为唯一月度计划。
+- **Do** 将花呗金额显示为次级递延信息，并说明其进入下月预计还款的来源。
+- **Do** 在 390px iPhone 14 上保持所有可聚焦表单控件至少 16px。
 - **Do** 使用同一套无填充、圆端点、等线重 SVG 图标。
 - **Do** 保持 LXGW WenKai Lite 字体文件与 OFL 许可证随应用本地提供。
 
@@ -244,4 +271,5 @@ components:
 - **Don't** 在密集正文、表单或金额中使用文楷。
 - **Don't** 为普通表格行和数据分区添加阴影、渐变或独立白卡背景。
 - **Don't** 在首页重新加入逐笔流水、日期分组或明细编辑入口。
+- **Don't** 把预计放进按日流水，或把花呗消费计入本月实际支出和余额。
 - **Don't** 引入栅格装饰资产；继续使用字体、CSS 和自绘 SVG 表达视觉世界。

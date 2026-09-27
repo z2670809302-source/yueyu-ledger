@@ -26,22 +26,24 @@ The product is a private monthly money sheet: current balance and the seven cate
 
 - Primary use is quick entry and review on an iPhone 14.
 - Records are grouped by month and denominated only in CNY.
-- The user needs expected and actual values for income and expenses.
+- The user needs one monthly expected amount per category, while actual income and expenses remain dated records.
 - Initial installation requires opening the web app once; routine use and data storage must work offline afterward.
 
 ## Capabilities and Constraints
 
 - Core data: current balance, monthly repayment, monthly rent, salary, receivables, daily expenses, special expenses, and remaining balance.
 - Salary and receivables are income categories. Repayment, rent, daily expenses, and special expenses are expense categories.
-- Expected and actual totals must be derived from the entries and remain arithmetically consistent.
+- Each category has at most one expected amount per month; saving it again updates that monthly plan. Actual records keep their exact dates.
+- Expected and actual totals must remain arithmetically consistent, and expected plans must not appear in the daily timeline.
+- Expense records can use balance payment or Huabei. Huabei spending stays visible on its purchase date, does not reduce the current balance or count toward that month's actual expense, and is added automatically to the following month's expected repayment.
 - Data stays in the browser on the user's device. There is no login, analytics, cloud service, paid API, or network data transfer.
 - The user can create, edit, and delete entries; browse months; export a complete backup; and restore a backup.
 - The interface language is Simplified Chinese.
-- Open deployment decision: an iPhone-installable PWA needs an HTTPS address for first installation. Publishing or hosting is outside the current local build until the user approves a destination.
+- The installable PWA is published on GitHub Pages at `https://z2670809302-source.github.io/yueyu-ledger/`; program updates keep the same origin so device-local records remain available.
 
 ## Brand Commitments
 
-The interface is concise, calm, and centered on “quickly record one item” and “understand this month.” No product name or logo has been committed.
+The interface is concise, calm, and centered on “quickly record one item” and “understand this month.” The product name is “月余”, with a paper-ledger app icon.
 
 ## Evidence on Hand
 
@@ -50,8 +52,8 @@ No existing records, brand assets, screenshots, or third-party claims were suppl
 ## Product Principles
 
 - A new record should take only a few taps.
+- Form controls must not trigger Safari page zoom on the primary iPhone 14 viewport.
 - The monthly balance must be understandable without opening a report.
 - Every stored record belongs to the user and can be exported in full.
 - Offline behavior and arithmetic correctness take priority over decorative features.
 - The first version stays focused on one currency and one user.
-

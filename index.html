@@ -106,6 +106,7 @@
             <strong id="detailActual">¥0.00</strong>
           </div>
         </section>
+        <p class="huabei-notice" id="detailHuabeiNotice" hidden></p>
 
         <section class="detail-ledger" aria-labelledby="dailyDetailTitle">
           <div class="section-heading">
@@ -117,8 +118,8 @@
           <div id="detailTimeline"></div>
           <div id="detailEmpty" class="empty-state">
             <svg viewBox="0 0 80 80" aria-hidden="true"><path d="M20 11h40v58H20zM28 25h24M28 36h24M28 47h14"/></svg>
-            <strong>这个月还没有记录</strong>
-            <span>每笔都可以填写具体日期，首页会自动汇总。</span>
+            <strong>这个月还没有实际记录</strong>
+            <span>实际收支按天记录，首页会自动汇总。</span>
             <button class="primary-button" id="detailEmptyAdd">记第一笔</button>
           </div>
         </section>
@@ -219,20 +220,33 @@
             <span class="field-label">项目</span>
             <select id="category" name="category" required></select>
           </label>
-          <label>
+          <label id="actualDateField">
             <span class="field-label">日期</span>
             <input id="entryDate" name="entryDate" type="date" required />
           </label>
+          <div id="planMonthField" hidden>
+            <span class="field-label">计划月份</span>
+            <strong class="plan-month" id="planMonthLabel"></strong>
+          </div>
         </div>
 
-        <label>
+        <div id="paymentMethodField">
+          <span class="field-label">支付方式</span>
+          <div class="segmented-control" aria-label="支付方式">
+            <label><input type="radio" name="paymentMethod" value="cash" checked /><span>余额支付</span></label>
+            <label><input type="radio" name="paymentMethod" value="huabei" /><span>花呗</span></label>
+          </div>
+          <p class="field-hint">花呗消费不计入本月支出，将自动加入下月预计还款。</p>
+        </div>
+
+        <label id="actualNoteField">
           <span class="field-label">备注（可选）</span>
           <input id="note" name="note" type="text" maxlength="60" placeholder="例如：9 月房租" />
         </label>
 
         <div class="dialog-actions">
           <button class="danger-button" id="deleteEntry" type="button" hidden>删除</button>
-          <button class="primary-button grow" type="submit">保存记录</button>
+          <button class="primary-button grow" id="saveEntry" type="submit">保存记录</button>
         </div>
       </form>
     </dialog>

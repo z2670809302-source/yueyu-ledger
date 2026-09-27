@@ -7,7 +7,9 @@ const entries = [
   { id: "2", date: "2026-09-02", category: "salary", recordType: "actual", amount: 9800 },
   { id: "3", date: "2026-09-03", category: "rent", recordType: "expected", amount: 2500 },
   { id: "4", date: "2026-09-03", category: "rent", recordType: "actual", amount: 2500 },
-  { id: "5", date: "2026-08-20", category: "daily", recordType: "actual", amount: 100 }
+  { id: "5", date: "2026-08-20", category: "daily", recordType: "actual", amount: 100 },
+  { id: "6", date: "2026-09-04", category: "daily", recordType: "actual", paymentMethod: "huabei", amount: 300 },
+  { id: "7", date: "2026-10-01", category: "repayment", recordType: "expected", amount: 100 }
 ];
 
 test("monthly summary keeps expected and actual values separate", () => {
@@ -19,10 +21,19 @@ test("monthly summary keeps expected and actual values separate", () => {
   assert.equal(result.expectedRemaining, 7500);
   assert.equal(result.actualRemaining, 7300);
   assert.equal(result.planDifference, -200);
+  assert.equal(result.huabeiSpent, 300);
+  assert.equal(result.categories.daily.huabei, 300);
 });
 
 test("current balance uses actual records across all months", () => {
   assert.equal(currentBalance(3000, entries), 10200);
+});
+
+test("huabei spending becomes next month's expected repayment", () => {
+  const result = summarize(entries, "2026-10");
+  assert.equal(result.huabeiRepayment, 300);
+  assert.equal(result.categories.repayment.expected, 400);
+  assert.equal(result.expectedExpense, 400);
 });
 
 test("backup validation rejects unknown categories", () => {

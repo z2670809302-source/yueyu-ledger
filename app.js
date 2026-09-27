@@ -55,10 +55,13 @@ function render() {
   $("#openingBalance").value = state.openingBalance;
 
   $("#categoryRows").innerHTML = Object.entries(categories).map(([key, category]) => `
-    <button class="ledger-row category-row" role="row" data-category="${key}" aria-label="查看${category.label}每日明细">
+    <button class="ledger-row category-row" role="row" data-category="${key}" aria-label="查看${category.label}实际每日明细">
       <span role="cell"><i class="direction-mark ${category.direction}"></i>${category.label}</span>
       <strong role="cell">${formatMoney(summary.categories[key].expected)}</strong>
-      <strong role="cell">${formatMoney(summary.categories[key].actual)}</strong>
+      <div class="category-actual" role="cell">
+        <strong>${formatMoney(summary.categories[key].actual)}</strong>
+        ${summary.categories[key].huabei ? `<small>花呗 ${formatMoney(summary.categories[key].huabei)}</small>` : ""}
+      </div>
     </button>
   `).join("");
   if (activeDetailCategory) renderDetail();
@@ -68,15 +71,23 @@ function renderDetail() {
   const category = categories[activeDetailCategory];
   if (!category) return;
   const key = selectedMonthKey();
-  const categorySummary = summarize(state.entries, key).categories[activeDetailCategory];
+  const summary = summarize(state.entries, key);
+  const categorySummary = summary.categories[activeDetailCategory];
   const entries = state.entries
-    .filter((entry) => entry.category === activeDetailCategory && entry.date.startsWith(key))
+    .filter((entry) => entry.recordType === "actual" && entry.category === activeDetailCategory && entry.date.startsWith(key))
     .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
 
   $("#detailTitle").textContent = category.label;
-  $("#detailMonth").textContent = `${selectedDate.getFullYear()} 年 ${selectedDate.getMonth() + 1} 月 · 按日记录`;
+  $("#detailMonth").textContent = `${selectedDate.getFullYear()} 年 ${selectedDate.getMonth() + 1} 月 · 实际按日记录`;
   $("#detailExpected").textContent = formatMoney(categorySummary.expected);
   $("#detailActual").textContent = formatMoney(categorySummary.actual);
+  const huabeiNotice = activeDetailCategory === "repayment" && summary.huabeiRepayment
+    ? `预计还款中有 ${formatMoney(summary.huabeiRepayment)} 来自上月花呗消费。`
+    : categorySummary.huabei
+      ? `本月花呗消费 ${formatMoney(categorySummary.huabei)}，不计入本月支出，已自动加入下月预计还款。`
+      : "";
+  $("#detailHuabeiNotice").textContent = huabeiNotice;
+  $("#detailHuabeiNotice").hidden = !huabeiNotice;
   $("#detailCount").textContent = entries.length ? `${entries.length} 条记录` : "还没有记录";
   $("#detailEmpty").hidden = entries.length > 0;
 
@@ -93,7 +104,7 @@ function renderDetail() {
           const sign = category.direction === "income" ? "+" : "−";
           const note = entry.note ? escapeHtml(entry.note) : category.label;
           return `<button class="entry-item detail-entry" data-entry-id="${entry.id}">
-            <span class="entry-main"><strong>${note}</strong><small>${entry.recordType === "expected" ? "预计" : "实际"}</small></span>
+            <span class="entry-main"><strong>${note}</strong><small>${entry.paymentMethod === "huabei" ? "花呗 · 下月还款" : "实际"}</small></span>
             <span class="entry-amount ${category.direction}">${sign}${formatMoney(entry.amount)}</span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
           </button>`;
@@ -133,6 +144,7 @@ function openEntryForm({ recordType = "actual", category = "daily", id = null } 
     $("#category").value = entry.category;
     $("#entryDate").value = entry.date;
     $("#note").value = entry.note;
+    entryForm.elements.paymentMethod.value = entry.paymentMethod === "huabei" ? "huabei" : "cash";
     entryForm.elements.recordType.value = entry.recordType;
     $("#entryDialogTitle").textContent = "修改记录";
     $("#deleteEntry").hidden = false;
@@ -144,7 +156,30 @@ function openEntryForm({ recordType = "actual", category = "daily", id = null } 
 
 function updateFormKind() {
   const expected = entryForm.elements.recordType.value === "expected";
-  if (!$("#entryId").value) $("#entryDialogTitle").textContent = expected ? "录入计划" : "记一笔";
+  $("#actualDateField").hidden = expected;
+  $("#actualNoteField").hidden = expected;
+  $("#planMonthField").hidden = !expected;
+  $("#entryDate").required = !expected;
+  const acceptsHuabei = !expected && categories[$("#category").value]?.direction === "expense" && $("#category").value !== "repayment";
+  $("#paymentMethodField").hidden = !acceptsHuabei;
+  if (!acceptsHuabei) entryForm.elements.paymentMethod.value = "cash";
+  $("#planMonthLabel").textContent = `${selectedDate.getFullYear()} 年 ${selectedDate.getMonth() + 1} 月`;
+  $("#saveEntry").textContent = expected ? "保存月度预计" : "保存记录";
+  if (expected) {
+    const plans = state.entries.filter((item) => item.recordType === "expected" && item.category === $("#category").value && item.date.startsWith(selectedMonthKey()));
+    $("#entryId").value = plans[0]?.id || "";
+    $("#amount").value = plans.length ? plans.reduce((total, item) => total + Number(item.amount), 0) : "";
+    $("#deleteEntry").hidden = plans.length === 0;
+    $("#entryDialogTitle").textContent = plans.length ? "修改月度预计" : "录入月度预计";
+  } else {
+    const selectedEntry = state.entries.find((item) => item.id === $("#entryId").value);
+    if (selectedEntry?.recordType === "expected") {
+      $("#entryId").value = "";
+      $("#amount").value = "";
+      $("#deleteEntry").hidden = true;
+    }
+    if (!$("#entryId").value) $("#entryDialogTitle").textContent = "记一笔";
+  }
 }
 
 function closeEntryForm() {
@@ -194,37 +229,54 @@ document.addEventListener("click", (event) => {
 });
 
 entryForm.elements.recordType.forEach((radio) => radio.addEventListener("change", updateFormKind));
+$("#category").addEventListener("change", updateFormKind);
 entryForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const existingId = $("#entryId").value;
+  const recordType = entryForm.elements.recordType.value;
+  const expected = recordType === "expected";
+  const category = $("#category").value;
+  const planEntries = expected
+    ? state.entries.filter((item) => item.recordType === "expected" && item.category === category && item.date.startsWith(selectedMonthKey()))
+    : [];
+  const sourceEntry = state.entries.find((item) => item.id === existingId) || planEntries[0];
   const entry = {
-    id: existingId || crypto.randomUUID(),
+    id: sourceEntry?.id || crypto.randomUUID(),
     amount: Number($("#amount").value),
-    category: $("#category").value,
-    date: $("#entryDate").value,
-    note: $("#note").value.trim(),
-    recordType: entryForm.elements.recordType.value,
-    createdAt: existingId
-      ? state.entries.find((item) => item.id === existingId)?.createdAt || new Date().toISOString()
-      : new Date().toISOString()
+    category,
+    date: expected ? `${selectedMonthKey()}-01` : $("#entryDate").value,
+    note: expected ? "" : $("#note").value.trim(),
+    recordType,
+    paymentMethod: !expected && categories[category].direction === "expense" && category !== "repayment" && entryForm.elements.paymentMethod.value === "huabei" ? "huabei" : "cash",
+    createdAt: sourceEntry?.createdAt || new Date().toISOString()
   };
-  if (existingId) state.entries = state.entries.map((item) => item.id === existingId ? entry : item);
+  if (expected) {
+    state.entries = state.entries.filter((item) => !(item.recordType === "expected" && item.category === category && item.date.startsWith(selectedMonthKey())));
+    state.entries.push(entry);
+  } else if (existingId) state.entries = state.entries.map((item) => item.id === existingId ? entry : item);
   else state.entries.push(entry);
   selectedDate = new Date(`${entry.date}T12:00:00`);
   saveState();
   closeEntryForm();
   render();
-  showToast(existingId ? "记录已更新" : "已经记下");
+  showToast(expected ? "月度预计已保存" : existingId ? "记录已更新" : "已经记下");
 });
 
 $("#deleteEntry").addEventListener("click", () => {
   const id = $("#entryId").value;
-  if (!id || !window.confirm("确定删除这条记录吗？删除后只能通过备份恢复。")) return;
-  state.entries = state.entries.filter((entry) => entry.id !== id);
+  const expected = entryForm.elements.recordType.value === "expected";
+  const confirmation = expected ? "确定清除这个月的预计吗？" : "确定删除这条记录吗？删除后只能通过备份恢复。";
+  if (!id || !window.confirm(confirmation)) return;
+  if (expected) {
+    const category = $("#category").value;
+    state.entries = state.entries.filter((entry) => !(entry.recordType === "expected" && entry.category === category && entry.date.startsWith(selectedMonthKey())));
+  } else {
+    state.entries = state.entries.filter((entry) => entry.id !== id);
+  }
   saveState();
   closeEntryForm();
   render();
-  showToast("记录已删除");
+  showToast(expected ? "月度预计已清除" : "记录已删除");
 });
 
 document.querySelectorAll(".nav-item").forEach((button) => {

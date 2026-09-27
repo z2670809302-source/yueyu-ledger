@@ -13,6 +13,11 @@ export function monthKey(date = new Date()) {
   return `${year}-${month}`;
 }
 
+export function offsetMonthKey(selectedMonth, offset) {
+  const [year, month] = selectedMonth.split("-").map(Number);
+  return monthKey(new Date(year, month - 1 + offset, 1));
+}
+
 export function signedAmount(entry) {
   const direction = categories[entry.category]?.direction;
   return direction === "income" ? Number(entry.amount) : -Number(entry.amount);
@@ -24,7 +29,9 @@ export function summarize(entries, selectedMonth) {
     expectedExpense: 0,
     actualIncome: 0,
     actualExpense: 0,
-    categories: Object.fromEntries(Object.keys(categories).map((key) => [key, { expected: 0, actual: 0 }]))
+    huabeiSpent: 0,
+    huabeiRepayment: 0,
+    categories: Object.fromEntries(Object.keys(categories).map((key) => [key, { expected: 0, actual: 0, huabei: 0 }]))
   };
 
   entries
@@ -33,9 +40,23 @@ export function summarize(entries, selectedMonth) {
       const amount = Number(entry.amount) || 0;
       const recordType = entry.recordType === "expected" ? "expected" : "actual";
       const direction = categories[entry.category].direction;
+      if (recordType === "actual" && direction === "expense" && entry.paymentMethod === "huabei") {
+        summary.categories[entry.category].huabei += amount;
+        summary.huabeiSpent += amount;
+        return;
+      }
       summary.categories[entry.category][recordType] += amount;
       summary[`${recordType}${direction === "income" ? "Income" : "Expense"}`] += amount;
     });
+
+  summary.huabeiRepayment = entries
+    .filter((entry) => entry.recordType === "actual"
+      && entry.paymentMethod === "huabei"
+      && categories[entry.category]?.direction === "expense"
+      && entry.date.startsWith(offsetMonthKey(selectedMonth, -1)))
+    .reduce((total, entry) => total + Number(entry.amount || 0), 0);
+  summary.categories.repayment.expected += summary.huabeiRepayment;
+  summary.expectedExpense += summary.huabeiRepayment;
 
   summary.expectedRemaining = summary.expectedIncome - summary.expectedExpense;
   summary.actualRemaining = summary.actualIncome - summary.actualExpense;
@@ -45,7 +66,8 @@ export function summarize(entries, selectedMonth) {
 
 export function currentBalance(openingBalance, entries) {
   return Number(openingBalance || 0) + entries
-    .filter((entry) => entry.recordType === "actual")
+    .filter((entry) => entry.recordType === "actual"
+      && !(entry.paymentMethod === "huabei" && categories[entry.category]?.direction === "expense"))
     .reduce((total, entry) => total + signedAmount(entry), 0);
 }
 
@@ -67,6 +89,7 @@ export function validateBackup(value) {
       date: entry.date,
       category: entry.category,
       recordType: entry.recordType === "expected" ? "expected" : "actual",
+      paymentMethod: entry.paymentMethod === "huabei" ? "huabei" : "cash",
       amount,
       note: String(entry.note || "").slice(0, 60),
       createdAt: entry.createdAt || new Date().toISOString()

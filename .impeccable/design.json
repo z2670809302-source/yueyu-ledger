@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-27T13:14:59.1436419+08:00",
+  "generatedAt": "2026-09-27T19:06:05.9573879+08:00",
   "title": "Design System: 月余",
   "extensions": {
     "colorMeta": {
@@ -64,6 +64,7 @@
       "headline": { "displayName": "局部大标题", "purpose": "录入弹层等独立任务的起点。" },
       "title": { "displayName": "章节标题", "purpose": "月度收支、明细和数据分区。" },
       "body": { "displayName": "界面正文", "purpose": "分类、说明、表单和操作文字。" },
+      "control-input": { "displayName": "移动端表单输入", "purpose": "iPhone 上的 text、date、number 与 select 控件；保持至少 16px 以避免 Safari 聚焦放大。" },
       "label": { "displayName": "微型标签", "purpose": "日期、状态、列头和字段名。" },
       "numerals": { "displayName": "余额数字", "purpose": "当前余额与其他需要稳定对齐的财务数值。" }
     },
@@ -105,9 +106,9 @@
       "name": "Standard Field",
       "kind": "input",
       "refersTo": "input-standard",
-      "description": "浅纸底、规则线描边的普通文本字段。",
+      "description": "浅纸底、规则线描边的普通字段；iPhone 可聚焦控件保持至少 16px。",
       "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">备注（可选）</span><input type=\"text\" placeholder=\"例如：9 月房租\"></label>",
-      "css": ".ds-field { display: grid; gap: 7px; color: var(--ink, #17202a); font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-field-label { font-size: .72rem; font-weight: 700; } .ds-field input { min-height: 46px; padding: 0 12px; border: 1px solid var(--rule, #d6cab5); border-radius: 10px; background: var(--paper-light, #fffaf0); color: var(--ink, #17202a); font: .86rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-field input:hover { border-color: var(--ink-soft, #56615f); } .ds-field input:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 3px; }"
+      "css": ".ds-field { display: grid; gap: 7px; color: var(--ink, #17202a); font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-field-label { font-size: .72rem; font-weight: 700; } .ds-field input { min-height: 46px; padding: 0 12px; border: 1px solid var(--rule, #d6cab5); border-radius: 10px; background: var(--paper-light, #fffaf0); color: var(--ink, #17202a); font: 1rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-field input:hover { border-color: var(--ink-soft, #56615f); } .ds-field input:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 3px; }"
     },
     {
       "name": "Balance Sheet",
@@ -118,32 +119,39 @@
       "css": ".ds-balance { padding: 17px 20px 15px; border-radius: var(--radius, 14px); background: var(--ink, #17202a); color: var(--on-dark, #fdf7eb); box-shadow: 0 12px 28px rgba(57,45,29,.11); font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-balance > span { color: #c8cfcc; font-size: .8rem; } .ds-balance > strong { display: block; margin: 5px 0 14px; font-size: clamp(2.2rem,10vw,4.25rem); font-weight: 650; line-height: 1; letter-spacing: -.035em; font-variant-numeric: tabular-nums; } .ds-balance-rule { height: 1px; background: rgba(255,255,255,.16); } .ds-balance-meta { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; padding-top: 11px; color: #abb4b0; font-size: .7rem; } .ds-balance-meta b { display: inline-block; margin-top: 6px; color: var(--on-dark, #fdf7eb); font-size: .88rem; font-variant-numeric: tabular-nums; white-space: nowrap; } .ds-balance-meta .ds-negative { color: #ffb6a5; } .ds-balance:focus-within { outline: 3px solid rgba(182,65,47,.28); outline-offset: 3px; }"
     },
     {
-      "name": "Ruled Ledger Row",
+      "name": "Category Actual Stack Row",
       "kind": "custom",
-      "description": "以方向竖记号和等宽数字呈现分类预计与实际，整行进入对应分类明细。",
-      "html": "<button class=\"ds-ledger-row\"><span><i></i>当月房租</span><strong>¥2,500.00</strong><strong>¥2,500.00</strong></button>",
-      "css": ".ds-ledger-row { display: grid; grid-template-columns: minmax(112px,1.25fr) 1fr 1fr; align-items: center; width: 100%; min-height: 46px; border: 0; border-bottom: 1px solid var(--rule, #d6cab5); background: transparent; color: var(--ink, #17202a); text-align: right; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; font-variant-numeric: tabular-nums; cursor: pointer; } .ds-ledger-row > span { display: flex; align-items: center; gap: 9px; text-align: left; font-size: .88rem; } .ds-ledger-row i { width: 5px; height: 22px; border-radius: 3px; background: var(--red, #b6412f); } .ds-ledger-row strong { font-size: .82rem; font-weight: 650; } .ds-ledger-row:hover { background: rgba(255,255,255,.22); } .ds-ledger-row:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 1px; } .ds-ledger-row:active { background: rgba(255,255,255,.38); }"
+      "description": "分类预计与实际的规则行；实际列可在主金额下堆叠花呗递延金额，整行进入分类明细。",
+      "html": "<button class=\"ds-ledger-row\"><span><i></i>日常开销</span><strong>¥2,500.00</strong><span class=\"ds-category-actual\"><strong>¥1,860.00</strong><small>花呗 ¥320.00</small></span></button>",
+      "css": ".ds-ledger-row { display: grid; grid-template-columns: minmax(112px,1.25fr) 1fr 1fr; align-items: center; width: 100%; min-height: 46px; border: 0; border-bottom: 1px solid var(--rule, #d6cab5); background: transparent; color: var(--ink, #17202a); text-align: right; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; font-variant-numeric: tabular-nums; cursor: pointer; } .ds-ledger-row > :first-child { display: flex; align-items: center; gap: 9px; text-align: left; font-size: .88rem; } .ds-ledger-row i { width: 5px; height: 22px; border-radius: 3px; background: var(--red, #b6412f); } .ds-ledger-row strong { font-size: .82rem; font-weight: 650; } .ds-category-actual { display: grid; justify-items: end; gap: 2px; } .ds-category-actual small { color: var(--red-dark, #8f2f22); font-size: .75rem; font-weight: 650; } .ds-ledger-row:hover { background: rgba(255,255,255,.22); } .ds-ledger-row:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 1px; } .ds-ledger-row:active { background: rgba(255,255,255,.38); }"
     },
     {
       "name": "Category Detail Header",
       "kind": "custom",
       "description": "返回、分类名、月份、分类记账动作与预计/实际小计组成的明细页起点；记账动作预选当前分类。",
-      "html": "<section class=\"ds-detail\"><header class=\"ds-detail-top\"><button class=\"ds-detail-back\" aria-label=\"返回月度总览\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m15 18-6-6 6-6\"/></svg></button><div><h2>日常开销</h2><p>2026 年 9 月 · 按日记录</p></div><button class=\"ds-detail-add\">记一笔</button></header><div class=\"ds-detail-totals\"><div><span>预计总额</span><strong>¥2,500.00</strong></div><div><span>实际总额</span><strong>¥2,380.00</strong></div></div></section>",
+      "html": "<section class=\"ds-detail\"><header class=\"ds-detail-top\"><button class=\"ds-detail-back\" aria-label=\"返回月度总览\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m15 18-6-6 6-6\"/></svg></button><div><h2>日常开销</h2><p>2026 年 9 月 · 实际按日记录</p></div><button class=\"ds-detail-add\">记一笔</button></header><div class=\"ds-detail-totals\"><div><span>预计总额</span><strong>¥2,500.00</strong></div><div><span>实际总额</span><strong>¥2,380.00</strong></div></div></section>",
       "css": ".ds-detail { color: var(--ink, #17202a); } .ds-detail-top { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 10px; margin: 4px 0 24px; } .ds-detail-top h2 { margin: 0; font: 700 clamp(2rem,8vw,3rem) 'LXGW WenKai Lite', serif; line-height: 1; letter-spacing: -.03em; } .ds-detail-top p { margin: 4px 0 0; color: var(--ink-soft, #56615f); font: .74rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; letter-spacing: .04em; } .ds-detail-back { display: grid; place-items: center; width: 44px; height: 44px; margin-left: -10px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink, #17202a); cursor: pointer; } .ds-detail-back svg { width: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; } .ds-detail-add { padding: 4px 0; border: 0; background: transparent; color: var(--red, #b6412f); font: 700 .82rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; cursor: pointer; } .ds-detail-back:hover { background: rgba(23,32,42,.08); } .ds-detail-add:hover { color: var(--red-dark, #8f2f22); } .ds-detail-back:focus-visible, .ds-detail-add:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 3px; } .ds-detail-totals { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 16px 0; border-top: 2px solid var(--ink, #17202a); border-bottom: 1px solid var(--ink, #17202a); } .ds-detail-totals > div:last-child { padding-left: 18px; border-left: 1px solid var(--rule, #d6cab5); } .ds-detail-totals span, .ds-detail-totals strong { display: block; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-detail-totals span { margin-bottom: 7px; color: var(--ink-soft, #56615f); font-size: .74rem; } .ds-detail-totals strong { font-size: 1.45rem; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Huabei Notice",
+      "kind": "custom",
+      "description": "解释花呗不计本月实际与余额、并派生到下月预计还款的规则或来源。",
+      "html": "<p class=\"ds-huabei-notice\">本月花呗消费 ¥320.00，不计入本月支出，已自动加入下月预计还款。</p>",
+      "css": ".ds-huabei-notice { margin: 12px 0 0; padding: 10px 12px; border: 1px solid var(--rule, #d6cab5); border-radius: 10px; background: transparent; color: var(--red-dark, #8f2f22); font: .76rem/1.55 -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; }"
     },
     {
       "name": "Daily Entry Group",
       "kind": "custom",
       "description": "按具体日期倒序分组的分类流水，同日可连续显示多条备注与金额；空状态按钮预选当前分类。",
-      "html": "<section class=\"ds-day-group\"><h3>9月27日周日</h3><div class=\"ds-entry-list\"><button class=\"ds-detail-entry\"><span><strong>午餐</strong><small>实际</small></span><b>−¥36.00</b><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m9 18 6-6-6-6\"/></svg></button><button class=\"ds-detail-entry\"><span><strong>地铁</strong><small>实际</small></span><b>−¥6.00</b><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m9 18 6-6-6-6\"/></svg></button></div></section>",
+      "html": "<section class=\"ds-day-group\"><h3>9月27日周日</h3><div class=\"ds-entry-list\"><button class=\"ds-detail-entry\"><span><strong>午餐</strong><small>实际</small></span><b>−¥36.00</b><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m9 18 6-6-6-6\"/></svg></button><button class=\"ds-detail-entry\"><span><strong>日用品</strong><small>花呗 · 下月还款</small></span><b>−¥128.00</b><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m9 18 6-6-6-6\"/></svg></button></div></section>",
       "css": ".ds-day-group { margin-top: 22px; color: var(--ink, #17202a); } .ds-day-group h3 { margin: 0 0 7px; color: var(--ink-soft, #56615f); font: 700 .78rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-entry-list { border-top: 2px solid var(--ink, #17202a); } .ds-detail-entry { display: grid; grid-template-columns: 1fr auto 18px; align-items: center; gap: 10px; width: 100%; min-height: 70px; padding: 9px 0; border: 0; border-bottom: 1px solid var(--rule, #d6cab5); background: transparent; color: var(--ink, #17202a); text-align: left; cursor: pointer; } .ds-detail-entry strong, .ds-detail-entry small { display: block; } .ds-detail-entry strong { font-size: .94rem; } .ds-detail-entry small { margin-top: 3px; color: var(--ink-soft, #56615f); font: .69rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-detail-entry b { color: var(--red-dark, #8f2f22); font: 700 .88rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; font-variant-numeric: tabular-nums; } .ds-detail-entry svg { width: 18px; fill: none; stroke: var(--ink-soft, #56615f); stroke-width: 1.8; } .ds-detail-entry:hover { background: rgba(255,255,255,.22); } .ds-detail-entry:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 1px; } .ds-detail-entry:active { background: rgba(255,255,255,.38); }"
     },
     {
-      "name": "Segmented Record Type",
+      "name": "Payment Method Segmented",
       "kind": "custom",
-      "description": "在实际与预计之间切换，选中项以墨面反白。",
-      "html": "<div class=\"ds-segmented\"><button class=\"ds-selected\">实际</button><button>预计</button></div>",
-      "css": ".ds-segmented { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; border: 1px solid var(--rule, #d6cab5); border-radius: 12px; background: var(--paper-light, #fffaf0); } .ds-segmented button { min-height: 38px; border: 0; border-radius: 9px; background: transparent; color: var(--ink-soft, #56615f); font: 700 .82rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; cursor: pointer; } .ds-segmented button:hover { background: rgba(23,32,42,.08); } .ds-segmented button:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 1px; } .ds-segmented .ds-selected { background: var(--ink, #17202a); color: white; }"
+      "description": "非还款实际支出在余额支付与花呗之间选择，选中项以墨面反白并附递延说明。",
+      "html": "<div class=\"ds-payment-field\"><div class=\"ds-segmented\"><button class=\"ds-selected\">余额支付</button><button>花呗</button></div><p>花呗消费不计入本月支出，将自动加入下月预计还款。</p></div>",
+      "css": ".ds-payment-field { color: var(--ink, #17202a); font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-segmented { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; border: 1px solid var(--rule, #d6cab5); border-radius: 12px; background: var(--paper-light, #fffaf0); } .ds-segmented button { min-height: 38px; border: 0; border-radius: 9px; background: transparent; color: var(--ink-soft, #56615f); font: 700 .82rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; cursor: pointer; } .ds-segmented button:hover { background: rgba(23,32,42,.08); } .ds-segmented button:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 1px; } .ds-segmented .ds-selected { background: var(--ink, #17202a); color: white; } .ds-payment-field p { margin: 7px 0 0; color: var(--ink-soft, #56615f); font-size: .78rem; line-height: 1.55; }"
     },
     {
       "name": "Bottom Navigation",
@@ -162,21 +170,28 @@
       "朱砂红表示支出和主操作，深绿表示收入和本机可信状态。",
       "文楷只用于标题和月份，正文、控件与金额坚持系统无衬线体。",
       "移动端先行，固定底栏与中央圆形加号保证随手记一笔。",
-      "首页保持月度摘要，分类明细按具体日期倒序展开。"
+      "首页保持月度摘要，分类明细按具体日期倒序展开。",
+      "月度计划、余额实际支出与花呗递延额保持三种清楚可辨的数据状态。"
     ],
     "rules": [
       { "name": "The Two-Ink Rule", "body": "朱砂只表达支出或主操作，深绿只表达收入或本机可信状态；不要把它们当作无语义装饰色互换。", "section": "colors" },
       { "name": "The Paper Continuity Rule", "body": "页面主体保持整张暖纸，不把每一组数字包进独立白卡。", "section": "colors" },
       { "name": "The Split-Voice Rule", "body": "文楷负责账本的声音，系统无衬线负责操作和计算；不要让文楷进入密集表格、表单或金额。", "section": "typography" },
+      { "name": "The No-Zoom Input Rule", "body": "iPhone 表单的可聚焦 text、date、number 与 select 控件字号不得低于 16px。", "section": "typography" },
       { "name": "The One-Sheet Rule", "body": "信息沿一张纸纵向展开；层级依靠标题、规则线和留白，不依靠多列仪表盘或卡片网格。", "section": "layout" },
       { "name": "The Reserved Depth Rule", "body": "阴影只解释余额总览、主操作、固定导航或模态层级；规则表格和普通分区永远留在纸面上。", "section": "elevation" },
-      { "name": "The Restrained Radius Rule", "body": "12–16px 是主要表面的圆角语言；不要把普通内容变成胶囊或过度圆润的卡片集合。", "section": "shapes" }
+      { "name": "The Restrained Radius Rule", "body": "12–16px 是主要表面的圆角语言；不要把普通内容变成胶囊或过度圆润的卡片集合。", "section": "shapes" },
+      { "name": "The Monthly Plan Rule", "body": "预计只有月份和分类两个归属维度；不要为它伪造日级时间线或多条同类计划。", "section": "components" },
+      { "name": "The Deferred Huabei Rule", "body": "花呗金额只能作为次级递延信息出现；不得混入本月实际合计或余额。", "section": "components" }
     ],
     "dos": [
       "Do 让一张近黑余额单成为每个主账本视图的视觉锚点。",
       "Do 用规则线、对齐和等宽数字组织高密度财务信息。",
       "Do 在 390px 宽度优先验证六个分类、固定导航与中央加号的关系。",
       "Do 让分类整行进入独立明细，并在明细页按日期倒序保留同日多条记录。",
+      "Do 把同月同分类的预计回填、覆盖或清除为唯一月度计划。",
+      "Do 将花呗金额显示为次级递延信息，并说明其进入下月预计还款的来源。",
+      "Do 在 390px iPhone 14 上保持所有可聚焦表单控件至少 16px。",
       "Do 使用同一套无填充、圆端点、等线重 SVG 图标。",
       "Do 保持 LXGW WenKai Lite 字体文件与 OFL 许可证随应用本地提供。"
     ],
@@ -186,6 +201,7 @@
       "Don't 在密集正文、表单或金额中使用文楷。",
       "Don't 为普通表格行和数据分区添加阴影、渐变或独立白卡背景。",
       "Don't 在首页重新加入逐笔流水、日期分组或明细编辑入口。",
+      "Don't 把预计放进按日流水，或把花呗消费计入本月实际支出和余额。",
       "Don't 引入栅格装饰资产；继续使用字体、CSS 和自绘 SVG 表达视觉世界。"
     ]
   }

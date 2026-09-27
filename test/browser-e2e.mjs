@@ -78,7 +78,7 @@ try {
   await evaluate("localStorage.clear(); location.reload(); true");
   await waitFor("document.readyState === 'complete' && document.querySelector('#addEntry')");
 
-  const addEntry = (recordType, amount, category, date, note) => evaluate(`(() => {
+  const addEntry = (recordType, amount, category, date, note, paymentMethod = "cash") => evaluate(`(() => {
     document.querySelector('#addEntry').click();
     const form = document.querySelector('#entryForm');
     form.elements.recordType.value = ${JSON.stringify(recordType)};
@@ -86,6 +86,7 @@ try {
     document.querySelector('#category').value = ${JSON.stringify(category)};
     document.querySelector('#entryDate').value = ${JSON.stringify(date)};
     document.querySelector('#note').value = ${JSON.stringify(note)};
+    form.elements.paymentMethod.value = ${JSON.stringify(paymentMethod)};
     form.requestSubmit();
     return true;
   })()`);
@@ -96,6 +97,20 @@ try {
   await addEntry("actual", 2500, "rent", "2026-09-03", "九月房租");
   await addEntry("actual", 35, "daily", "2026-09-04", "早餐和地铁");
   await addEntry("actual", 65, "daily", "2026-09-05", "日用品");
+  await evaluate(`(() => {
+    document.querySelector('#addEntry').click();
+    const form = document.querySelector('#entryForm');
+    document.querySelector('#amount').value = '180';
+    document.querySelector('#category').value = 'daily';
+    document.querySelector('#entryDate').value = '2026-09-06';
+    document.querySelector('#note').value = '花呗买药';
+    form.elements.paymentMethod.value = 'huabei';
+    return true;
+  })()`);
+  await mkdir(".impeccable/review", { recursive: true });
+  const huabeiMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/huabei-mobile.png", Buffer.from(huabeiMobile.data, "base64"));
+  await evaluate("document.querySelector('#entryForm').requestSubmit(); true");
 
   const result = await evaluate(`(() => ({
     balance: document.querySelector('#currentBalance').textContent,
@@ -104,22 +119,61 @@ try {
     difference: document.querySelector('#planDifference').textContent,
     storedCount: JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length,
     homeDetailEntries: document.querySelectorAll('.entry-item').length,
-    dailyTotal: document.querySelector('[data-category="daily"] strong:last-of-type').textContent,
+    dailyTotal: document.querySelector('[data-category="daily"] .category-actual strong').textContent,
     width: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
-    dialogClosed: !document.querySelector('#entryDialog').open
+    dialogClosed: !document.querySelector('#entryDialog').open,
+    zoomSafeInputs: [...document.querySelectorAll('select, input[type="date"], input[type="text"], input[type="number"]')].every((input) => parseFloat(getComputedStyle(input).fontSize) >= 16)
   }))()`);
 
   assert.equal(result.balance, "¥7,200.00");
   assert.equal(result.expected, "+¥7,500.00");
   assert.equal(result.actual, "+¥7,200.00");
   assert.equal(result.difference, "-¥300.00");
-  assert.equal(result.storedCount, 6);
+  assert.equal(result.storedCount, 7);
   assert.equal(result.homeDetailEntries, 0);
   assert.equal(result.dailyTotal, "¥100.00");
   assert.equal(result.width, 390);
   assert.equal(result.scrollWidth, 390);
   assert.equal(result.dialogClosed, true);
+  assert.equal(result.zoomSafeInputs, true);
+  assert.deepEqual(await evaluate("JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.filter((entry) => entry.recordType === 'expected').map((entry) => entry.date)"), ["2026-09-01", "2026-09-01"]);
+
+  const salaryDetail = await evaluate(`(() => {
+    document.querySelector('[data-category="salary"]').click();
+    const value = {
+      entries: document.querySelectorAll('#detailTimeline .entry-item').length,
+      notes: [...document.querySelectorAll('#detailTimeline .entry-main strong')].map((item) => item.textContent)
+    };
+    document.querySelector('#detailBack').click();
+    return value;
+  })()`);
+  assert.equal(salaryDetail.entries, 1);
+  assert.deepEqual(salaryDetail.notes, ["九月工资"]);
+
+  const previousPlanAmount = await evaluate(`(() => {
+    document.querySelector('#addExpected').click();
+    document.querySelector('#category').value = 'salary';
+    document.querySelector('#category').dispatchEvent(new Event('change'));
+    return document.querySelector('#amount').value;
+  })()`);
+  const planMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await mkdir(".impeccable/review", { recursive: true });
+  await writeFile(".impeccable/review/plan-mobile.png", Buffer.from(planMobile.data, "base64"));
+  const planUpdate = await evaluate(`(() => {
+    document.querySelector('#amount').value = '10500';
+    document.querySelector('#entryForm').requestSubmit();
+    const stored = JSON.parse(localStorage.getItem('yueyu-ledger-v1'));
+    return {
+      expectedSalaryRecords: stored.entries.filter((entry) => entry.recordType === 'expected' && entry.category === 'salary').length,
+      storedCount: stored.entries.length,
+      expectedRemaining: document.querySelector('#expectedRemaining').textContent
+    };
+  })()`);
+  assert.equal(previousPlanAmount, "10000");
+  assert.equal(planUpdate.expectedSalaryRecords, 1);
+  assert.equal(planUpdate.storedCount, 7);
+  assert.equal(planUpdate.expectedRemaining, "+¥8,000.00");
 
   const dailyDetail = await evaluate(`(() => {
     document.querySelector('[data-category="daily"]').click();
@@ -128,15 +182,30 @@ try {
       total: document.querySelector('#detailActual').textContent,
       groups: document.querySelectorAll('.day-group').length,
       entries: document.querySelectorAll('#detailTimeline .entry-item').length,
-      dates: [...document.querySelectorAll('.day-group h3')].map((item) => item.textContent)
+      dates: [...document.querySelectorAll('.day-group h3')].map((item) => item.textContent),
+      huabeiNotice: document.querySelector('#detailHuabeiNotice').textContent,
+      huabeiLabels: [...document.querySelectorAll('#detailTimeline .entry-main small')].filter((item) => item.textContent.includes('花呗')).length
     };
   })()`);
   assert.equal(dailyDetail.title, "日常开销");
   assert.equal(dailyDetail.total, "¥100.00");
-  assert.equal(dailyDetail.groups, 2);
-  assert.equal(dailyDetail.entries, 2);
+  assert.equal(dailyDetail.groups, 3);
+  assert.equal(dailyDetail.entries, 3);
   assert.ok(dailyDetail.dates.some((date) => date.includes("9月5日")));
+  assert.match(dailyDetail.huabeiNotice, /¥180\.00/);
+  assert.equal(dailyDetail.huabeiLabels, 1);
   await evaluate("document.querySelector('#detailBack').click(); true");
+
+  const nextMonthRepayment = await evaluate(`(() => {
+    document.querySelector('#nextMonth').click();
+    return {
+      expected: document.querySelector('[data-category="repayment"] strong:first-of-type').textContent,
+      currentBalance: document.querySelector('#currentBalance').textContent
+    };
+  })()`);
+  assert.equal(nextMonthRepayment.expected, "¥180.00");
+  assert.equal(nextMonthRepayment.currentBalance, "¥7,200.00");
+  await evaluate("document.querySelector('#previousMonth').click(); true");
 
   await addEntry("actual", 123, "special", "2026-09-04", "临时测试记录");
   await evaluate(`(() => {
@@ -180,7 +249,7 @@ try {
   })()`);
   assert.equal(await evaluate("document.querySelector('#currentBalance').textContent"), "¥500.00");
   await evaluate(`localStorage.setItem('yueyu-ledger-v1', ${JSON.stringify(savedState)}); location.reload(); true`);
-  await waitFor("document.readyState === 'complete' && JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length === 6");
+  await waitFor("document.readyState === 'complete' && JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length === 7");
 
   await mkdir(".impeccable/review", { recursive: true });
   const mobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
@@ -199,8 +268,8 @@ try {
   await call("Network.emulateNetworkConditions", { offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0 });
   await call("Page.reload", { ignoreCache: false });
   await waitFor("document.readyState === 'complete' && document.title.includes('月余')");
-  assert.equal(await evaluate("JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length"), 6);
-  assert.equal(await evaluate("document.querySelector('[data-category=\"daily\"] strong:last-of-type').textContent"), "¥100.00");
+  assert.equal(await evaluate("JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length"), 7);
+  assert.equal(await evaluate("document.querySelector('[data-category=\"daily\"] .category-actual strong').textContent"), "¥100.00");
   await call("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
 
   console.log(JSON.stringify({ ...result, offlineReload: true }, null, 2));

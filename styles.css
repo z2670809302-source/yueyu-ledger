@@ -72,6 +72,8 @@ h2 { margin-bottom: 3px; font-size: 1.16rem; letter-spacing: -0.02em; }
 .category-row:active { background: rgba(255,255,255,.38); }
 .category-row span { display: flex; align-items: center; gap: 9px; font-size: 0.88rem; }
 .category-row strong { font-size: 0.82rem; font-weight: 650; }
+.category-actual { display: grid; justify-items: end; gap: 2px; }
+.category-actual small { color: var(--red-dark); font-size: .75rem; font-weight: 650; }
 .direction-mark { width: 5px; height: 22px; border-radius: 3px; background: var(--red); }
 .direction-mark.income { background: var(--green); }
 
@@ -94,6 +96,7 @@ h2 { margin-bottom: 3px; font-size: 1.16rem; letter-spacing: -0.02em; }
 .detail-totals span, .detail-totals strong { display: block; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
 .detail-totals span { margin-bottom: 7px; color: var(--ink-soft); font-size: .74rem; }
 .detail-totals strong { font-size: 1.45rem; font-variant-numeric: tabular-nums; }
+.huabei-notice { margin: 12px 0 0; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 10px; color: var(--red-dark); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: .76rem; line-height: 1.55; }
 .detail-ledger { margin-top: 30px; }
 .day-group { margin-top: 22px; }
 .day-group h3 { margin: 0 0 7px; color: var(--ink-soft); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: .78rem; font-weight: 700; }
@@ -152,7 +155,9 @@ h2 { margin-bottom: 3px; font-size: 1.16rem; letter-spacing: -0.02em; }
 .amount-input.small span { font-size: 1rem; }
 .amount-input.small input { font-size: 1.3rem; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; padding: 0 12px; border: 1px solid var(--rule); border-radius: 10px; background: #fffcf4; color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: .86rem; }
+.plan-month { display: flex; align-items: center; min-height: 46px; padding: 0 12px; border: 1px solid var(--rule); border-radius: 10px; background: rgba(255,255,255,.38); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: .9rem; }
+select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; padding: 0 12px; border: 1px solid var(--rule); border-radius: 10px; background: #fffcf4; color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: 1rem; }
+.field-hint { margin: 7px 0 0; color: var(--ink-soft); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: .78rem; line-height: 1.55; }
 .dialog-actions { display: flex; gap: 10px; margin-top: 24px; }
 .toast { position: fixed; z-index: 40; left: 50%; bottom: calc(88px + env(safe-area-inset-bottom)); max-width: calc(100% - 40px); padding: 11px 16px; transform: translate(-50%, 12px); border-radius: 10px; background: var(--ink); color: white; opacity: 0; pointer-events: none; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: .8rem; transition: opacity .2s ease, transform .2s ease; }
 .toast.show { transform: translate(-50%, 0); opacity: 1; }
