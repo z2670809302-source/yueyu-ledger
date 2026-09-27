@@ -1,0 +1,192 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-27T13:14:59.1436419+08:00",
+  "title": "Design System: 月余",
+  "extensions": {
+    "colorMeta": {
+      "vermilion": {
+        "role": "primary",
+        "displayName": "朱砂行动色",
+        "canonical": "#b6412f",
+        "tonalRamp": ["oklch(24% 0.10 30)", "oklch(34% 0.12 30)", "oklch(44% 0.14 30)", "oklch(54% 0.14 30)", "oklch(64% 0.12 30)", "oklch(74% 0.09 30)", "oklch(85% 0.05 30)", "oklch(95% 0.02 30)"]
+      },
+      "vermilion-deep": {
+        "role": "primary",
+        "displayName": "深朱砂",
+        "canonical": "#8f2f22",
+        "tonalRamp": ["oklch(20% 0.09 30)", "oklch(30% 0.11 30)", "oklch(40% 0.13 30)", "oklch(50% 0.13 30)", "oklch(60% 0.11 30)", "oklch(72% 0.08 30)", "oklch(84% 0.05 30)", "oklch(95% 0.02 30)"]
+      },
+      "income-green": {
+        "role": "secondary",
+        "displayName": "收入深绿",
+        "canonical": "#176b54",
+        "tonalRamp": ["oklch(20% 0.06 165)", "oklch(30% 0.08 165)", "oklch(40% 0.09 165)", "oklch(50% 0.09 165)", "oklch(61% 0.08 165)", "oklch(73% 0.06 165)", "oklch(85% 0.04 165)", "oklch(95% 0.015 165)"]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "暖纸",
+        "canonical": "#f2ead9",
+        "tonalRamp": ["oklch(18% 0.02 83)", "oklch(30% 0.025 83)", "oklch(42% 0.03 83)", "oklch(55% 0.035 83)", "oklch(68% 0.035 83)", "oklch(80% 0.03 83)", "oklch(90% 0.025 83)", "oklch(96% 0.02 83)"]
+      },
+      "paper-light": {
+        "role": "neutral",
+        "displayName": "浅纸",
+        "canonical": "#fffaf0",
+        "tonalRamp": ["oklch(18% 0.015 83)", "oklch(30% 0.02 83)", "oklch(42% 0.025 83)", "oklch(55% 0.03 83)", "oklch(68% 0.03 83)", "oklch(80% 0.025 83)", "oklch(90% 0.02 83)", "oklch(98% 0.012 83)"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "近黑墨",
+        "canonical": "#17202a",
+        "tonalRamp": ["oklch(18% 0.02 248)", "oklch(28% 0.025 248)", "oklch(39% 0.03 248)", "oklch(51% 0.03 248)", "oklch(63% 0.025 248)", "oklch(75% 0.02 248)", "oklch(87% 0.012 248)", "oklch(96% 0.006 248)"]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "褪墨",
+        "canonical": "#56615f",
+        "tonalRamp": ["oklch(18% 0.01 180)", "oklch(29% 0.015 180)", "oklch(40% 0.02 180)", "oklch(52% 0.02 180)", "oklch(64% 0.018 180)", "oklch(76% 0.014 180)", "oklch(87% 0.009 180)", "oklch(96% 0.004 180)"]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "纸上规则线",
+        "canonical": "#d6cab5",
+        "tonalRamp": ["oklch(18% 0.015 77)", "oklch(30% 0.02 77)", "oklch(42% 0.025 77)", "oklch(54% 0.03 77)", "oklch(66% 0.03 77)", "oklch(77% 0.026 77)", "oklch(87% 0.02 77)", "oklch(95% 0.01 77)"]
+      },
+      "on-dark": {
+        "role": "neutral",
+        "displayName": "暗面米白",
+        "canonical": "#fdf7eb",
+        "tonalRamp": ["oklch(18% 0.012 80)", "oklch(30% 0.017 80)", "oklch(42% 0.022 80)", "oklch(55% 0.026 80)", "oklch(68% 0.026 80)", "oklch(80% 0.022 80)", "oklch(90% 0.017 80)", "oklch(97% 0.012 80)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "账本页名", "purpose": "产品页名与最高层级手写感标题。" },
+      "headline": { "displayName": "局部大标题", "purpose": "录入弹层等独立任务的起点。" },
+      "title": { "displayName": "章节标题", "purpose": "月度收支、明细和数据分区。" },
+      "body": { "displayName": "界面正文", "purpose": "分类、说明、表单和操作文字。" },
+      "label": { "displayName": "微型标签", "purpose": "日期、状态、列头和字段名。" },
+      "numerals": { "displayName": "余额数字", "purpose": "当前余额与其他需要稳定对齐的财务数值。" }
+    },
+    "shadows": [
+      { "name": "balance-sheet", "value": "0 12px 28px rgba(57, 45, 29, 0.11)", "purpose": "从暖纸上抬起主余额容器。" },
+      { "name": "primary-action", "value": "0 7px 16px rgba(143, 47, 34, 0.18)", "purpose": "强化矩形主操作的可按性。" },
+      { "name": "central-action", "value": "0 9px 20px rgba(143, 47, 34, 0.28)", "purpose": "强化固定底栏中央加号。" },
+      { "name": "bottom-navigation", "value": "0 -10px 28px rgba(57, 45, 29, 0.08)", "purpose": "区分固定底栏与滚动账页。" },
+      { "name": "dialog", "value": "0 -18px 48px rgba(24, 26, 25, 0.24)", "purpose": "表达录入弹层位于页面上方。" }
+    ],
+    "motion": [
+      { "name": "toast-standard", "value": "200ms ease", "purpose": "提示条的透明度与 12px 位移过渡。" },
+      { "name": "reduced-motion", "value": "0.01ms", "purpose": "用户偏好减少动态时将滚动和过渡压缩到近乎即时。" }
+    ],
+    "breakpoints": [
+      { "name": "mobile-reference", "value": "390px" },
+      { "name": "desktop-layout", "value": "700px" },
+      { "name": "content-max", "value": "760px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "朱砂色主操作，用于保存、记录和导出。",
+      "html": "<button class=\"ds-btn-primary\">记一笔</button>",
+      "css": ".ds-btn-primary { min-height: 46px; padding: 0 18px; border: 0; border-radius: 12px; background: var(--red, #b6412f); color: var(--paper-light, #fffaf0); font: 750 .88rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; box-shadow: 0 7px 16px rgba(143,47,34,.18); cursor: pointer; } .ds-btn-primary:hover { background: var(--red-dark, #8f2f22); } .ds-btn-primary:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 3px; } .ds-btn-primary:active { background: var(--red-dark, #8f2f22); transform: translateY(1px); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "透明纸面上的墨色描边操作。",
+      "html": "<button class=\"ds-btn-secondary\">保存基准</button>",
+      "css": ".ds-btn-secondary { min-height: 46px; padding: 0 18px; border: 1px solid var(--ink, #17202a); border-radius: 12px; background: transparent; color: var(--ink, #17202a); font: 750 .88rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; cursor: pointer; } .ds-btn-secondary:hover { background: rgba(255,255,255,.38); } .ds-btn-secondary:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 3px; } .ds-btn-secondary:active { background: rgba(23,32,42,.08); }"
+    },
+    {
+      "name": "Standard Field",
+      "kind": "input",
+      "refersTo": "input-standard",
+      "description": "浅纸底、规则线描边的普通文本字段。",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">备注（可选）</span><input type=\"text\" placeholder=\"例如：9 月房租\"></label>",
+      "css": ".ds-field { display: grid; gap: 7px; color: var(--ink, #17202a); font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-field-label { font-size: .72rem; font-weight: 700; } .ds-field input { min-height: 46px; padding: 0 12px; border: 1px solid var(--rule, #d6cab5); border-radius: 10px; background: var(--paper-light, #fffaf0); color: var(--ink, #17202a); font: .86rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-field input:hover { border-color: var(--ink-soft, #56615f); } .ds-field input:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 3px; }"
+    },
+    {
+      "name": "Balance Sheet",
+      "kind": "card",
+      "refersTo": "balance-sheet",
+      "description": "主视图唯一的深色总览面，承载当前余额和三项月度摘要。",
+      "html": "<section class=\"ds-balance\"><span>当前余额</span><strong>¥7,300.00</strong><div class=\"ds-balance-rule\"></div><div class=\"ds-balance-meta\"><span>预计结余<br><b>+¥7,500.00</b></span><span>实际结余<br><b>+¥7,300.00</b></span><span>计划差额<br><b class=\"ds-negative\">-¥200.00</b></span></div></section>",
+      "css": ".ds-balance { padding: 17px 20px 15px; border-radius: var(--radius, 14px); background: var(--ink, #17202a); color: var(--on-dark, #fdf7eb); box-shadow: 0 12px 28px rgba(57,45,29,.11); font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-balance > span { color: #c8cfcc; font-size: .8rem; } .ds-balance > strong { display: block; margin: 5px 0 14px; font-size: clamp(2.2rem,10vw,4.25rem); font-weight: 650; line-height: 1; letter-spacing: -.035em; font-variant-numeric: tabular-nums; } .ds-balance-rule { height: 1px; background: rgba(255,255,255,.16); } .ds-balance-meta { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; padding-top: 11px; color: #abb4b0; font-size: .7rem; } .ds-balance-meta b { display: inline-block; margin-top: 6px; color: var(--on-dark, #fdf7eb); font-size: .88rem; font-variant-numeric: tabular-nums; white-space: nowrap; } .ds-balance-meta .ds-negative { color: #ffb6a5; } .ds-balance:focus-within { outline: 3px solid rgba(182,65,47,.28); outline-offset: 3px; }"
+    },
+    {
+      "name": "Ruled Ledger Row",
+      "kind": "custom",
+      "description": "以方向竖记号和等宽数字呈现分类预计与实际，整行进入对应分类明细。",
+      "html": "<button class=\"ds-ledger-row\"><span><i></i>当月房租</span><strong>¥2,500.00</strong><strong>¥2,500.00</strong></button>",
+      "css": ".ds-ledger-row { display: grid; grid-template-columns: minmax(112px,1.25fr) 1fr 1fr; align-items: center; width: 100%; min-height: 46px; border: 0; border-bottom: 1px solid var(--rule, #d6cab5); background: transparent; color: var(--ink, #17202a); text-align: right; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; font-variant-numeric: tabular-nums; cursor: pointer; } .ds-ledger-row > span { display: flex; align-items: center; gap: 9px; text-align: left; font-size: .88rem; } .ds-ledger-row i { width: 5px; height: 22px; border-radius: 3px; background: var(--red, #b6412f); } .ds-ledger-row strong { font-size: .82rem; font-weight: 650; } .ds-ledger-row:hover { background: rgba(255,255,255,.22); } .ds-ledger-row:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 1px; } .ds-ledger-row:active { background: rgba(255,255,255,.38); }"
+    },
+    {
+      "name": "Category Detail Header",
+      "kind": "custom",
+      "description": "返回、分类名、月份、分类记账动作与预计/实际小计组成的明细页起点；记账动作预选当前分类。",
+      "html": "<section class=\"ds-detail\"><header class=\"ds-detail-top\"><button class=\"ds-detail-back\" aria-label=\"返回月度总览\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m15 18-6-6 6-6\"/></svg></button><div><h2>日常开销</h2><p>2026 年 9 月 · 按日记录</p></div><button class=\"ds-detail-add\">记一笔</button></header><div class=\"ds-detail-totals\"><div><span>预计总额</span><strong>¥2,500.00</strong></div><div><span>实际总额</span><strong>¥2,380.00</strong></div></div></section>",
+      "css": ".ds-detail { color: var(--ink, #17202a); } .ds-detail-top { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 10px; margin: 4px 0 24px; } .ds-detail-top h2 { margin: 0; font: 700 clamp(2rem,8vw,3rem) 'LXGW WenKai Lite', serif; line-height: 1; letter-spacing: -.03em; } .ds-detail-top p { margin: 4px 0 0; color: var(--ink-soft, #56615f); font: .74rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; letter-spacing: .04em; } .ds-detail-back { display: grid; place-items: center; width: 44px; height: 44px; margin-left: -10px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink, #17202a); cursor: pointer; } .ds-detail-back svg { width: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; } .ds-detail-add { padding: 4px 0; border: 0; background: transparent; color: var(--red, #b6412f); font: 700 .82rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; cursor: pointer; } .ds-detail-back:hover { background: rgba(23,32,42,.08); } .ds-detail-add:hover { color: var(--red-dark, #8f2f22); } .ds-detail-back:focus-visible, .ds-detail-add:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 3px; } .ds-detail-totals { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 16px 0; border-top: 2px solid var(--ink, #17202a); border-bottom: 1px solid var(--ink, #17202a); } .ds-detail-totals > div:last-child { padding-left: 18px; border-left: 1px solid var(--rule, #d6cab5); } .ds-detail-totals span, .ds-detail-totals strong { display: block; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-detail-totals span { margin-bottom: 7px; color: var(--ink-soft, #56615f); font-size: .74rem; } .ds-detail-totals strong { font-size: 1.45rem; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Daily Entry Group",
+      "kind": "custom",
+      "description": "按具体日期倒序分组的分类流水，同日可连续显示多条备注与金额；空状态按钮预选当前分类。",
+      "html": "<section class=\"ds-day-group\"><h3>9月27日周日</h3><div class=\"ds-entry-list\"><button class=\"ds-detail-entry\"><span><strong>午餐</strong><small>实际</small></span><b>−¥36.00</b><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m9 18 6-6-6-6\"/></svg></button><button class=\"ds-detail-entry\"><span><strong>地铁</strong><small>实际</small></span><b>−¥6.00</b><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m9 18 6-6-6-6\"/></svg></button></div></section>",
+      "css": ".ds-day-group { margin-top: 22px; color: var(--ink, #17202a); } .ds-day-group h3 { margin: 0 0 7px; color: var(--ink-soft, #56615f); font: 700 .78rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-entry-list { border-top: 2px solid var(--ink, #17202a); } .ds-detail-entry { display: grid; grid-template-columns: 1fr auto 18px; align-items: center; gap: 10px; width: 100%; min-height: 70px; padding: 9px 0; border: 0; border-bottom: 1px solid var(--rule, #d6cab5); background: transparent; color: var(--ink, #17202a); text-align: left; cursor: pointer; } .ds-detail-entry strong, .ds-detail-entry small { display: block; } .ds-detail-entry strong { font-size: .94rem; } .ds-detail-entry small { margin-top: 3px; color: var(--ink-soft, #56615f); font: .69rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-detail-entry b { color: var(--red-dark, #8f2f22); font: 700 .88rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; font-variant-numeric: tabular-nums; } .ds-detail-entry svg { width: 18px; fill: none; stroke: var(--ink-soft, #56615f); stroke-width: 1.8; } .ds-detail-entry:hover { background: rgba(255,255,255,.22); } .ds-detail-entry:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 1px; } .ds-detail-entry:active { background: rgba(255,255,255,.38); }"
+    },
+    {
+      "name": "Segmented Record Type",
+      "kind": "custom",
+      "description": "在实际与预计之间切换，选中项以墨面反白。",
+      "html": "<div class=\"ds-segmented\"><button class=\"ds-selected\">实际</button><button>预计</button></div>",
+      "css": ".ds-segmented { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; border: 1px solid var(--rule, #d6cab5); border-radius: 12px; background: var(--paper-light, #fffaf0); } .ds-segmented button { min-height: 38px; border: 0; border-radius: 9px; background: transparent; color: var(--ink-soft, #56615f); font: 700 .82rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; cursor: pointer; } .ds-segmented button:hover { background: rgba(23,32,42,.08); } .ds-segmented button:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 1px; } .ds-segmented .ds-selected { background: var(--ink, #17202a); color: white; }"
+    },
+    {
+      "name": "Bottom Navigation",
+      "kind": "nav",
+      "description": "固定双端导航与上浮的中央记账动作；在分类明细页预选当前分类。",
+      "html": "<nav class=\"ds-bottom-nav\"><button class=\"ds-nav-item ds-active\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 4h14v16H5zM8 8h8M8 12h8M8 16h5\"/></svg>账本</button><button class=\"ds-add\" aria-label=\"记一笔\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg></button><button class=\"ds-nav-item\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 7h16M4 12h16M4 17h16\"/></svg>数据</button></nav>",
+      "css": ".ds-bottom-nav { display: grid; grid-template-columns: 1fr 72px 1fr; align-items: end; height: 72px; padding: 8px 44px; border-top: 1px solid rgba(82,68,46,.15); background: rgba(250,246,236,.96); box-shadow: 0 -10px 28px rgba(57,45,29,.08); backdrop-filter: blur(14px); } .ds-nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 48px; border: 0; background: transparent; color: var(--ink-soft, #56615f); font: 650 .72rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; cursor: pointer; } .ds-nav-item svg { width: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; } .ds-nav-item:hover, .ds-nav-item.ds-active { color: var(--red-dark, #8f2f22); } .ds-nav-item:focus-visible, .ds-add:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 3px; } .ds-add { display: grid; place-items: center; width: 58px; height: 58px; margin: -18px auto 0; border: 0; border-radius: 50%; background: var(--red, #b6412f); color: white; box-shadow: 0 9px 20px rgba(143,47,34,.28); cursor: pointer; } .ds-add:hover { background: var(--red-dark, #8f2f22); } .ds-add:active { transform: translateY(2px); } .ds-add svg { width: 27px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "掌心里的月度纸账本",
+    "overview": "月余把一本私人手写账本压缩进 iPhone：温暖纸张承载内容，近黑墨色建立秩序，朱砂红落在支出和关键动作上，深绿只标记收入与本机状态。整体克制、安静、实用，信息像按月誊写在同一张纸上，而不是被拆成通用财务仪表盘的悬浮统计卡和装饰性图表。\n\n界面以清楚的数值关系为主角。书写感标题提供人味，系统无衬线体让控件、说明和金额保持快速可扫；细规则线、对齐的表格数字和一张深色余额单构成稳定节奏。首页只承担月度总览，逐笔流水进入对应分类的独立明细页。没有栅格图像，图标均为一致线重的自绘 SVG；随包字体使用 OFL 许可。",
+    "keyCharacteristics": [
+      "温暖纸面与近黑墨色构成连续、低干扰的阅读底盘。",
+      "一张深色余额单承担全屏最强层级，其他内容回到纸上规则线。",
+      "朱砂红表示支出和主操作，深绿表示收入和本机可信状态。",
+      "文楷只用于标题和月份，正文、控件与金额坚持系统无衬线体。",
+      "移动端先行，固定底栏与中央圆形加号保证随手记一笔。",
+      "首页保持月度摘要，分类明细按具体日期倒序展开。"
+    ],
+    "rules": [
+      { "name": "The Two-Ink Rule", "body": "朱砂只表达支出或主操作，深绿只表达收入或本机可信状态；不要把它们当作无语义装饰色互换。", "section": "colors" },
+      { "name": "The Paper Continuity Rule", "body": "页面主体保持整张暖纸，不把每一组数字包进独立白卡。", "section": "colors" },
+      { "name": "The Split-Voice Rule", "body": "文楷负责账本的声音，系统无衬线负责操作和计算；不要让文楷进入密集表格、表单或金额。", "section": "typography" },
+      { "name": "The One-Sheet Rule", "body": "信息沿一张纸纵向展开；层级依靠标题、规则线和留白，不依靠多列仪表盘或卡片网格。", "section": "layout" },
+      { "name": "The Reserved Depth Rule", "body": "阴影只解释余额总览、主操作、固定导航或模态层级；规则表格和普通分区永远留在纸面上。", "section": "elevation" },
+      { "name": "The Restrained Radius Rule", "body": "12–16px 是主要表面的圆角语言；不要把普通内容变成胶囊或过度圆润的卡片集合。", "section": "shapes" }
+    ],
+    "dos": [
+      "Do 让一张近黑余额单成为每个主账本视图的视觉锚点。",
+      "Do 用规则线、对齐和等宽数字组织高密度财务信息。",
+      "Do 在 390px 宽度优先验证六个分类、固定导航与中央加号的关系。",
+      "Do 让分类整行进入独立明细，并在明细页按日期倒序保留同日多条记录。",
+      "Do 使用同一套无填充、圆端点、等线重 SVG 图标。",
+      "Do 保持 LXGW WenKai Lite 字体文件与 OFL 许可证随应用本地提供。"
+    ],
+    "donts": [
+      "Don't 用浮动统计卡、装饰性图表或多彩分类瓦片替代纸账本结构。",
+      "Don't 把朱砂与深绿用于没有收支或可信状态含义的装饰。",
+      "Don't 在密集正文、表单或金额中使用文楷。",
+      "Don't 为普通表格行和数据分区添加阴影、渐变或独立白卡背景。",
+      "Don't 在首页重新加入逐笔流水、日期分组或明细编辑入口。",
+      "Don't 引入栅格装饰资产；继续使用字体、CSS 和自绘 SVG 表达视觉世界。"
+    ]
+  }
+}

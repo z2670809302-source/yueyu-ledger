@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f2ead9" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="月余" />
+    <meta name="description" content="完全离线、数据由自己保管的私人月度记账本。" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <title>月余 · 私人记账本</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section id="ledgerView" class="view" aria-labelledby="pageTitle">
+        <header class="topbar">
+          <div>
+            <h1 id="pageTitle">月余</h1>
+            <p class="date-line" id="todayLabel"></p>
+          </div>
+          <span class="offline-mark" title="数据仅保存在本机">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 11V8a4 4 0 0 1 8 0v3m-9 0h10a2 2 0 0 1 2 2v6H5v-6a2 2 0 0 1 2-2Z"/></svg>
+            本机账本
+          </span>
+        </header>
+
+        <div class="month-switcher" aria-label="选择月份">
+          <button class="icon-button" id="previousMonth" aria-label="上个月">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <button class="month-button" id="monthPicker" aria-label="回到本月">
+            <strong id="monthTitle"></strong>
+            <span id="monthStatus">本月</span>
+          </button>
+          <button class="icon-button" id="nextMonth" aria-label="下个月">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <section class="balance-sheet" aria-labelledby="balanceTitle">
+          <div class="balance-heading">
+            <span id="balanceTitle">当前余额</span>
+            <button class="text-button" id="calibrateBalance">校准</button>
+          </div>
+          <p class="balance-value" id="currentBalance">¥0.00</p>
+          <div class="balance-rule" aria-hidden="true"></div>
+          <div class="balance-columns">
+            <div>
+              <span>预计结余</span>
+              <strong id="expectedRemaining">¥0.00</strong>
+            </div>
+            <div>
+              <span>实际结余</span>
+              <strong id="actualRemaining">¥0.00</strong>
+            </div>
+            <div>
+              <span>计划差额</span>
+              <strong id="planDifference">¥0.00</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-block" aria-labelledby="categoryTitle">
+          <div class="section-heading">
+            <div>
+              <h2 id="categoryTitle">本月收支</h2>
+              <p>预计与实际，一眼对照</p>
+            </div>
+            <button class="text-button" id="addExpected">录入计划</button>
+          </div>
+          <div class="ledger-table" role="table" aria-label="本月分类汇总">
+            <div class="ledger-row ledger-head" role="row">
+              <span role="columnheader">项目</span>
+              <span role="columnheader">预计</span>
+              <span role="columnheader">实际</span>
+            </div>
+            <div id="categoryRows"></div>
+          </div>
+        </section>
+
+      </section>
+
+      <section id="detailView" class="view" hidden aria-labelledby="detailTitle">
+        <header class="detail-topbar">
+          <button class="icon-button back-button" id="detailBack" aria-label="返回月度总览">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <div>
+            <h1 id="detailTitle">日常开销</h1>
+            <p class="date-line" id="detailMonth"></p>
+          </div>
+          <button class="text-button" id="detailAdd">记一笔</button>
+        </header>
+
+        <section class="detail-totals" aria-label="分类月度汇总">
+          <div>
+            <span>预计总额</span>
+            <strong id="detailExpected">¥0.00</strong>
+          </div>
+          <div>
+            <span>实际总额</span>
+            <strong id="detailActual">¥0.00</strong>
+          </div>
+        </section>
+
+        <section class="detail-ledger" aria-labelledby="dailyDetailTitle">
+          <div class="section-heading">
+            <div>
+              <h2 id="dailyDetailTitle">每日明细</h2>
+              <p id="detailCount">还没有记录</p>
+            </div>
+          </div>
+          <div id="detailTimeline"></div>
+          <div id="detailEmpty" class="empty-state">
+            <svg viewBox="0 0 80 80" aria-hidden="true"><path d="M20 11h40v58H20zM28 25h24M28 36h24M28 47h14"/></svg>
+            <strong>这个月还没有记录</strong>
+            <span>每笔都可以填写具体日期，首页会自动汇总。</span>
+            <button class="primary-button" id="detailEmptyAdd">记第一笔</button>
+          </div>
+        </section>
+      </section>
+
+      <section id="dataView" class="view" hidden aria-labelledby="dataTitle">
+        <header class="topbar data-topbar">
+          <div>
+            <h1 id="dataTitle">数据管理</h1>
+            <p class="date-line">账目只保存在你的设备里</p>
+          </div>
+        </header>
+
+        <section class="data-section">
+          <h2>余额基准</h2>
+          <p>当前余额由起始余额，加上全部实际收入，再减去全部实际支出得出。</p>
+          <form id="balanceForm" class="inline-form">
+            <label for="openingBalance">起始余额</label>
+            <div class="amount-input small">
+              <span>¥</span>
+              <input id="openingBalance" name="openingBalance" type="number" step="0.01" inputmode="decimal" required />
+            </div>
+            <button class="secondary-button" type="submit">保存基准</button>
+          </form>
+        </section>
+
+        <section class="data-section">
+          <h2>备份与恢复</h2>
+          <p>建议每月导出一次。备份包含起始余额和全部计划、流水，可以在另一台设备恢复。</p>
+          <div class="action-stack">
+            <button class="primary-button full" id="exportData">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
+              导出完整备份
+            </button>
+            <label class="secondary-button full file-button" for="importData">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m0 0 4 4m-4-4L8 7M5 19h14"/></svg>
+              从备份恢复
+            </label>
+            <input id="importData" type="file" accept="application/json,.json" hidden />
+          </div>
+          <p class="privacy-note">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.9 8.6 7 10 4.1-1.4 7-5.4 7-10V6l-7-3Z"/></svg>
+            本应用没有服务器，也不会上传你的账目。
+          </p>
+        </section>
+
+        <section class="data-section install-section">
+          <h2>安装到 iPhone</h2>
+          <ol>
+            <li>用 Safari 打开部署后的 HTTPS 地址。</li>
+            <li>点“分享”，再选“添加到主屏幕”。</li>
+            <li>首次打开后，即可离线使用。</li>
+          </ol>
+        </section>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="主导航">
+      <button class="nav-item active" data-view="ledgerView">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg>
+        账本
+      </button>
+      <button class="add-button" id="addEntry" aria-label="记一笔">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <button class="nav-item" data-view="dataView">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        数据
+      </button>
+    </nav>
+
+    <dialog id="entryDialog" class="entry-dialog">
+      <form id="entryForm" method="dialog">
+        <div class="dialog-handle" aria-hidden="true"></div>
+        <div class="dialog-heading">
+          <div>
+            <h2 id="entryDialogTitle">记一笔</h2>
+          </div>
+          <button class="icon-button" type="button" id="closeDialog" aria-label="关闭">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+
+        <input type="hidden" id="entryId" />
+        <div class="segmented-control" aria-label="记录类型">
+          <label><input type="radio" name="recordType" value="actual" checked /><span>实际</span></label>
+          <label><input type="radio" name="recordType" value="expected" /><span>预计</span></label>
+        </div>
+
+        <label class="field-label" for="amount">金额</label>
+        <div class="amount-input">
+          <span>¥</span>
+          <input id="amount" name="amount" type="number" step="0.01" min="0.01" inputmode="decimal" placeholder="0.00" required />
+        </div>
+
+        <div class="form-grid">
+          <label>
+            <span class="field-label">项目</span>
+            <select id="category" name="category" required></select>
+          </label>
+          <label>
+            <span class="field-label">日期</span>
+            <input id="entryDate" name="entryDate" type="date" required />
+          </label>
+        </div>
+
+        <label>
+          <span class="field-label">备注（可选）</span>
+          <input id="note" name="note" type="text" maxlength="60" placeholder="例如：9 月房租" />
+        </label>
+
+        <div class="dialog-actions">
+          <button class="danger-button" id="deleteEntry" type="button" hidden>删除</button>
+          <button class="primary-button grow" type="submit">保存记录</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
