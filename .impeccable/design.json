@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-27T19:06:05.9573879+08:00",
+  "generatedAt": "2026-09-27T19:18:53.9113085+08:00",
   "title": "Design System: 月余",
   "extensions": {
     "colorMeta": {
@@ -95,12 +95,12 @@
       "css": ".ds-btn-primary { min-height: 46px; padding: 0 18px; border: 0; border-radius: 12px; background: var(--red, #b6412f); color: var(--paper-light, #fffaf0); font: 750 .88rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; box-shadow: 0 7px 16px rgba(143,47,34,.18); cursor: pointer; } .ds-btn-primary:hover { background: var(--red-dark, #8f2f22); } .ds-btn-primary:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 3px; } .ds-btn-primary:active { background: var(--red-dark, #8f2f22); transform: translateY(1px); }"
     },
     {
-      "name": "Secondary Button",
+      "name": "In-app Update Action",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "透明纸面上的墨色描边操作。",
-      "html": "<button class=\"ds-btn-secondary\">保存基准</button>",
-      "css": ".ds-btn-secondary { min-height: 46px; padding: 0 18px; border: 1px solid var(--ink, #17202a); border-radius: 12px; background: transparent; color: var(--ink, #17202a); font: 750 .88rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; cursor: pointer; } .ds-btn-secondary:hover { background: rgba(255,255,255,.38); } .ds-btn-secondary:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 3px; } .ds-btn-secondary:active { background: rgba(23,32,42,.08); }"
+      "description": "备份恢复后的全宽次级操作；默认显示“刷新并检查更新”，处理中禁用并显示“正在检查更新…”，失败复用现有 toast，账目数据始终保留。",
+      "html": "<section class=\"ds-update-section\"><h3>应用更新</h3><p>联网检查并加载最新版本。刷新只更新程序，不会删除余额、计划或流水。</p><button class=\"ds-update-button\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7\"/></svg><span>刷新并检查更新</span></button></section>",
+      "css": ".ds-update-section { padding: 25px 0 28px; border-top: 2px solid var(--ink, #17202a); color: var(--ink, #17202a); } .ds-update-section h3 { margin: 0 0 3px; font: 700 1.16rem 'LXGW WenKai Lite', serif; letter-spacing: -.02em; } .ds-update-section p { margin: 0; color: var(--ink-soft, #56615f); font: .8rem/1.65 -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; } .ds-update-button { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; min-height: 46px; margin-top: 18px; padding: 0 18px; border: 1px solid var(--ink, #17202a); border-radius: 12px; background: transparent; color: var(--ink, #17202a); font: 750 .88rem -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; cursor: pointer; } .ds-update-button svg { width: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; } .ds-update-button:hover { background: rgba(255,255,255,.38); } .ds-update-button:focus-visible { outline: 3px solid rgba(182,65,47,.28); outline-offset: 3px; } .ds-update-button:active { background: rgba(23,32,42,.08); }"
     },
     {
       "name": "Standard Field",
@@ -182,7 +182,8 @@
       { "name": "The Reserved Depth Rule", "body": "阴影只解释余额总览、主操作、固定导航或模态层级；规则表格和普通分区永远留在纸面上。", "section": "elevation" },
       { "name": "The Restrained Radius Rule", "body": "12–16px 是主要表面的圆角语言；不要把普通内容变成胶囊或过度圆润的卡片集合。", "section": "shapes" },
       { "name": "The Monthly Plan Rule", "body": "预计只有月份和分类两个归属维度；不要为它伪造日级时间线或多条同类计划。", "section": "components" },
-      { "name": "The Deferred Huabei Rule", "body": "花呗金额只能作为次级递延信息出现；不得混入本月实际合计或余额。", "section": "components" }
+      { "name": "The Deferred Huabei Rule", "body": "花呗金额只能作为次级递延信息出现；不得混入本月实际合计或余额。", "section": "components" },
+      { "name": "The Data-Preserving Refresh Rule", "body": "应用更新只替换程序资源，不得暗示或执行余额、计划或流水的清除。", "section": "components" }
     ],
     "dos": [
       "Do 让一张近黑余额单成为每个主账本视图的视觉锚点。",
@@ -192,6 +193,7 @@
       "Do 把同月同分类的预计回填、覆盖或清除为唯一月度计划。",
       "Do 将花呗金额显示为次级递延信息，并说明其进入下月预计还款的来源。",
       "Do 在 390px iPhone 14 上保持所有可聚焦表单控件至少 16px。",
+      "Do 让应用更新操作复用全宽次级按钮、线性刷新图标和现有 toast 状态反馈。",
       "Do 使用同一套无填充、圆端点、等线重 SVG 图标。",
       "Do 保持 LXGW WenKai Lite 字体文件与 OFL 许可证随应用本地提供。"
     ],
@@ -202,6 +204,7 @@
       "Don't 为普通表格行和数据分区添加阴影、渐变或独立白卡背景。",
       "Don't 在首页重新加入逐笔流水、日期分组或明细编辑入口。",
       "Don't 把预计放进按日流水，或把花呗消费计入本月实际支出和余额。",
+      "Don't 为应用更新增加新的颜色、字号、圆角或独立卡片样式。",
       "Don't 引入栅格装饰资产；继续使用字体、CSS 和自绘 SVG 表达视觉世界。"
     ]
   }

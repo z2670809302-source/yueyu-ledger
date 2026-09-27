@@ -322,6 +322,37 @@ $("#importData").addEventListener("change", async (event) => {
   }
 });
 
+function waitForServiceWorker(worker) {
+  if (!worker || worker.state === "activated" || worker.state === "redundant") return Promise.resolve();
+  return Promise.race([
+    new Promise((resolve) => worker.addEventListener("statechange", () => {
+      if (worker.state === "activated" || worker.state === "redundant") resolve();
+    })),
+    new Promise((resolve) => window.setTimeout(resolve, 8000))
+  ]);
+}
+
+$("#refreshApp").addEventListener("click", async () => {
+  const button = $("#refreshApp");
+  const label = $("#refreshAppLabel");
+  button.disabled = true;
+  label.textContent = "正在检查更新…";
+  try {
+    if ("serviceWorker" in navigator) {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration) {
+        await registration.update();
+        await waitForServiceWorker(registration.installing || registration.waiting);
+      }
+    }
+    window.location.reload();
+  } catch {
+    button.disabled = false;
+    label.textContent = "刷新并检查更新";
+    showToast(navigator.onLine ? "刷新失败，请稍后再试" : "当前离线，无法检查更新");
+  }
+});
+
 entryDialog.addEventListener("click", (event) => {
   if (event.target === entryDialog) closeEntryForm();
 });

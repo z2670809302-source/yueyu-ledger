@@ -38,6 +38,7 @@ The product is a private monthly money sheet: current balance and the seven cate
 - Expense records can use balance payment or Huabei. Huabei spending stays visible on its purchase date, does not reduce the current balance or count toward that month's actual expense, and is added automatically to the following month's expected repayment.
 - Data stays in the browser on the user's device. There is no login, analytics, cloud service, paid API, or network data transfer.
 - The user can create, edit, and delete entries; browse months; export a complete backup; and restore a backup.
+- The data-management view includes an in-app refresh action that checks for a new Service Worker version and reloads the program without clearing local ledger data.
 - The interface language is Simplified Chinese.
 - The installable PWA is published on GitHub Pages at `https://z2670809302-source.github.io/yueyu-ledger/`; program updates keep the same origin so device-local records remain available.
 

@@ -137,6 +137,26 @@ try {
   assert.equal(result.scrollWidth, 390);
   assert.equal(result.dialogClosed, true);
   assert.equal(result.zoomSafeInputs, true);
+  const refreshFailure = await evaluate(`(async () => {
+    const serviceWorkers = navigator.serviceWorker;
+    const originalGetRegistration = serviceWorkers.getRegistration.bind(serviceWorkers);
+    Object.defineProperty(serviceWorkers, 'getRegistration', {
+      configurable: true,
+      value: async () => ({ update: async () => { throw new Error('test update failure'); } })
+    });
+    document.querySelector('#refreshApp').click();
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    const value = {
+      disabled: document.querySelector('#refreshApp').disabled,
+      label: document.querySelector('#refreshAppLabel').textContent,
+      storedCount: JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length
+    };
+    Object.defineProperty(serviceWorkers, 'getRegistration', { configurable: true, value: originalGetRegistration });
+    return value;
+  })()`);
+  assert.equal(refreshFailure.disabled, false);
+  assert.equal(refreshFailure.label, "刷新并检查更新");
+  assert.equal(refreshFailure.storedCount, 7);
   assert.deepEqual(await evaluate("JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.filter((entry) => entry.recordType === 'expected').map((entry) => entry.date)"), ["2026-09-01", "2026-09-01"]);
 
   const salaryDetail = await evaluate(`(() => {
@@ -263,6 +283,12 @@ try {
   await call("Emulation.setDeviceMetricsOverride", { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
   const desktop = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/desktop.png", Buffer.from(desktop.data, "base64"));
+
+  await call("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
+  await evaluate("document.querySelector('[data-view=\"dataView\"]').click(); true");
+  const updateMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/update-mobile.png", Buffer.from(updateMobile.data, "base64"));
+  await evaluate("document.querySelector('[data-view=\"ledgerView\"]').click(); true");
 
   await evaluate("navigator.serviceWorker.ready.then(() => true)");
   await call("Network.emulateNetworkConditions", { offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0 });

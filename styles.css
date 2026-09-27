@@ -115,6 +115,7 @@ h2 { margin-bottom: 3px; font-size: 1.16rem; letter-spacing: -0.02em; }
 .primary-button.full, .secondary-button.full { display: flex; width: 100%; align-items: center; justify-content: center; gap: 9px; }
 .primary-button svg, .secondary-button svg { width: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .secondary-button { border: 1px solid var(--ink); background: transparent; color: var(--ink); }
+.secondary-button:disabled { opacity: .56; cursor: wait; }
 .danger-button { border: 1px solid #bd887f; background: transparent; color: var(--red-dark); }
 .grow { flex: 1; }
 
@@ -132,6 +133,7 @@ h2 { margin-bottom: 3px; font-size: 1.16rem; letter-spacing: -0.02em; }
 .inline-form { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; margin-top: 18px; }
 .inline-form > label { grid-column: 1 / -1; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: .76rem; font-weight: 700; }
 .action-stack { display: grid; gap: 10px; margin-top: 20px; }
+.update-button { margin-top: 18px; }
 .file-button { cursor: pointer; }
 .privacy-note { display: flex; align-items: flex-start; gap: 8px; margin: 18px 0 0; color: var(--green) !important; }
 .privacy-note svg { flex: 0 0 auto; width: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; }
