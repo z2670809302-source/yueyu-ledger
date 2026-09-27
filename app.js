@@ -1,4 +1,4 @@
-import { categories, currentBalance, monthKey, summarize, validateBackup } from "./ledger-core.js";
+import { categories, monthKey, monthOpeningBalance, summarize, validateBackup } from "./ledger-core.js";
 
 const STORAGE_KEY = "yueyu-ledger-v1";
 const currency = new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY" });
@@ -15,9 +15,9 @@ const entryForm = $("#entryForm");
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? validateBackup(JSON.parse(raw)) : { version: 1, openingBalance: 0, entries: [] };
+    return raw ? validateBackup(JSON.parse(raw)) : { version: 1, openingBalance: 0, openingMonth: monthKey(), entries: [] };
   } catch {
-    return { version: 1, openingBalance: 0, entries: [] };
+    return { version: 1, openingBalance: 0, openingMonth: monthKey(), entries: [] };
   }
 }
 
@@ -28,6 +28,11 @@ function saveState() {
 function formatMoney(value, signed = false) {
   if (signed && value > 0) return `+${currency.format(value)}`;
   return currency.format(value);
+}
+
+function formatDirectionalMoney(value, direction) {
+  if (!value) return formatMoney(0);
+  return `${direction === "income" ? "+" : "−"}${formatMoney(value)}`;
 }
 
 function selectedMonthKey() {
@@ -42,24 +47,30 @@ function defaultDateForSelectedMonth() {
 
 function render() {
   const key = selectedMonthKey();
-  const summary = summarize(state.entries, key);
+  const openingBalance = monthOpeningBalance(state.openingBalance, state.openingMonth, state.entries, key);
+  const summary = summarize(state.entries, key, openingBalance);
   const nowKey = monthKey();
   $("#todayLabel").textContent = fullDate.format(new Date());
   $("#monthTitle").textContent = `${selectedDate.getFullYear()} 年 ${selectedDate.getMonth() + 1} 月`;
   $("#monthStatus").textContent = key === nowKey ? "本月" : key < nowKey ? "历史月份" : "未来计划";
-  $("#currentBalance").textContent = formatMoney(currentBalance(state.openingBalance, state.entries));
+  $("#monthOpeningBalance").textContent = formatMoney(openingBalance);
+  $("#expectedIncome").textContent = formatMoney(summary.expectedIncome, true);
+  $("#expectedExpense").textContent = formatDirectionalMoney(summary.expectedExpense, "expense");
   $("#expectedRemaining").textContent = formatMoney(summary.expectedRemaining, true);
+  $("#actualIncome").textContent = formatMoney(summary.actualIncome, true);
+  $("#actualExpense").textContent = formatDirectionalMoney(summary.actualExpense, "expense");
   $("#actualRemaining").textContent = formatMoney(summary.actualRemaining, true);
   $("#planDifference").textContent = formatMoney(summary.planDifference, true);
   $("#planDifference").className = summary.planDifference < 0 ? "negative" : "positive";
-  $("#openingBalance").value = state.openingBalance;
+  $("#openingBalanceMonth").textContent = `${selectedDate.getFullYear()} 年 ${selectedDate.getMonth() + 1} 月`;
+  $("#openingBalance").value = openingBalance;
 
   $("#categoryRows").innerHTML = Object.entries(categories).map(([key, category]) => `
     <button class="ledger-row category-row" role="row" data-category="${key}" aria-label="查看${category.label}实际每日明细">
       <span role="cell"><i class="direction-mark ${category.direction}"></i>${category.label}</span>
-      <strong role="cell">${formatMoney(summary.categories[key].expected)}</strong>
+      <strong role="cell">${formatDirectionalMoney(summary.categories[key].expected, category.direction)}</strong>
       <div class="category-actual" role="cell">
-        <strong>${formatMoney(summary.categories[key].actual)}</strong>
+        <strong>${formatDirectionalMoney(summary.categories[key].actual, category.direction)}</strong>
         ${summary.categories[key].huabei ? `<small>花呗 ${formatMoney(summary.categories[key].huabei)}</small>` : ""}
       </div>
     </button>
@@ -288,9 +299,10 @@ document.querySelectorAll(".nav-item").forEach((button) => {
 $("#balanceForm").addEventListener("submit", (event) => {
   event.preventDefault();
   state.openingBalance = Number($("#openingBalance").value);
+  state.openingMonth = selectedMonthKey();
   saveState();
   render();
-  showToast("余额基准已保存");
+  showToast("本月月初余额已保存");
 });
 
 $("#exportData").addEventListener("click", () => {
@@ -311,6 +323,7 @@ $("#importData").addEventListener("change", async (event) => {
     if (!window.confirm(`备份中有 ${restored.entries.length} 条记录。恢复后将替换当前账本，是否继续？`)) return;
     state.version = restored.version;
     state.openingBalance = restored.openingBalance;
+    state.openingMonth = restored.openingMonth;
     state.entries = restored.entries;
     saveState();
     render();

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { currentBalance, summarize, validateBackup } from "../ledger-core.js";
+import { monthOpeningBalance, summarize, validateBackup } from "../ledger-core.js";
 
 const entries = [
   { id: "1", date: "2026-09-01", category: "salary", recordType: "expected", amount: 10000 },
@@ -13,27 +13,40 @@ const entries = [
 ];
 
 test("monthly summary keeps expected and actual values separate", () => {
-  const result = summarize(entries, "2026-09");
+  const result = summarize(entries, "2026-09", 5000);
   assert.equal(result.expectedIncome, 10000);
   assert.equal(result.actualIncome, 9800);
   assert.equal(result.expectedExpense, 2500);
   assert.equal(result.actualExpense, 2500);
-  assert.equal(result.expectedRemaining, 7500);
-  assert.equal(result.actualRemaining, 7300);
+  assert.equal(result.expectedRemaining, 12500);
+  assert.equal(result.actualRemaining, 12300);
   assert.equal(result.planDifference, -200);
   assert.equal(result.huabeiSpent, 300);
   assert.equal(result.categories.daily.huabei, 300);
 });
 
-test("current balance uses actual records across all months", () => {
-  assert.equal(currentBalance(3000, entries), 10200);
+test("next month opening follows changes to the previous month's actual balance", () => {
+  assert.equal(monthOpeningBalance(5000, "2026-09", entries, "2026-10"), 12300);
+  const changedEntries = [...entries, { id: "8", date: "2026-09-20", category: "daily", recordType: "actual", amount: 200 }];
+  assert.equal(monthOpeningBalance(5000, "2026-09", changedEntries, "2026-10"), 12100);
+  assert.equal(monthOpeningBalance(5000, "2026-09", entries, "2026-09"), 5000);
+  assert.equal(monthOpeningBalance(5000, "2026-09", entries, "2026-08"), 5100);
 });
 
 test("huabei spending becomes next month's expected repayment", () => {
-  const result = summarize(entries, "2026-10");
+  const opening = monthOpeningBalance(5000, "2026-09", entries, "2026-10");
+  const result = summarize(entries, "2026-10", opening);
   assert.equal(result.huabeiRepayment, 300);
   assert.equal(result.categories.repayment.expected, 400);
   assert.equal(result.expectedExpense, 400);
+  assert.equal(result.expectedRemaining, 11900);
+  assert.equal(result.actualRemaining, 12300);
+  assert.equal(result.planDifference, 400);
+});
+
+test("old backups infer the balance anchor from the first actual month", () => {
+  const restored = validateBackup({ version: 1, openingBalance: 5000, entries });
+  assert.equal(restored.openingMonth, "2026-08");
 });
 
 test("backup validation rejects unknown categories", () => {

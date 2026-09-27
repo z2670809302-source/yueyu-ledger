@@ -113,26 +113,38 @@ try {
   await evaluate("document.querySelector('#entryForm').requestSubmit(); true");
 
   const result = await evaluate(`(() => ({
-    balance: document.querySelector('#currentBalance').textContent,
+    opening: document.querySelector('#monthOpeningBalance').textContent,
+    expectedIncome: document.querySelector('#expectedIncome').textContent,
+    expectedExpense: document.querySelector('#expectedExpense').textContent,
     expected: document.querySelector('#expectedRemaining').textContent,
+    actualIncome: document.querySelector('#actualIncome').textContent,
+    actualExpense: document.querySelector('#actualExpense').textContent,
     actual: document.querySelector('#actualRemaining').textContent,
     difference: document.querySelector('#planDifference').textContent,
     storedCount: JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length,
     homeDetailEntries: document.querySelectorAll('.entry-item').length,
     dailyTotal: document.querySelector('[data-category="daily"] .category-actual strong').textContent,
+    salaryActual: document.querySelector('[data-category="salary"] .category-actual strong').textContent,
+    rentActual: document.querySelector('[data-category="rent"] .category-actual strong').textContent,
     width: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
     dialogClosed: !document.querySelector('#entryDialog').open,
     zoomSafeInputs: [...document.querySelectorAll('select, input[type="date"], input[type="text"], input[type="number"]')].every((input) => parseFloat(getComputedStyle(input).fontSize) >= 16)
   }))()`);
 
-  assert.equal(result.balance, "¥7,200.00");
+  assert.equal(result.opening, "¥0.00");
+  assert.equal(result.expectedIncome, "+¥10,000.00");
+  assert.equal(result.expectedExpense, "−¥2,500.00");
   assert.equal(result.expected, "+¥7,500.00");
+  assert.equal(result.actualIncome, "+¥9,800.00");
+  assert.equal(result.actualExpense, "−¥2,600.00");
   assert.equal(result.actual, "+¥7,200.00");
   assert.equal(result.difference, "-¥300.00");
   assert.equal(result.storedCount, 7);
   assert.equal(result.homeDetailEntries, 0);
-  assert.equal(result.dailyTotal, "¥100.00");
+  assert.equal(result.dailyTotal, "−¥100.00");
+  assert.equal(result.salaryActual, "+¥9,800.00");
+  assert.equal(result.rentActual, "−¥2,500.00");
   assert.equal(result.width, 390);
   assert.equal(result.scrollWidth, 390);
   assert.equal(result.dialogClosed, true);
@@ -220,11 +232,18 @@ try {
     document.querySelector('#nextMonth').click();
     return {
       expected: document.querySelector('[data-category="repayment"] strong:first-of-type').textContent,
-      currentBalance: document.querySelector('#currentBalance').textContent
+      openingBalance: document.querySelector('#monthOpeningBalance').textContent,
+      expectedRemaining: document.querySelector('#expectedRemaining').textContent,
+      actualRemaining: document.querySelector('#actualRemaining').textContent
     };
   })()`);
-  assert.equal(nextMonthRepayment.expected, "¥180.00");
-  assert.equal(nextMonthRepayment.currentBalance, "¥7,200.00");
+  assert.equal(nextMonthRepayment.expected, "−¥180.00");
+  assert.equal(nextMonthRepayment.openingBalance, "¥7,200.00");
+  assert.equal(nextMonthRepayment.expectedRemaining, "+¥7,020.00");
+  assert.equal(nextMonthRepayment.actualRemaining, "+¥7,200.00");
+  await evaluate("document.querySelector('#toast').hidden = true; true");
+  const nextMonthMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/next-month-mobile.png", Buffer.from(nextMonthMobile.data, "base64"));
   await evaluate("document.querySelector('#previousMonth').click(); true");
 
   await addEntry("actual", 123, "special", "2026-09-04", "临时测试记录");
@@ -236,7 +255,10 @@ try {
     document.querySelector('#entryForm').requestSubmit();
     return true;
   })()`);
-  assert.equal(await evaluate("document.querySelector('#currentBalance').textContent"), "¥7,075.00");
+  assert.equal(await evaluate("document.querySelector('#actualRemaining').textContent"), "+¥7,075.00");
+  await evaluate("document.querySelector('#nextMonth').click(); true");
+  assert.equal(await evaluate("document.querySelector('#monthOpeningBalance').textContent"), "¥7,075.00");
+  await evaluate("document.querySelector('#previousMonth').click(); true");
   await evaluate(`(() => {
     window.confirm = () => true;
     const item = [...document.querySelectorAll('.entry-item')].find((entry) => entry.textContent.includes('临时测试记录'));
@@ -244,7 +266,7 @@ try {
     document.querySelector('#deleteEntry').click();
     return true;
   })()`);
-  assert.equal(await evaluate("document.querySelector('#currentBalance').textContent"), "¥7,200.00");
+  assert.equal(await evaluate("document.querySelector('#actualRemaining').textContent"), "+¥7,200.00");
   assert.equal(await evaluate("document.querySelectorAll('#detailTimeline .entry-item').length"), 0);
   await evaluate("document.querySelector('#detailBack').click(); true");
 
@@ -267,7 +289,7 @@ try {
     await new Promise((resolve) => setTimeout(resolve, 60));
     return true;
   })()`);
-  assert.equal(await evaluate("document.querySelector('#currentBalance').textContent"), "¥500.00");
+  assert.equal(await evaluate("document.querySelector('#monthOpeningBalance').textContent"), "¥500.00");
   await evaluate(`localStorage.setItem('yueyu-ledger-v1', ${JSON.stringify(savedState)}); location.reload(); true`);
   await waitFor("document.readyState === 'complete' && JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length === 7");
 
@@ -295,7 +317,7 @@ try {
   await call("Page.reload", { ignoreCache: false });
   await waitFor("document.readyState === 'complete' && document.title.includes('月余')");
   assert.equal(await evaluate("JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length"), 7);
-  assert.equal(await evaluate("document.querySelector('[data-category=\"daily\"] .category-actual strong').textContent"), "¥100.00");
+  assert.equal(await evaluate("document.querySelector('[data-category=\"daily\"] .category-actual strong').textContent"), "−¥100.00");
   await call("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
 
   console.log(JSON.stringify({ ...result, offlineReload: true }, null, 2));

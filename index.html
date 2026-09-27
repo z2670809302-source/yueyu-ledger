@@ -43,24 +43,20 @@
 
         <section class="balance-sheet" aria-labelledby="balanceTitle">
           <div class="balance-heading">
-            <span id="balanceTitle">当前余额</span>
-            <button class="text-button" id="calibrateBalance">校准</button>
+            <span id="balanceTitle">月初余额</span>
+            <button class="text-button" id="calibrateBalance">设置</button>
           </div>
-          <p class="balance-value" id="currentBalance">¥0.00</p>
+          <p class="balance-value" id="monthOpeningBalance">¥0.00</p>
           <div class="balance-rule" aria-hidden="true"></div>
-          <div class="balance-columns">
-            <div>
-              <span>预计结余</span>
-              <strong id="expectedRemaining">¥0.00</strong>
-            </div>
-            <div>
-              <span>实际结余</span>
-              <strong id="actualRemaining">¥0.00</strong>
-            </div>
-            <div>
-              <span>计划差额</span>
-              <strong id="planDifference">¥0.00</strong>
-            </div>
+          <div class="balance-grid" aria-label="本月预计与实际对比">
+            <span></span><span class="grid-heading">预计</span><span class="grid-heading">实际</span>
+            <span class="grid-label">收入</span><strong id="expectedIncome">¥0.00</strong><strong id="actualIncome">¥0.00</strong>
+            <span class="grid-label">支出</span><strong id="expectedExpense">¥0.00</strong><strong id="actualExpense">¥0.00</strong>
+            <span class="grid-label">剩余</span><strong id="expectedRemaining">¥0.00</strong><strong id="actualRemaining">¥0.00</strong>
+          </div>
+          <div class="balance-difference">
+            <span>计划差额</span>
+            <strong id="planDifference">¥0.00</strong>
           </div>
         </section>
 
@@ -134,21 +130,21 @@
         </header>
 
         <section class="data-section">
-          <h2>余额基准</h2>
-          <p>当前余额由起始余额，加上全部实际收入，再减去全部实际支出得出。</p>
+          <h2>月初余额基准</h2>
+          <p>这里设置当前所选月份的月初余额。其他月份会根据每月实际收支自动推导。</p>
           <form id="balanceForm" class="inline-form">
-            <label for="openingBalance">起始余额</label>
+            <label for="openingBalance"><span id="openingBalanceMonth"></span>月初余额</label>
             <div class="amount-input small">
               <span>¥</span>
               <input id="openingBalance" name="openingBalance" type="number" step="0.01" inputmode="decimal" required />
             </div>
-            <button class="secondary-button" type="submit">保存基准</button>
+            <button class="secondary-button" type="submit">保存月初余额</button>
           </form>
         </section>
 
         <section class="data-section">
           <h2>备份与恢复</h2>
-          <p>建议每月导出一次。备份包含起始余额和全部计划、流水，可以在另一台设备恢复。</p>
+          <p>建议每月导出一次。备份包含月初余额基准和全部计划、流水，可以在另一台设备恢复。</p>
           <div class="action-stack">
             <button class="primary-button full" id="exportData">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>

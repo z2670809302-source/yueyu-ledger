@@ -23,7 +23,7 @@ export function signedAmount(entry) {
   return direction === "income" ? Number(entry.amount) : -Number(entry.amount);
 }
 
-export function summarize(entries, selectedMonth) {
+export function summarize(entries, selectedMonth, openingBalance = 0) {
   const summary = {
     expectedIncome: 0,
     expectedExpense: 0,
@@ -58,17 +58,23 @@ export function summarize(entries, selectedMonth) {
   summary.categories.repayment.expected += summary.huabeiRepayment;
   summary.expectedExpense += summary.huabeiRepayment;
 
-  summary.expectedRemaining = summary.expectedIncome - summary.expectedExpense;
-  summary.actualRemaining = summary.actualIncome - summary.actualExpense;
+  summary.expectedRemaining = Number(openingBalance || 0) + summary.expectedIncome - summary.expectedExpense;
+  summary.actualRemaining = Number(openingBalance || 0) + summary.actualIncome - summary.actualExpense;
   summary.planDifference = summary.actualRemaining - summary.expectedRemaining;
   return summary;
 }
 
-export function currentBalance(openingBalance, entries) {
-  return Number(openingBalance || 0) + entries
-    .filter((entry) => entry.recordType === "actual"
-      && !(entry.paymentMethod === "huabei" && categories[entry.category]?.direction === "expense"))
+export function monthOpeningBalance(openingBalance, openingMonth, entries, selectedMonth) {
+  const actualCashEntries = entries.filter((entry) => entry.recordType === "actual"
+    && !(entry.paymentMethod === "huabei" && categories[entry.category]?.direction === "expense"));
+  const netBetween = (startMonth, endMonth) => actualCashEntries
+    .filter((entry) => entry.date.slice(0, 7) >= startMonth && entry.date.slice(0, 7) < endMonth)
     .reduce((total, entry) => total + signedAmount(entry), 0);
+
+  if (selectedMonth >= openingMonth) {
+    return Number(openingBalance || 0) + netBetween(openingMonth, selectedMonth);
+  }
+  return Number(openingBalance || 0) - netBetween(selectedMonth, openingMonth);
 }
 
 export function validateBackup(value) {
@@ -98,5 +104,10 @@ export function validateBackup(value) {
 
   const openingBalance = Number(value.openingBalance || 0);
   if (!Number.isFinite(openingBalance)) throw new Error("备份中的起始余额无效。");
-  return { version: 1, openingBalance, entries };
+  const inferredMonth = entries
+    .filter((entry) => entry.recordType === "actual")
+    .map((entry) => entry.date.slice(0, 7))
+    .sort()[0] || monthKey();
+  const openingMonth = /^\d{4}-\d{2}$/.test(value.openingMonth) ? value.openingMonth : inferredMonth;
+  return { version: 1, openingBalance, openingMonth, entries };
 }

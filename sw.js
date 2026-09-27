@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "yueyu-";
-const CACHE_NAME = `${CACHE_PREFIX}v7`;
+const CACHE_NAME = `${CACHE_PREFIX}v8`;
 const FONT_STYLESHEET = "./assets/fonts/lxgw-wenkai-lite/lxgwwenkailite-bold.css";
 const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./ledger-core.js", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", FONT_STYLESHEET];
 

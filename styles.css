@@ -54,11 +54,16 @@ h2 { margin-bottom: 3px; font-size: 1.16rem; letter-spacing: -0.02em; }
 .balance-sheet .text-button { color: #f0b9aa; }
 .balance-value { margin: 5px 0 14px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", sans-serif; font-size: clamp(2.2rem, 10vw, 4.25rem); font-weight: 650; line-height: 1; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
 .balance-rule { height: 1px; background: rgba(255,255,255,.16); }
-.balance-columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding-top: 11px; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
-.balance-columns span { display: block; margin-bottom: 6px; color: #abb4b0; font-size: 0.7rem; }
-.balance-columns strong { display: block; font-size: 0.88rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.balance-columns .negative { color: #ffb6a5; }
-.balance-columns .positive { color: #a6dccb; }
+.balance-grid { display: grid; grid-template-columns: 50px minmax(0, 1fr) minmax(0, 1fr); align-items: center; row-gap: 8px; padding: 10px 0; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-variant-numeric: tabular-nums; }
+.balance-grid .grid-heading { color: #abb4b0; font-size: .68rem; text-align: right; }
+.balance-grid .grid-label { color: #abb4b0; font-size: .72rem; }
+.balance-grid strong { font-size: .84rem; text-align: right; white-space: nowrap; }
+.balance-grid strong[id$="Remaining"] { color: #fdf7eb; font-size: .91rem; }
+.balance-difference { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.16); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+.balance-difference span { color: #abb4b0; font-size: .72rem; }
+.balance-difference strong { font-size: .91rem; font-variant-numeric: tabular-nums; }
+.balance-difference .negative { color: #ffb6a5; }
+.balance-difference .positive { color: #a6dccb; }
 
 .section-block { margin-top: 21px; }
 .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 8px; }
