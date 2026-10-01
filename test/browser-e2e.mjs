@@ -68,6 +68,13 @@ try {
     if (!result) throw new Error(`Waiting for ${expression}`);
     return result;
   });
+  const selectMonth = (targetYear, targetMonth) => evaluate(`(() => {
+    const [year, month] = document.querySelector('#monthTitle').textContent.match(/\\d+/g).map(Number);
+    const offset = (${targetYear} - year) * 12 + (${targetMonth} - month);
+    const button = offset < 0 ? document.querySelector('#previousMonth') : document.querySelector('#nextMonth');
+    for (let index = 0; index < Math.abs(offset); index += 1) button.click();
+    return true;
+  })()`);
 
   await call("Page.enable");
   await call("Runtime.enable");
@@ -75,8 +82,9 @@ try {
   await call("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
   await call("Page.navigate", { url: "http://localhost:4174" });
   await waitFor("document.readyState === 'complete'");
-  await evaluate("localStorage.clear(); location.reload(); true");
+  await evaluate(`localStorage.setItem('yueyu-ledger-v1', JSON.stringify({ version: 1, openingBalance: 0, openingMonth: '2026-09', entries: [] })); localStorage.removeItem('yueyu-ledger-meta-v1'); location.reload(); true`);
   await waitFor("document.readyState === 'complete' && document.querySelector('#addEntry')");
+  await selectMonth(2026, 9);
 
   const addEntry = (recordType, amount, category, date, note, paymentMethod = "cash") => evaluate(`(() => {
     document.querySelector('#addEntry').click();
@@ -149,6 +157,42 @@ try {
   assert.equal(result.scrollWidth, 390);
   assert.equal(result.dialogClosed, true);
   assert.equal(result.zoomSafeInputs, true);
+  await evaluate("document.querySelector('#toast').hidden = true; true");
+  const stats = await evaluate(`(() => {
+    document.querySelector('[data-view="statsView"]').click();
+    return {
+      visible: !document.querySelector('#statsView').hidden,
+      actualRemaining: document.querySelector('#statsActualRemaining').textContent,
+      actualIncome: document.querySelector('#statsActualIncome').textContent,
+      actualExpense: document.querySelector('#statsActualExpense').textContent,
+      huabeiSpent: document.querySelector('#statsHuabeiSpent').textContent,
+      huabeiRepayment: document.querySelector('#statsHuabeiRepayment').textContent,
+      categories: document.querySelectorAll('#categoryChart .chart-row').length,
+      trendMonths: document.querySelectorAll('#trendChart .trend-row').length
+    };
+  })()`);
+  assert.equal(stats.visible, true);
+  assert.equal(stats.actualRemaining, "+¥7,200.00");
+  assert.equal(stats.actualIncome, "+¥9,800.00");
+  assert.equal(stats.actualExpense, "−¥2,600.00");
+  assert.equal(stats.huabeiSpent, "¥180.00");
+  assert.equal(stats.huabeiRepayment, "¥180.00");
+  assert.equal(stats.categories, 3);
+  assert.equal(stats.trendMonths, 6);
+  const statsMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/stats-mobile.png", Buffer.from(statsMobile.data, "base64"));
+  const backupPrompt = await evaluate(`(() => {
+    document.querySelector('#openManage').click();
+    return {
+      visible: !document.querySelector('#manageView').hidden,
+      text: document.querySelector('#backupStatus').textContent,
+      warning: document.querySelector('#backupStatus').classList.contains('warning')
+    };
+  })()`);
+  assert.equal(backupPrompt.visible, true);
+  assert.match(backupPrompt.text, /尚未备份/);
+  assert.equal(backupPrompt.warning, true);
+  await evaluate("document.querySelector('[data-view=\"ledgerView\"]').click(); true");
   const refreshFailure = await evaluate(`(async () => {
     const serviceWorkers = navigator.serviceWorker;
     const originalGetRegistration = serviceWorkers.getRegistration.bind(serviceWorkers);
@@ -244,9 +288,62 @@ try {
   await evaluate("document.querySelector('#toast').hidden = true; true");
   const nextMonthMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/next-month-mobile.png", Buffer.from(nextMonthMobile.data, "base64"));
-  await evaluate("document.querySelector('#previousMonth').click(); true");
+  const copiedPlans = await evaluate(`(() => {
+    document.querySelector('#copyPreviousPlan').click();
+    const stored = JSON.parse(localStorage.getItem('yueyu-ledger-v1'));
+    return {
+      count: stored.entries.filter((entry) => entry.recordType === 'expected' && entry.date.startsWith('2026-10')).length,
+      salary: document.querySelector('[data-category="salary"] strong:first-of-type').textContent,
+      rent: document.querySelector('[data-category="rent"] strong:first-of-type').textContent
+    };
+  })()`);
+  assert.equal(copiedPlans.count, 2);
+  assert.equal(copiedPlans.salary, "+¥10,500.00");
+  assert.equal(copiedPlans.rent, "−¥2,500.00");
+  await evaluate(`(() => {
+    window.confirm = () => true;
+    for (const category of ['salary', 'rent']) {
+      document.querySelector('#addExpected').click();
+      document.querySelector('#category').value = category;
+      document.querySelector('#category').dispatchEvent(new Event('change'));
+      document.querySelector('#deleteEntry').click();
+    }
+    return true;
+  })()`);
+  assert.equal(await evaluate("JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length"), 7);
+  await selectMonth(2026, 9);
 
-  await addEntry("actual", 123, "special", "2026-09-04", "临时测试记录");
+  const formulaEntry = await evaluate(`(() => {
+    document.querySelector('#addEntry').click();
+    document.querySelector('#amount').value = '35';
+    document.querySelector('#addAmountPart').click();
+    document.querySelector('#amount').value += '88';
+    document.querySelector('#amount').dispatchEvent(new Event('input'));
+    document.querySelector('#category').value = 'special';
+    document.querySelector('#entryDate').value = '2026-09-04';
+    document.querySelector('#note').value = '临时测试记录';
+    return {
+      expression: document.querySelector('#amount').value,
+      result: document.querySelector('#amountResult').textContent,
+      resultVisible: !document.querySelector('#amountResult').hidden
+    };
+  })()`);
+  assert.equal(formulaEntry.expression, "35+88");
+  assert.equal(formulaEntry.result, "= ¥123.00");
+  assert.equal(formulaEntry.resultVisible, true);
+  const calculatedFormula = await evaluate(`(() => {
+    document.querySelector('#calculateAmount').click();
+    return {
+      amount: document.querySelector('#amount').value,
+      result: document.querySelector('#amountResult').textContent
+    };
+  })()`);
+  assert.equal(calculatedFormula.amount, "123");
+  assert.equal(calculatedFormula.result, "35+88 = ¥123.00");
+  const formulaMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/formula-mobile.png", Buffer.from(formulaMobile.data, "base64"));
+  await evaluate("document.querySelector('#entryForm').requestSubmit(); true");
+  assert.equal(await evaluate("JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.find((entry) => entry.note === '临时测试记录').amount"), 123);
   await evaluate(`(() => {
     document.querySelector('[data-category="special"]').click();
     const item = [...document.querySelectorAll('.entry-item')].find((entry) => entry.textContent.includes('临时测试记录'));
@@ -268,6 +365,17 @@ try {
   })()`);
   assert.equal(await evaluate("document.querySelector('#actualRemaining').textContent"), "+¥7,200.00");
   assert.equal(await evaluate("document.querySelectorAll('#detailTimeline .entry-item').length"), 0);
+  await evaluate("document.querySelector('#toast button').click(); true");
+  assert.equal(await evaluate("document.querySelector('#actualRemaining').textContent"), "+¥7,075.00");
+  assert.equal(await evaluate("document.querySelectorAll('#detailTimeline .entry-item').length"), 1);
+  await evaluate(`(() => {
+    const item = [...document.querySelectorAll('.entry-item')].find((entry) => entry.textContent.includes('临时测试记录'));
+    item.click();
+    document.querySelector('#deleteEntry').click();
+    return true;
+  })()`);
+  assert.equal(await evaluate("document.querySelector('#actualRemaining').textContent"), "+¥7,200.00");
+  assert.equal(await evaluate("document.querySelectorAll('#detailTimeline .entry-item').length"), 0);
   await evaluate("document.querySelector('#detailBack').click(); true");
 
   const downloadName = await evaluate(`(() => {
@@ -278,6 +386,14 @@ try {
     return window.__downloadName;
   })()`);
   assert.match(downloadName, /^月余备份-\d{4}-\d{2}-\d{2}\.json$/);
+  const backupRecorded = await evaluate(`(() => ({
+    saved: Boolean(JSON.parse(localStorage.getItem('yueyu-ledger-meta-v1')).lastBackupAt),
+    warning: document.querySelector('#backupStatus').classList.contains('warning'),
+    text: document.querySelector('#backupStatus').textContent
+  }))()`);
+  assert.equal(backupRecorded.saved, true);
+  assert.equal(backupRecorded.warning, false);
+  assert.match(backupRecorded.text, /最近备份/);
 
   const savedState = await evaluate("localStorage.getItem('yueyu-ledger-v1')");
   await evaluate(`(async () => {
@@ -323,6 +439,21 @@ try {
     assert.equal(layout.amountsFit, true);
     const screenshot = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
     await writeFile(`.impeccable/review/${phone.name}.png`, Buffer.from(screenshot.data, "base64"));
+    const statsLayout = await evaluate(`(() => {
+      document.querySelector('[data-view="statsView"]').click();
+      const card = document.querySelector('.stats-balance').getBoundingClientRect();
+      return {
+        scrollWidth: document.documentElement.scrollWidth,
+        cardFits: card.left >= 0 && card.right <= document.documentElement.clientWidth
+      };
+    })()`);
+    assert.equal(statsLayout.scrollWidth, phone.width);
+    assert.equal(statsLayout.cardFits, true);
+    if (phone.width === 320) {
+      const statsScreenshot = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+      await writeFile(".impeccable/review/stats-small-320.png", Buffer.from(statsScreenshot.data, "base64"));
+    }
+    await evaluate("document.querySelector('[data-view=\"ledgerView\"]').click(); true");
   }
   await call("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
 
@@ -336,7 +467,7 @@ try {
   await writeFile(".impeccable/review/desktop.png", Buffer.from(desktop.data, "base64"));
 
   await call("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
-  await evaluate("document.querySelector('[data-view=\"dataView\"]').click(); true");
+  await evaluate("document.querySelector('[data-view=\"statsView\"]').click(); document.querySelector('#openManage').click(); true");
   const updateMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/update-mobile.png", Buffer.from(updateMobile.data, "base64"));
   await evaluate("document.querySelector('[data-view=\"ledgerView\"]').click(); true");
@@ -346,6 +477,7 @@ try {
   await call("Page.reload", { ignoreCache: false });
   await waitFor("document.readyState === 'complete' && document.title.includes('月余')");
   assert.equal(await evaluate("JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length"), 7);
+  await selectMonth(2026, 9);
   assert.equal(await evaluate("document.querySelector('[data-category=\"daily\"] .category-actual strong').textContent"), "−¥100.00");
   await call("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
 

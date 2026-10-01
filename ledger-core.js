@@ -23,6 +23,14 @@ export function signedAmount(entry) {
   return direction === "income" ? Number(entry.amount) : -Number(entry.amount);
 }
 
+export function parseAmountExpression(value) {
+  const expression = String(value ?? "").replace(/\s+/g, "");
+  const amountPattern = "(?:\\d+(?:\\.\\d{0,2})?|\\.\\d{1,2})";
+  if (!new RegExp(`^${amountPattern}(?:[+-]${amountPattern})*$`).test(expression)) return NaN;
+  const parts = expression.match(new RegExp(`[+-]?${amountPattern}`, "g"));
+  return Math.round(parts.reduce((total, part) => total + Number(part), 0) * 100) / 100;
+}
+
 export function summarize(entries, selectedMonth, openingBalance = 0) {
   const summary = {
     expectedIncome: 0,

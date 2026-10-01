@@ -1,10 +1,12 @@
-import { categories, monthKey, monthOpeningBalance, summarize, validateBackup } from "./ledger-core.js";
+import { categories, monthKey, monthOpeningBalance, offsetMonthKey, parseAmountExpression, summarize, validateBackup } from "./ledger-core.js";
 
 const STORAGE_KEY = "yueyu-ledger-v1";
+const META_KEY = "yueyu-ledger-meta-v1";
 const currency = new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY" });
 const fullDate = new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "short" });
 const detailDate = new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "short" });
 const state = loadState();
+const meta = loadMeta();
 let selectedDate = new Date();
 let activeDetailCategory = null;
 
@@ -23,6 +25,18 @@ function loadState() {
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadMeta() {
+  try {
+    return JSON.parse(localStorage.getItem(META_KEY)) || { lastBackupAt: null };
+  } catch {
+    return { lastBackupAt: null };
+  }
+}
+
+function saveMeta() {
+  localStorage.setItem(META_KEY, JSON.stringify(meta));
 }
 
 function formatMoney(value, signed = false) {
@@ -53,6 +67,8 @@ function render() {
   $("#todayLabel").textContent = fullDate.format(new Date());
   $("#monthTitle").textContent = `${selectedDate.getFullYear()} 年 ${selectedDate.getMonth() + 1} 月`;
   $("#monthStatus").textContent = key === nowKey ? "本月" : key < nowKey ? "历史月份" : "未来计划";
+  $("#statsMonthTitle").textContent = `${selectedDate.getFullYear()} 年 ${selectedDate.getMonth() + 1} 月`;
+  $("#statsMonthStatus").textContent = key === nowKey ? "本月" : key < nowKey ? "历史月份" : "未来计划";
   $("#monthOpeningBalance").textContent = formatMoney(openingBalance);
   $("#expectedIncome").textContent = formatMoney(summary.expectedIncome, true);
   $("#expectedExpense").textContent = formatDirectionalMoney(summary.expectedExpense, "expense");
@@ -75,7 +91,63 @@ function render() {
       </div>
     </button>
   `).join("");
+  renderStats(key, summary);
+  renderBackupStatus();
   if (activeDetailCategory) renderDetail();
+}
+
+function renderStats(key, summary) {
+  $("#statsActualRemaining").textContent = formatMoney(summary.actualRemaining, true);
+  $("#statsExpectedIncome").textContent = formatMoney(summary.expectedIncome, true);
+  $("#statsActualIncome").textContent = formatMoney(summary.actualIncome, true);
+  $("#statsExpectedExpense").textContent = formatDirectionalMoney(summary.expectedExpense, "expense");
+  $("#statsActualExpense").textContent = formatDirectionalMoney(summary.actualExpense, "expense");
+  $("#statsExpectedRemaining").textContent = formatMoney(summary.expectedRemaining, true);
+  $("#statsRemaining").textContent = formatMoney(summary.actualRemaining, true);
+  $("#statsHuabeiSpent").textContent = formatMoney(summary.huabeiSpent);
+  $("#statsHuabeiRepayment").textContent = formatMoney(summarize(state.entries, offsetMonthKey(key, 1)).huabeiRepayment);
+
+  const categoryRows = Object.entries(categories)
+    .map(([categoryKey, category]) => {
+      const amount = summary.categories[categoryKey].actual;
+      const total = category.direction === "income" ? summary.actualIncome : summary.actualExpense;
+      return { ...category, amount, percentage: total ? Math.round(amount / total * 100) : 0 };
+    })
+    .filter((item) => item.amount > 0);
+  $("#categoryChartEmpty").hidden = categoryRows.length > 0;
+  $("#categoryChart").hidden = categoryRows.length === 0;
+  $("#categoryChart").innerHTML = categoryRows.map((item) => `
+    <div class="chart-row ${item.direction}">
+      <span class="chart-label">${item.label}</span>
+      <span class="chart-track"><i class="chart-fill" style="--chart-width:${item.percentage}%"></i></span>
+      <strong class="chart-value">${item.percentage}% · ${formatMoney(item.amount)}</strong>
+    </div>
+  `).join("");
+
+  const trend = Array.from({ length: 6 }, (_, index) => offsetMonthKey(key, index - 5)).map((month) => {
+    const opening = monthOpeningBalance(state.openingBalance, state.openingMonth, state.entries, month);
+    return { month, summary: summarize(state.entries, month, opening) };
+  });
+  const maxFlow = Math.max(1, ...trend.flatMap((item) => [item.summary.actualIncome, item.summary.actualExpense]));
+  $("#trendChart").innerHTML = trend.map((item) => `
+    <div class="trend-row">
+      <span class="trend-month">${Number(item.month.slice(5))}月</span>
+      <span class="trend-bars">
+        <i class="trend-bar" style="--trend-width:${item.summary.actualIncome / maxFlow * 100}%"></i>
+        <i class="trend-bar expense" style="--trend-width:${item.summary.actualExpense / maxFlow * 100}%"></i>
+      </span>
+      <strong class="trend-remaining">${formatMoney(item.summary.actualRemaining)}</strong>
+    </div>
+  `).join("");
+}
+
+function renderBackupStatus() {
+  const lastBackup = meta.lastBackupAt ? new Date(meta.lastBackupAt) : null;
+  const overdue = state.entries.length > 0 && (!lastBackup || Date.now() - lastBackup.getTime() > 31 * 24 * 60 * 60 * 1000);
+  $("#backupStatus").textContent = lastBackup
+    ? `最近备份：${lastBackup.toLocaleDateString("zh-CN")}${overdue ? " · 建议重新备份" : ""}`
+    : `最近备份：尚未备份${overdue ? " · 建议现在备份" : ""}`;
+  $("#backupStatus").classList.toggle("warning", overdue);
 }
 
 function renderDetail() {
@@ -128,7 +200,7 @@ function renderDetail() {
 function showView(viewId) {
   document.querySelectorAll(".view").forEach((view) => { view.hidden = view.id !== viewId; });
   document.querySelectorAll(".nav-item").forEach((item) => {
-    const activeView = viewId === "detailView" ? "ledgerView" : viewId;
+    const activeView = viewId === "detailView" ? "ledgerView" : viewId === "manageView" ? "statsView" : viewId;
     item.classList.toggle("active", item.dataset.view === activeView);
   });
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -136,6 +208,28 @@ function showView(viewId) {
 
 function escapeHtml(value) {
   return value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
+}
+
+function updateAmountResult() {
+  const input = $("#amount");
+  const total = parseAmountExpression(input.value);
+  const valid = Number.isFinite(total) && total > 0;
+  input.setCustomValidity(input.value && !valid ? "请输入有效金额，例如 35+65 或 100-20" : "");
+  $("#amountResult").hidden = !/[+-]/.test(input.value) || !valid;
+  $("#amountResult").textContent = valid ? `= ${formatMoney(total)}` : "";
+}
+
+function appendAmountOperator(operator) {
+  const input = $("#amount");
+  const value = input.value.trim();
+  if (!value || /[+-]$/.test(value) || !Number.isFinite(parseAmountExpression(value))) {
+    input.reportValidity();
+    input.focus();
+    return;
+  }
+  input.value = `${value}${operator}`;
+  updateAmountResult();
+  input.focus();
 }
 
 function openEntryForm({ recordType = "actual", category = "daily", id = null } = {}) {
@@ -146,6 +240,7 @@ function openEntryForm({ recordType = "actual", category = "daily", id = null } 
   entryForm.elements.recordType.value = recordType;
   $("#category").value = category;
   $("#entryDate").value = defaultDateForSelectedMonth();
+  updateAmountResult();
 
   if (id) {
     const entry = state.entries.find((item) => item.id === id);
@@ -160,6 +255,7 @@ function openEntryForm({ recordType = "actual", category = "daily", id = null } 
     $("#entryDialogTitle").textContent = "修改记录";
     $("#deleteEntry").hidden = false;
   }
+  updateAmountResult();
   updateFormKind();
   entryDialog.showModal();
   window.setTimeout(() => $("#amount").focus(), 120);
@@ -191,15 +287,27 @@ function updateFormKind() {
     }
     if (!$("#entryId").value) $("#entryDialogTitle").textContent = "记一笔";
   }
+  updateAmountResult();
 }
 
 function closeEntryForm() {
   entryDialog.close();
 }
 
-function showToast(message) {
+function showToast(message, action = null) {
   const toast = $("#toast");
-  toast.textContent = message;
+  toast.hidden = false;
+  toast.replaceChildren(document.createTextNode(message));
+  if (action) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = action.label;
+    button.addEventListener("click", () => {
+      action.run();
+      toast.classList.remove("show");
+    }, { once: true });
+    toast.append(button);
+  }
   toast.classList.add("show");
   window.clearTimeout(showToast.timer);
   showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2200);
@@ -211,20 +319,63 @@ function changeMonth(amount) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+function copyPreviousPlans() {
+  const currentMonth = selectedMonthKey();
+  const previousMonth = offsetMonthKey(currentMonth, -1);
+  const existingCategories = new Set(state.entries
+    .filter((entry) => entry.recordType === "expected" && entry.date.startsWith(currentMonth))
+    .map((entry) => entry.category));
+  const previousPlans = state.entries
+    .filter((entry) => entry.recordType === "expected" && entry.date.startsWith(previousMonth))
+    .reduce((plans, entry) => {
+      plans.set(entry.category, (plans.get(entry.category) || 0) + Number(entry.amount));
+      return plans;
+    }, new Map());
+  const copied = [...previousPlans]
+    .filter(([category]) => !existingCategories.has(category))
+    .map(([category, amount]) => ({
+      id: crypto.randomUUID(),
+      date: `${currentMonth}-01`,
+      category,
+      recordType: "expected",
+      paymentMethod: "cash",
+      amount,
+      note: "",
+      createdAt: new Date().toISOString()
+    }));
+  if (!previousPlans.size) {
+    showToast("上月没有可沿用的计划");
+    return;
+  }
+  if (!copied.length) {
+    showToast("本月计划已经齐全");
+    return;
+  }
+  state.entries.push(...copied);
+  saveState();
+  render();
+  showToast(`已沿用 ${copied.length} 项计划`);
+}
+
 $("#category").innerHTML = Object.entries(categories)
   .map(([value, item]) => `<option value="${value}">${item.label}</option>`).join("");
 
 $("#previousMonth").addEventListener("click", () => changeMonth(-1));
 $("#nextMonth").addEventListener("click", () => changeMonth(1));
 $("#monthPicker").addEventListener("click", () => { selectedDate = new Date(); render(); });
+$("#statsPreviousMonth").addEventListener("click", () => changeMonth(-1));
+$("#statsNextMonth").addEventListener("click", () => changeMonth(1));
+$("#statsMonthPicker").addEventListener("click", () => { selectedDate = new Date(); render(); });
 $("#addEntry").addEventListener("click", () => openEntryForm({ category: $("#detailView").hidden ? "daily" : activeDetailCategory }));
 $("#addExpected").addEventListener("click", () => openEntryForm({ recordType: "expected" }));
+$("#copyPreviousPlan").addEventListener("click", copyPreviousPlans);
+$("#openManage").addEventListener("click", () => showView("manageView"));
 $("#detailAdd").addEventListener("click", () => openEntryForm({ category: activeDetailCategory }));
 $("#detailEmptyAdd").addEventListener("click", () => openEntryForm({ category: activeDetailCategory }));
 $("#detailBack").addEventListener("click", () => showView("ledgerView"));
 $("#closeDialog").addEventListener("click", closeEntryForm);
 $("#calibrateBalance").addEventListener("click", () => {
-  showView("dataView");
+  showView("manageView");
   $("#openingBalance").focus();
 });
 
@@ -241,8 +392,33 @@ document.addEventListener("click", (event) => {
 
 entryForm.elements.recordType.forEach((radio) => radio.addEventListener("change", updateFormKind));
 $("#category").addEventListener("change", updateFormKind);
+$("#amount").addEventListener("input", updateAmountResult);
+$("#addAmountPart").addEventListener("click", () => appendAmountOperator("+"));
+$("#subtractAmountPart").addEventListener("click", () => appendAmountOperator("-"));
+$("#calculateAmount").addEventListener("click", () => {
+  const input = $("#amount");
+  const expression = input.value.trim();
+  const total = parseAmountExpression(expression);
+  if (!Number.isFinite(total) || total <= 0) {
+    updateAmountResult();
+    input.reportValidity();
+    input.focus();
+    return;
+  }
+  input.value = String(total);
+  input.setCustomValidity("");
+  $("#amountResult").hidden = false;
+  $("#amountResult").textContent = `${expression} = ${formatMoney(total)}`;
+  input.focus();
+});
 entryForm.addEventListener("submit", (event) => {
   event.preventDefault();
+  const amount = parseAmountExpression($("#amount").value);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    updateAmountResult();
+    $("#amount").reportValidity();
+    return;
+  }
   const existingId = $("#entryId").value;
   const recordType = entryForm.elements.recordType.value;
   const expected = recordType === "expected";
@@ -253,7 +429,7 @@ entryForm.addEventListener("submit", (event) => {
   const sourceEntry = state.entries.find((item) => item.id === existingId) || planEntries[0];
   const entry = {
     id: sourceEntry?.id || crypto.randomUUID(),
-    amount: Number($("#amount").value),
+    amount,
     category,
     date: expected ? `${selectedMonthKey()}-01` : $("#entryDate").value,
     note: expected ? "" : $("#note").value.trim(),
@@ -276,18 +452,29 @@ entryForm.addEventListener("submit", (event) => {
 $("#deleteEntry").addEventListener("click", () => {
   const id = $("#entryId").value;
   const expected = entryForm.elements.recordType.value === "expected";
-  const confirmation = expected ? "确定清除这个月的预计吗？" : "确定删除这条记录吗？删除后只能通过备份恢复。";
+  const confirmation = expected ? "确定清除这个月的预计吗？" : "确定删除这条记录吗？";
   if (!id || !window.confirm(confirmation)) return;
+  let deletedEntries = [];
   if (expected) {
     const category = $("#category").value;
+    deletedEntries = state.entries.filter((entry) => entry.recordType === "expected" && entry.category === category && entry.date.startsWith(selectedMonthKey()));
     state.entries = state.entries.filter((entry) => !(entry.recordType === "expected" && entry.category === category && entry.date.startsWith(selectedMonthKey())));
   } else {
+    deletedEntries = state.entries.filter((entry) => entry.id === id);
     state.entries = state.entries.filter((entry) => entry.id !== id);
   }
   saveState();
   closeEntryForm();
   render();
-  showToast(expected ? "月度预计已清除" : "记录已删除");
+  showToast(expected ? "月度预计已清除" : "记录已删除", {
+    label: "撤销",
+    run: () => {
+      state.entries.push(...deletedEntries);
+      saveState();
+      render();
+      showToast("已经恢复");
+    }
+  });
 });
 
 document.querySelectorAll(".nav-item").forEach((button) => {
@@ -312,6 +499,9 @@ $("#exportData").addEventListener("click", () => {
   link.download = `月余备份-${new Date().toISOString().slice(0, 10)}.json`;
   link.click();
   URL.revokeObjectURL(link.href);
+  meta.lastBackupAt = new Date().toISOString();
+  saveMeta();
+  renderBackupStatus();
   showToast("备份文件已导出");
 });
 

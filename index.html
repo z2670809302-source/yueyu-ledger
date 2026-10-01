@@ -64,9 +64,11 @@
           <div class="section-heading">
             <div>
               <h2 id="categoryTitle">本月收支</h2>
-              <p>预计与实际，一眼对照</p>
             </div>
-            <button class="text-button" id="addExpected">录入计划</button>
+            <div class="section-actions">
+              <button class="text-button muted" id="copyPreviousPlan">沿用上月</button>
+              <button class="text-button" id="addExpected">录入计划</button>
+            </div>
           </div>
           <div class="ledger-table" role="table" aria-label="本月分类汇总">
             <div class="ledger-row ledger-head" role="row">
@@ -121,17 +123,76 @@
         </section>
       </section>
 
-      <section id="dataView" class="view" hidden aria-labelledby="dataTitle">
+      <section id="statsView" class="view" hidden aria-labelledby="statsTitle">
+        <header class="topbar stats-topbar">
+          <div>
+            <h1 id="statsTitle">统计</h1>
+            <p class="date-line">预计与实际</p>
+          </div>
+          <button class="text-button manage-button" id="openManage">管理</button>
+        </header>
+
+        <div class="month-switcher stats-month-switcher" aria-label="选择统计月份">
+          <button class="icon-button" id="statsPreviousMonth" aria-label="上个月">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <button class="month-button" id="statsMonthPicker" aria-label="回到本月">
+            <strong id="statsMonthTitle"></strong>
+            <span id="statsMonthStatus">本月</span>
+          </button>
+          <button class="icon-button" id="statsNextMonth" aria-label="下个月">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <section class="stats-balance" aria-labelledby="statsBalanceTitle">
+          <div class="stats-balance-heading">
+            <span id="statsBalanceTitle">实际剩余</span>
+            <strong id="statsActualRemaining">¥0.00</strong>
+          </div>
+          <div class="stats-compare" role="table" aria-label="预计与实际汇总">
+            <span></span><span>预计</span><span>实际</span>
+            <span>收入</span><strong id="statsExpectedIncome">¥0.00</strong><strong id="statsActualIncome">¥0.00</strong>
+            <span>支出</span><strong id="statsExpectedExpense">¥0.00</strong><strong id="statsActualExpense">¥0.00</strong>
+            <span>剩余</span><strong id="statsExpectedRemaining">¥0.00</strong><strong id="statsRemaining">¥0.00</strong>
+          </div>
+        </section>
+
+        <section class="stats-section" aria-labelledby="categoryStatsTitle">
+          <div class="section-heading">
+            <h2 id="categoryStatsTitle">分类实际</h2>
+          </div>
+          <div class="category-chart" id="categoryChart"></div>
+          <p class="stats-empty" id="categoryChartEmpty" hidden>本月还没有实际记录</p>
+        </section>
+
+        <section class="stats-section" aria-labelledby="trendTitle">
+          <div class="section-heading trend-heading">
+            <h2 id="trendTitle">近六个月</h2>
+            <div class="trend-legend"><span class="income"></span>收入<span class="expense"></span>支出</div>
+          </div>
+          <div class="trend-chart" id="trendChart"></div>
+        </section>
+
+        <section class="stats-section huabei-summary" aria-labelledby="huabeiStatsTitle">
+          <h2 id="huabeiStatsTitle">花呗</h2>
+          <div>
+            <span>本月消费<strong id="statsHuabeiSpent">¥0.00</strong></span>
+            <span>下月待还<strong id="statsHuabeiRepayment">¥0.00</strong></span>
+          </div>
+        </section>
+      </section>
+
+      <section id="manageView" class="view" hidden aria-labelledby="dataTitle">
         <header class="topbar data-topbar">
           <div>
             <h1 id="dataTitle">数据管理</h1>
-            <p class="date-line">账目只保存在你的设备里</p>
+          <p class="date-line">仅保存在本机</p>
           </div>
         </header>
 
         <section class="data-section">
           <h2>月初余额基准</h2>
-          <p>这里设置当前所选月份的月初余额。其他月份会根据每月实际收支自动推导。</p>
           <form id="balanceForm" class="inline-form">
             <label for="openingBalance"><span id="openingBalanceMonth"></span>月初余额</label>
             <div class="amount-input small">
@@ -144,7 +205,7 @@
 
         <section class="data-section">
           <h2>备份与恢复</h2>
-          <p>建议每月导出一次。备份包含月初余额基准和全部计划、流水，可以在另一台设备恢复。</p>
+          <p class="backup-status" id="backupStatus">最近备份：尚未备份</p>
           <div class="action-stack">
             <button class="primary-button full" id="exportData">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
@@ -158,13 +219,12 @@
           </div>
           <p class="privacy-note">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.9 8.6 7 10 4.1-1.4 7-5.4 7-10V6l-7-3Z"/></svg>
-            本应用没有服务器，也不会上传你的账目。
+            本机保存 · 不上传
           </p>
         </section>
 
         <section class="data-section">
           <h2>应用更新</h2>
-          <p>联网检查并加载最新版本。刷新只更新程序，不会删除余额、计划或流水。</p>
           <button class="secondary-button full update-button" id="refreshApp" type="button">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>
             <span id="refreshAppLabel">刷新并检查更新</span>
@@ -173,11 +233,7 @@
 
         <section class="data-section install-section">
           <h2>安装到 iPhone</h2>
-          <ol>
-            <li>用 Safari 打开部署后的 HTTPS 地址。</li>
-            <li>点“分享”，再选“添加到主屏幕”。</li>
-            <li>首次打开后，即可离线使用。</li>
-          </ol>
+          <p>Safari → 分享 → 添加到主屏幕</p>
         </section>
       </section>
     </main>
@@ -190,9 +246,9 @@
       <button class="add-button" id="addEntry" aria-label="记一笔">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
       </button>
-      <button class="nav-item" data-view="dataView">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-        数据
+      <button class="nav-item" data-view="statsView">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V9m7 10V5m7 14v-7"/></svg>
+        统计
       </button>
     </nav>
 
@@ -217,7 +273,15 @@
         <label class="field-label" for="amount">金额</label>
         <div class="amount-input">
           <span>¥</span>
-          <input id="amount" name="amount" type="number" step="0.01" min="0.01" inputmode="decimal" placeholder="0.00" required />
+          <input id="amount" name="amount" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00" required />
+        </div>
+        <div class="amount-tools">
+          <div class="amount-operators" aria-label="金额计算">
+            <button class="amount-operator" id="addAmountPart" type="button" aria-label="加">＋</button>
+            <button class="amount-operator" id="subtractAmountPart" type="button" aria-label="减">－</button>
+            <button class="amount-operator" id="calculateAmount" type="button" aria-label="等于">＝</button>
+          </div>
+          <p class="amount-result" id="amountResult" hidden></p>
         </div>
 
         <div class="form-grid">
@@ -241,7 +305,7 @@
             <label><input type="radio" name="paymentMethod" value="cash" checked /><span>余额支付</span></label>
             <label><input type="radio" name="paymentMethod" value="huabei" /><span>花呗</span></label>
           </div>
-          <p class="field-hint">花呗消费不计入本月支出，将自动加入下月预计还款。</p>
+          <p class="field-hint">花呗消费不计本月，自动加入下月预计还款。</p>
         </div>
 
         <label id="actualNoteField">

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { monthOpeningBalance, summarize, validateBackup } from "../ledger-core.js";
+import { monthOpeningBalance, parseAmountExpression, summarize, validateBackup } from "../ledger-core.js";
 
 const entries = [
   { id: "1", date: "2026-09-01", category: "salary", recordType: "expected", amount: 10000 },
@@ -51,4 +51,12 @@ test("old backups infer the balance anchor from the first actual month", () => {
 
 test("backup validation rejects unknown categories", () => {
   assert.throws(() => validateBackup({ version: 1, openingBalance: 0, entries: [{ id: "x", date: "2026-09-01", category: "other", amount: 1 }] }), /无法识别/);
+});
+
+test("amount expressions add several payments into one total", () => {
+  assert.equal(parseAmountExpression("35+65"), 100);
+  assert.equal(parseAmountExpression("12.50 + 7.25 + .25"), 20);
+  assert.equal(parseAmountExpression("100-20+5"), 85);
+  assert.equal(Number.isNaN(parseAmountExpression("35++65")), true);
+  assert.equal(Number.isNaN(parseAmountExpression("35*5")), true);
 });
