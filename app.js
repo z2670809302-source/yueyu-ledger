@@ -2,6 +2,8 @@ import { categories, monthKey, monthOpeningBalance, offsetMonthKey, parseAmountE
 
 const STORAGE_KEY = "yueyu-ledger-v1";
 const META_KEY = "yueyu-ledger-meta-v1";
+const UPDATE_CHECK_TIMEOUT = 6000;
+const UPDATE_INSTALL_TIMEOUT = 4000;
 const currency = new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY" });
 const fullDate = new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "short" });
 const detailDate = new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "short" });
@@ -9,10 +11,19 @@ const state = loadState();
 const meta = loadMeta();
 let selectedDate = new Date();
 let activeDetailCategory = null;
+let statsYear = new Date().getFullYear();
+let statsDirection = "expense";
+let pendingUpdateWorker = null;
+let reloadForUpdate = false;
 
 const $ = (selector) => document.querySelector(selector);
 const entryDialog = $("#entryDialog");
+const statsDialog = $("#statsDialog");
 const entryForm = $("#entryForm");
+const statsColors = {
+  expense: ["#b6412f", "#d66f52", "#8f2f22", "#d49a62"],
+  income: ["#176b54", "#52917d"]
+};
 
 function loadState() {
   try {
@@ -67,8 +78,6 @@ function render() {
   $("#todayLabel").textContent = fullDate.format(new Date());
   $("#monthTitle").textContent = `${selectedDate.getFullYear()} 年 ${selectedDate.getMonth() + 1} 月`;
   $("#monthStatus").textContent = key === nowKey ? "本月" : key < nowKey ? "历史月份" : "未来计划";
-  $("#statsMonthTitle").textContent = `${selectedDate.getFullYear()} 年 ${selectedDate.getMonth() + 1} 月`;
-  $("#statsMonthStatus").textContent = key === nowKey ? "本月" : key < nowKey ? "历史月份" : "未来计划";
   $("#monthOpeningBalance").textContent = formatMoney(openingBalance);
   $("#expectedIncome").textContent = formatMoney(summary.expectedIncome, true);
   $("#expectedExpense").textContent = formatDirectionalMoney(summary.expectedExpense, "expense");
@@ -91,54 +100,84 @@ function render() {
       </div>
     </button>
   `).join("");
-  renderStats(key, summary);
+  renderStats();
   renderBackupStatus();
   if (activeDetailCategory) renderDetail();
 }
 
-function renderStats(key, summary) {
-  $("#statsActualRemaining").textContent = formatMoney(summary.actualRemaining, true);
-  $("#statsExpectedIncome").textContent = formatMoney(summary.expectedIncome, true);
-  $("#statsActualIncome").textContent = formatMoney(summary.actualIncome, true);
-  $("#statsExpectedExpense").textContent = formatDirectionalMoney(summary.expectedExpense, "expense");
-  $("#statsActualExpense").textContent = formatDirectionalMoney(summary.actualExpense, "expense");
-  $("#statsExpectedRemaining").textContent = formatMoney(summary.expectedRemaining, true);
-  $("#statsRemaining").textContent = formatMoney(summary.actualRemaining, true);
-  $("#statsHuabeiSpent").textContent = formatMoney(summary.huabeiSpent);
-  $("#statsHuabeiRepayment").textContent = formatMoney(summarize(state.entries, offsetMonthKey(key, 1)).huabeiRepayment);
-
-  const categoryRows = Object.entries(categories)
-    .map(([categoryKey, category]) => {
-      const amount = summary.categories[categoryKey].actual;
-      const total = category.direction === "income" ? summary.actualIncome : summary.actualExpense;
-      return { ...category, amount, percentage: total ? Math.round(amount / total * 100) : 0 };
-    })
-    .filter((item) => item.amount > 0);
-  $("#categoryChartEmpty").hidden = categoryRows.length > 0;
-  $("#categoryChart").hidden = categoryRows.length === 0;
-  $("#categoryChart").innerHTML = categoryRows.map((item) => `
-    <div class="chart-row ${item.direction}">
-      <span class="chart-label">${item.label}</span>
-      <span class="chart-track"><i class="chart-fill" style="--chart-width:${item.percentage}%"></i></span>
-      <strong class="chart-value">${item.percentage}% · ${formatMoney(item.amount)}</strong>
-    </div>
-  `).join("");
-
-  const trend = Array.from({ length: 6 }, (_, index) => offsetMonthKey(key, index - 5)).map((month) => {
-    const opening = monthOpeningBalance(state.openingBalance, state.openingMonth, state.entries, month);
-    return { month, summary: summarize(state.entries, month, opening) };
+function annualStats() {
+  return Array.from({ length: 12 }, (_, index) => {
+    const key = `${statsYear}-${String(index + 1).padStart(2, "0")}`;
+    const summary = summarize(state.entries, key);
+    const total = statsDirection === "income" ? summary.actualIncome : summary.actualExpense;
+    return { key, month: index + 1, summary, total };
   });
-  const maxFlow = Math.max(1, ...trend.flatMap((item) => [item.summary.actualIncome, item.summary.actualExpense]));
-  $("#trendChart").innerHTML = trend.map((item) => `
-    <div class="trend-row">
-      <span class="trend-month">${Number(item.month.slice(5))}月</span>
-      <span class="trend-bars">
-        <i class="trend-bar" style="--trend-width:${item.summary.actualIncome / maxFlow * 100}%"></i>
-        <i class="trend-bar expense" style="--trend-width:${item.summary.actualExpense / maxFlow * 100}%"></i>
-      </span>
-      <strong class="trend-remaining">${formatMoney(item.summary.actualRemaining)}</strong>
+}
+
+function renderStats() {
+  const months = annualStats();
+  const annualTotal = months.reduce((total, item) => total + item.total, 0);
+  const maxMonth = Math.max(1, ...months.map((item) => item.total));
+  const directionLabel = statsDirection === "income" ? "收入" : "支出";
+  const currentKey = monthKey();
+
+  $("#statsYearTitle").textContent = `${statsYear} 年`;
+  $("#annualTotalLabel").textContent = `年度${directionLabel}`;
+  $("#annualTotal").textContent = formatMoney(annualTotal);
+  $("#annualChart").setAttribute("aria-label", `每月${directionLabel}柱状图`);
+  $("#annualChart").innerHTML = months.map((item) => `
+    <button class="annual-month ${statsDirection}${item.key === currentKey ? " current" : ""}" type="button"
+      data-stats-month="${item.key}" ${item.total ? "" : "disabled"}
+      aria-label="${item.month}月${directionLabel} ${formatMoney(item.total)}">
+      <span class="annual-bar-value">${item.total ? formatMoney(item.total) : ""}</span>
+      <span class="annual-bar" style="--bar-height:${item.total / maxMonth * 100}%"></span>
+    </button>
+  `).join("");
+  $("#annualEmpty").hidden = annualTotal > 0;
+  $("#annualEmpty").textContent = `这一年还没有实际${directionLabel}`;
+  $("#showExpense").classList.toggle("active", statsDirection === "expense");
+  $("#showExpense").setAttribute("aria-pressed", String(statsDirection === "expense"));
+  $("#showIncome").classList.toggle("active", statsDirection === "income");
+  $("#showIncome").setAttribute("aria-pressed", String(statsDirection === "income"));
+}
+
+function openStatsDetail(key) {
+  const summary = summarize(state.entries, key);
+  const total = statsDirection === "income" ? summary.actualIncome : summary.actualExpense;
+  const items = Object.entries(categories)
+    .filter(([, category]) => category.direction === statsDirection)
+    .map(([categoryKey, category], index) => ({
+      ...category,
+      amount: summary.categories[categoryKey].actual,
+      color: statsColors[statsDirection][index]
+    }))
+    .filter((item) => item.amount > 0);
+  const maxAmount = Math.max(1, ...items.map((item) => item.amount));
+  const [year, month] = key.split("-").map(Number);
+
+  $("#statsDialogTitle").textContent = `${year} 年 ${month} 月${statsDirection === "income" ? "收入" : "支出"}`;
+  $("#statsDialogTotal").textContent = formatMoney(total);
+  statsDialog.dataset.direction = statsDirection;
+  $("#statsDetailBars").innerHTML = items.map((item) => `
+    <div class="stats-detail-row">
+      <span>${item.label}</span>
+      <span class="stats-detail-track"><i style="--detail-width:${item.amount / maxAmount * 100}%;--detail-color:${item.color}"></i></span>
+      <strong>${formatMoney(item.amount)}</strong>
     </div>
   `).join("");
+
+  let angle = 0;
+  const stops = items.map((item) => {
+    const start = angle;
+    angle += item.amount / total * 360;
+    return `${item.color} ${start}deg ${angle}deg`;
+  });
+  $("#statsPie").style.background = `conic-gradient(${stops.join(",")})`;
+  $("#statsPie").setAttribute("aria-label", `${month}月${statsDirection === "income" ? "收入" : "支出"}分类占比`);
+  $("#statsPieLegend").innerHTML = items.map((item) => `
+    <div><i style="--legend-color:${item.color}"></i><span>${item.label}</span><strong>${Math.round(item.amount / total * 100)}%</strong></div>
+  `).join("");
+  statsDialog.showModal();
 }
 
 function renderBackupStatus() {
@@ -363,9 +402,12 @@ $("#category").innerHTML = Object.entries(categories)
 $("#previousMonth").addEventListener("click", () => changeMonth(-1));
 $("#nextMonth").addEventListener("click", () => changeMonth(1));
 $("#monthPicker").addEventListener("click", () => { selectedDate = new Date(); render(); });
-$("#statsPreviousMonth").addEventListener("click", () => changeMonth(-1));
-$("#statsNextMonth").addEventListener("click", () => changeMonth(1));
-$("#statsMonthPicker").addEventListener("click", () => { selectedDate = new Date(); render(); });
+$("#statsPreviousYear").addEventListener("click", () => { statsYear -= 1; renderStats(); });
+$("#statsNextYear").addEventListener("click", () => { statsYear += 1; renderStats(); });
+$("#statsYearPicker").addEventListener("click", () => { statsYear = new Date().getFullYear(); renderStats(); });
+$("#showExpense").addEventListener("click", () => { statsDirection = "expense"; renderStats(); });
+$("#showIncome").addEventListener("click", () => { statsDirection = "income"; renderStats(); });
+$("#closeStatsDialog").addEventListener("click", () => statsDialog.close());
 $("#addEntry").addEventListener("click", () => openEntryForm({ category: $("#detailView").hidden ? "daily" : activeDetailCategory }));
 $("#addExpected").addEventListener("click", () => openEntryForm({ recordType: "expected" }));
 $("#copyPreviousPlan").addEventListener("click", copyPreviousPlans);
@@ -380,6 +422,8 @@ $("#calibrateBalance").addEventListener("click", () => {
 });
 
 document.addEventListener("click", (event) => {
+  const statsMonth = event.target.closest("[data-stats-month]");
+  if (statsMonth) openStatsDetail(statsMonth.dataset.statsMonth);
   const categoryRow = event.target.closest("[data-category]");
   if (categoryRow) {
     activeDetailCategory = categoryRow.dataset.category;
@@ -526,14 +570,48 @@ $("#importData").addEventListener("change", async (event) => {
 });
 
 function waitForServiceWorker(worker) {
-  if (!worker || worker.state === "activated" || worker.state === "redundant") return Promise.resolve();
-  return Promise.race([
-    new Promise((resolve) => worker.addEventListener("statechange", () => {
-      if (worker.state === "activated" || worker.state === "redundant") resolve();
-    })),
-    new Promise((resolve) => window.setTimeout(resolve, 8000))
-  ]);
+  if (!worker || ["installed", "activated", "redundant"].includes(worker.state)) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error("UPDATE_TIMEOUT")), UPDATE_INSTALL_TIMEOUT);
+    worker.addEventListener("statechange", () => {
+      if (["installed", "activated", "redundant"].includes(worker.state)) resolve();
+      if (["installed", "activated", "redundant"].includes(worker.state)) window.clearTimeout(timer);
+    });
+  });
 }
+
+function checkForUpdate(registration) {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error("UPDATE_TIMEOUT")), UPDATE_CHECK_TIMEOUT);
+    registration.update().then((result) => {
+      window.clearTimeout(timer);
+      resolve(result);
+    }, (error) => {
+      window.clearTimeout(timer);
+      reject(error);
+    });
+  });
+}
+
+function showUpdateNotice(worker) {
+  if (!worker || worker.state !== "installed" || !navigator.serviceWorker.controller) return;
+  pendingUpdateWorker = worker;
+  $("#updateNotice").hidden = false;
+}
+
+function installPendingUpdate() {
+  if (!pendingUpdateWorker) {
+    window.location.reload();
+    return;
+  }
+  reloadForUpdate = true;
+  $("#installUpdate").disabled = true;
+  $("#installUpdate").textContent = "更新中…";
+  pendingUpdateWorker.postMessage("SKIP_WAITING");
+  window.setTimeout(() => window.location.reload(), 4000);
+}
+
+$("#installUpdate").addEventListener("click", installPendingUpdate);
 
 $("#refreshApp").addEventListener("click", async () => {
   const button = $("#refreshApp");
@@ -544,15 +622,26 @@ $("#refreshApp").addEventListener("click", async () => {
     if ("serviceWorker" in navigator) {
       const registration = await navigator.serviceWorker.getRegistration();
       if (registration) {
-        await registration.update();
-        await waitForServiceWorker(registration.installing || registration.waiting);
+        await checkForUpdate(registration);
+        const worker = registration.installing || registration.waiting;
+        await waitForServiceWorker(worker);
+        const readyWorker = registration.waiting || worker;
+        if (readyWorker?.state === "installed" && navigator.serviceWorker.controller) {
+          pendingUpdateWorker = readyWorker;
+          installPendingUpdate();
+          return;
+        }
       }
     }
     window.location.reload();
-  } catch {
+  } catch (error) {
     button.disabled = false;
     label.textContent = "刷新并检查更新";
-    showToast(navigator.onLine ? "刷新失败，请稍后再试" : "当前离线，无法检查更新");
+    showToast(!navigator.onLine
+      ? "当前离线，无法检查更新"
+      : error.message === "UPDATE_TIMEOUT"
+        ? "检查超时，请稍后重试"
+        : "刷新失败，请稍后再试");
   }
 });
 
@@ -560,8 +649,25 @@ entryDialog.addEventListener("click", (event) => {
   if (event.target === entryDialog) closeEntryForm();
 });
 
+statsDialog.addEventListener("click", (event) => {
+  if (event.target === statsDialog) statsDialog.close();
+});
+
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloadForUpdate) window.location.reload();
+  });
+  window.addEventListener("load", async () => {
+    const registration = await navigator.serviceWorker.register("./sw.js");
+    if (registration.waiting) showUpdateNotice(registration.waiting);
+    registration.addEventListener("updatefound", () => {
+      const worker = registration.installing;
+      worker?.addEventListener("statechange", () => {
+        if (worker.state === "installed") showUpdateNotice(worker);
+      });
+    });
+    if (navigator.onLine) checkForUpdate(registration).catch(() => {});
+  });
 }
 
 render();

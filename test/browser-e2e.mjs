@@ -158,29 +158,80 @@ try {
   assert.equal(result.dialogClosed, true);
   assert.equal(result.zoomSafeInputs, true);
   await evaluate("document.querySelector('#toast').hidden = true; true");
+  const updateNotice = await evaluate(`(() => {
+    const notice = document.querySelector('#updateNotice');
+    notice.hidden = false;
+    const rect = notice.getBoundingClientRect();
+    return {
+      title: notice.querySelector('strong').textContent,
+      action: document.querySelector('#installUpdate').textContent,
+      fits: rect.left >= 0 && rect.right <= document.documentElement.clientWidth,
+      storedCount: JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length
+    };
+  })()`);
+  assert.equal(updateNotice.title, "发现新版本");
+  assert.equal(updateNotice.action, "立即更新");
+  assert.equal(updateNotice.fits, true);
+  assert.equal(updateNotice.storedCount, 7);
+  const updateNoticeMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await mkdir(".impeccable/review", { recursive: true });
+  await writeFile(".impeccable/review/update-notice-mobile.png", Buffer.from(updateNoticeMobile.data, "base64"));
+  await evaluate("document.querySelector('#updateNotice').hidden = true; true");
   const stats = await evaluate(`(() => {
     document.querySelector('[data-view="statsView"]').click();
     return {
       visible: !document.querySelector('#statsView').hidden,
-      actualRemaining: document.querySelector('#statsActualRemaining').textContent,
-      actualIncome: document.querySelector('#statsActualIncome').textContent,
-      actualExpense: document.querySelector('#statsActualExpense').textContent,
-      huabeiSpent: document.querySelector('#statsHuabeiSpent').textContent,
-      huabeiRepayment: document.querySelector('#statsHuabeiRepayment').textContent,
-      categories: document.querySelectorAll('#categoryChart .chart-row').length,
-      trendMonths: document.querySelectorAll('#trendChart .trend-row').length
+      year: document.querySelector('#statsYearTitle').textContent,
+      total: document.querySelector('#annualTotal').textContent,
+      active: document.querySelector('.stats-direction .active').textContent,
+      monthsWithData: document.querySelectorAll('#annualChart .annual-month:not(:disabled)').length
     };
   })()`);
   assert.equal(stats.visible, true);
-  assert.equal(stats.actualRemaining, "+¥7,200.00");
-  assert.equal(stats.actualIncome, "+¥9,800.00");
-  assert.equal(stats.actualExpense, "−¥2,600.00");
-  assert.equal(stats.huabeiSpent, "¥180.00");
-  assert.equal(stats.huabeiRepayment, "¥180.00");
-  assert.equal(stats.categories, 3);
-  assert.equal(stats.trendMonths, 6);
+  assert.equal(stats.year, "2026 年");
+  assert.equal(stats.total, "¥2,600.00");
+  assert.equal(stats.active, "支出");
+  assert.equal(stats.monthsWithData, 1);
   const statsMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/stats-mobile.png", Buffer.from(statsMobile.data, "base64"));
+  const expenseDetail = await evaluate(`(() => {
+    document.querySelector('[data-stats-month="2026-09"]').click();
+    return {
+      open: document.querySelector('#statsDialog').open,
+      title: document.querySelector('#statsDialogTitle').textContent,
+      total: document.querySelector('#statsDialogTotal').textContent,
+      bars: document.querySelectorAll('#statsDetailBars .stats-detail-row').length,
+      legend: document.querySelectorAll('#statsPieLegend > div').length
+    };
+  })()`);
+  assert.equal(expenseDetail.open, true);
+  assert.equal(expenseDetail.title, "2026 年 9 月支出");
+  assert.equal(expenseDetail.total, "¥2,600.00");
+  assert.equal(expenseDetail.bars, 2);
+  assert.equal(expenseDetail.legend, 2);
+  const statsExpenseDetail = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/stats-detail-expense.png", Buffer.from(statsExpenseDetail.data, "base64"));
+  await evaluate("document.querySelector('#closeStatsDialog').click(); document.querySelector('#showIncome').click(); true");
+  const incomeStats = await evaluate(`(() => ({
+    total: document.querySelector('#annualTotal').textContent,
+    active: document.querySelector('.stats-direction .active').textContent,
+    monthsWithData: document.querySelectorAll('#annualChart .annual-month:not(:disabled)').length
+  }))()`);
+  assert.equal(incomeStats.total, "¥9,800.00");
+  assert.equal(incomeStats.active, "收入");
+  assert.equal(incomeStats.monthsWithData, 1);
+  const incomeDetail = await evaluate(`(() => {
+    document.querySelector('[data-stats-month="2026-09"]').click();
+    return {
+      total: document.querySelector('#statsDialogTotal').textContent,
+      bars: document.querySelectorAll('#statsDetailBars .stats-detail-row').length,
+      legend: document.querySelectorAll('#statsPieLegend > div').length
+    };
+  })()`);
+  assert.equal(incomeDetail.total, "¥9,800.00");
+  assert.equal(incomeDetail.bars, 1);
+  assert.equal(incomeDetail.legend, 1);
+  await evaluate("document.querySelector('#closeStatsDialog').click(); document.querySelector('#showExpense').click(); true");
   const backupPrompt = await evaluate(`(() => {
     document.querySelector('#openManage').click();
     return {
@@ -213,6 +264,31 @@ try {
   assert.equal(refreshFailure.disabled, false);
   assert.equal(refreshFailure.label, "刷新并检查更新");
   assert.equal(refreshFailure.storedCount, 7);
+  const refreshTimeout = await evaluate(`(async () => {
+    const serviceWorkers = navigator.serviceWorker;
+    const originalGetRegistration = serviceWorkers.getRegistration.bind(serviceWorkers);
+    const originalSetTimeout = window.setTimeout.bind(window);
+    Object.defineProperty(serviceWorkers, 'getRegistration', {
+      configurable: true,
+      value: async () => ({ update: () => new Promise(() => {}) })
+    });
+    window.setTimeout = (callback, delay, ...args) => originalSetTimeout(callback, delay === 6000 ? 20 : delay, ...args);
+    document.querySelector('#refreshApp').click();
+    await new Promise((resolve) => originalSetTimeout(resolve, 60));
+    const value = {
+      disabled: document.querySelector('#refreshApp').disabled,
+      label: document.querySelector('#refreshAppLabel').textContent,
+      message: document.querySelector('#toast').firstChild.textContent,
+      storedCount: JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length
+    };
+    window.setTimeout = originalSetTimeout;
+    Object.defineProperty(serviceWorkers, 'getRegistration', { configurable: true, value: originalGetRegistration });
+    return value;
+  })()`);
+  assert.equal(refreshTimeout.disabled, false);
+  assert.equal(refreshTimeout.label, "刷新并检查更新");
+  assert.equal(refreshTimeout.message, "检查超时，请稍后重试");
+  assert.equal(refreshTimeout.storedCount, 7);
   assert.deepEqual(await evaluate("JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.filter((entry) => entry.recordType === 'expected').map((entry) => entry.date)"), ["2026-09-01", "2026-09-01"]);
 
   const salaryDetail = await evaluate(`(() => {
@@ -441,7 +517,7 @@ try {
     await writeFile(`.impeccable/review/${phone.name}.png`, Buffer.from(screenshot.data, "base64"));
     const statsLayout = await evaluate(`(() => {
       document.querySelector('[data-view="statsView"]').click();
-      const card = document.querySelector('.stats-balance').getBoundingClientRect();
+      const card = document.querySelector('.annual-sheet').getBoundingClientRect();
       return {
         scrollWidth: document.documentElement.scrollWidth,
         cardFits: card.left >= 0 && card.right <= document.documentElement.clientWidth
@@ -452,6 +528,13 @@ try {
     if (phone.width === 320) {
       const statsScreenshot = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
       await writeFile(".impeccable/review/stats-small-320.png", Buffer.from(statsScreenshot.data, "base64"));
+      const detailFits = await evaluate(`(() => {
+        document.querySelector('[data-stats-month="2026-09"]').click();
+        const dialog = document.querySelector('#statsDialog').getBoundingClientRect();
+        return dialog.left >= 0 && dialog.right <= document.documentElement.clientWidth;
+      })()`);
+      assert.equal(detailFits, true);
+      await evaluate("document.querySelector('#closeStatsDialog').click(); true");
     }
     await evaluate("document.querySelector('[data-view=\"ledgerView\"]').click(); true");
   }

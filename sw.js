@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "yueyu-";
-const CACHE_NAME = `${CACHE_PREFIX}v10`;
+const CACHE_NAME = `${CACHE_PREFIX}v14`;
 const FONT_STYLESHEET = "./assets/fonts/lxgw-wenkai-lite/lxgwwenkailite-bold.css";
 const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./ledger-core.js", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", FONT_STYLESHEET];
 
@@ -12,7 +12,10 @@ self.addEventListener("install", (event) => {
       .map((match) => new URL(match[1], new URL(FONT_STYLESHEET, self.location.href)).href);
     await cache.addAll([...APP_SHELL, ...fontUrls]);
   })());
-  self.skipWaiting();
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data === "SKIP_WAITING") self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
@@ -22,5 +25,22 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-  event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request)));
+  event.respondWith((async () => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000);
+    try {
+      const response = await fetch(event.request, { signal: controller.signal });
+      if (response.ok && new URL(event.request.url).origin === self.location.origin) {
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(event.request, response.clone());
+      }
+      return response;
+    } catch {
+      return await caches.match(event.request)
+        || (event.request.mode === "navigate" ? caches.match("./index.html") : undefined)
+        || Response.error();
+    } finally {
+      clearTimeout(timeout);
+    }
+  })());
 });
