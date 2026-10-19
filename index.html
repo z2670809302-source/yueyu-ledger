@@ -234,7 +234,10 @@
 
     <div id="updateNotice" class="update-notice" role="status" aria-live="polite" hidden>
       <span><strong>发现新版本</strong><small>更新程序不会删除账本数据</small></span>
-      <button id="installUpdate" type="button">立即更新</button>
+      <div class="update-actions">
+        <button class="update-later" id="deferUpdate" type="button">稍后</button>
+        <button id="installUpdate" type="button">立即更新</button>
+      </div>
     </div>
 
     <dialog id="statsDialog" class="stats-dialog" aria-labelledby="statsDialogTitle">

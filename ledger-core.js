@@ -31,6 +31,15 @@ export function parseAmountExpression(value) {
   return Math.round(parts.reduce((total, part) => total + Number(part), 0) * 100) / 100;
 }
 
+export function validAmountExpression(value, amount) {
+  const expression = String(value || "").replace(/\s+/g, "");
+  return /[+-]/.test(expression)
+    && expression.length <= 80
+    && parseAmountExpression(expression) === Number(amount)
+    ? expression
+    : "";
+}
+
 export function summarize(entries, selectedMonth, openingBalance = 0) {
   const summary = {
     expectedIncome: 0,
@@ -105,6 +114,7 @@ export function validateBackup(value) {
       recordType: entry.recordType === "expected" ? "expected" : "actual",
       paymentMethod: entry.paymentMethod === "huabei" ? "huabei" : "cash",
       amount,
+      amountExpression: validAmountExpression(entry.amountExpression, amount),
       note: String(entry.note || "").slice(0, 60),
       createdAt: entry.createdAt || new Date().toISOString()
     };

@@ -165,12 +165,14 @@ try {
     return {
       title: notice.querySelector('strong').textContent,
       action: document.querySelector('#installUpdate').textContent,
+      later: document.querySelector('#deferUpdate').textContent,
       fits: rect.left >= 0 && rect.right <= document.documentElement.clientWidth,
       storedCount: JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length
     };
   })()`);
   assert.equal(updateNotice.title, "发现新版本");
   assert.equal(updateNotice.action, "立即更新");
+  assert.equal(updateNotice.later, "稍后");
   assert.equal(updateNotice.fits, true);
   assert.equal(updateNotice.storedCount, 7);
   const updateNoticeMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
@@ -419,12 +421,23 @@ try {
   const formulaMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/formula-mobile.png", Buffer.from(formulaMobile.data, "base64"));
   await evaluate("document.querySelector('#entryForm').requestSubmit(); true");
-  assert.equal(await evaluate("JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.find((entry) => entry.note === '临时测试记录').amount"), 123);
-  await evaluate(`(() => {
+  const storedFormula = await evaluate(`(() => {
+    const entry = JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.find((item) => item.note === '临时测试记录');
     document.querySelector('[data-category="special"]').click();
     const item = [...document.querySelectorAll('.entry-item')].find((entry) => entry.textContent.includes('临时测试记录'));
+    const calculation = item.querySelector('.entry-main small').textContent;
     item.click();
+    return { amount: entry.amount, expression: entry.amountExpression, calculation, editValue: document.querySelector('#amount').value };
+  })()`);
+  assert.equal(storedFormula.amount, 123);
+  assert.equal(storedFormula.expression, "35+88");
+  assert.equal(storedFormula.calculation, "35 + 88 = ¥123.00");
+  assert.equal(storedFormula.editValue, "35+88");
+  const formulaEditMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/formula-edit-mobile.png", Buffer.from(formulaEditMobile.data, "base64"));
+  await evaluate(`(() => {
     document.querySelector('#amount').value = '125';
+    document.querySelector('#amount').dispatchEvent(new Event('input'));
     document.querySelector('#entryForm').requestSubmit();
     return true;
   })()`);
@@ -535,6 +548,14 @@ try {
       })()`);
       assert.equal(detailFits, true);
       await evaluate("document.querySelector('#closeStatsDialog').click(); true");
+      const updateNoticeFits = await evaluate(`(() => {
+        const notice = document.querySelector('#updateNotice');
+        notice.hidden = false;
+        const rect = notice.getBoundingClientRect();
+        return rect.left >= 0 && rect.right <= document.documentElement.clientWidth;
+      })()`);
+      assert.equal(updateNoticeFits, true);
+      await evaluate("document.querySelector('#deferUpdate').click(); true");
     }
     await evaluate("document.querySelector('[data-view=\"ledgerView\"]').click(); true");
   }
@@ -563,8 +584,12 @@ try {
   await selectMonth(2026, 9);
   assert.equal(await evaluate("document.querySelector('[data-category=\"daily\"] .category-actual strong').textContent"), "−¥100.00");
   await call("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
+  await call("Page.reload", { ignoreCache: false });
+  await waitFor("document.readyState === 'complete' && document.querySelector('#updateNotice')");
+  await delay(500);
+  assert.equal(await evaluate("document.querySelector('#updateNotice').hidden"), true);
 
-  console.log(JSON.stringify({ ...result, offlineReload: true }, null, 2));
+  console.log(JSON.stringify({ ...result, offlineReload: true, repeatedUpdatePrompt: false }, null, 2));
   socket.close();
 } finally {
   chrome.kill();

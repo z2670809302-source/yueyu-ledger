@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { monthOpeningBalance, parseAmountExpression, summarize, validateBackup } from "../ledger-core.js";
+import { monthOpeningBalance, parseAmountExpression, summarize, validAmountExpression, validateBackup } from "../ledger-core.js";
 
 const entries = [
   { id: "1", date: "2026-09-01", category: "salary", recordType: "expected", amount: 10000 },
@@ -59,4 +59,15 @@ test("amount expressions add several payments into one total", () => {
   assert.equal(parseAmountExpression("100-20+5"), 85);
   assert.equal(Number.isNaN(parseAmountExpression("35++65")), true);
   assert.equal(Number.isNaN(parseAmountExpression("35*5")), true);
+});
+
+test("backup validation preserves only matching amount expressions", () => {
+  assert.equal(validAmountExpression("35 + 65-20", 80), "35+65-20");
+  assert.equal(validAmountExpression("35+65", 99), "");
+  const restored = validateBackup({
+    version: 1,
+    openingBalance: 0,
+    entries: [{ id: "formula", date: "2026-09-01", category: "daily", recordType: "actual", amount: 80, amountExpression: "35 + 65-20" }]
+  });
+  assert.equal(restored.entries[0].amountExpression, "35+65-20");
 });

@@ -1,4 +1,4 @@
-import { categories, monthKey, monthOpeningBalance, offsetMonthKey, parseAmountExpression, summarize, validateBackup } from "./ledger-core.js";
+import { categories, monthKey, monthOpeningBalance, offsetMonthKey, parseAmountExpression, summarize, validAmountExpression, validateBackup } from "./ledger-core.js";
 
 const STORAGE_KEY = "yueyu-ledger-v1";
 const META_KEY = "yueyu-ledger-meta-v1";
@@ -14,7 +14,9 @@ let activeDetailCategory = null;
 let statsYear = new Date().getFullYear();
 let statsDirection = "expense";
 let pendingUpdateWorker = null;
+let pendingUpdateVersion = null;
 let reloadForUpdate = false;
+let amountExpressionDraft = "";
 
 const $ = (selector) => document.querySelector(selector);
 const entryDialog = $("#entryDialog");
@@ -58,6 +60,10 @@ function formatMoney(value, signed = false) {
 function formatDirectionalMoney(value, direction) {
   if (!value) return formatMoney(0);
   return `${direction === "income" ? "+" : "−"}${formatMoney(value)}`;
+}
+
+function formatAmountExpression(expression) {
+  return escapeHtml(expression.replace(/\+/g, " + ").replace(/-/g, " − "));
 }
 
 function selectedMonthKey() {
@@ -225,8 +231,13 @@ function renderDetail() {
         ${dayEntries.map((entry) => {
           const sign = category.direction === "income" ? "+" : "−";
           const note = entry.note ? escapeHtml(entry.note) : category.label;
+          const calculation = entry.amountExpression
+            ? `${formatAmountExpression(entry.amountExpression)} = ${formatMoney(entry.amount)}`
+            : "";
+          const detailLabel = [entry.paymentMethod === "huabei" ? "花呗 · 下月还款" : "", calculation || (!entry.paymentMethod || entry.paymentMethod === "cash" ? "实际" : "")]
+            .filter(Boolean).join(" · ");
           return `<button class="entry-item detail-entry" data-entry-id="${entry.id}">
-            <span class="entry-main"><strong>${note}</strong><small>${entry.paymentMethod === "huabei" ? "花呗 · 下月还款" : "实际"}</small></span>
+            <span class="entry-main"><strong>${note}</strong><small>${detailLabel}</small></span>
             <span class="entry-amount ${category.direction}">${sign}${formatMoney(entry.amount)}</span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
           </button>`;
@@ -253,6 +264,7 @@ function updateAmountResult() {
   const input = $("#amount");
   const total = parseAmountExpression(input.value);
   const valid = Number.isFinite(total) && total > 0;
+  amountExpressionDraft = validAmountExpression(input.value, total);
   input.setCustomValidity(input.value && !valid ? "请输入有效金额，例如 35+65 或 100-20" : "");
   $("#amountResult").hidden = !/[+-]/.test(input.value) || !valid;
   $("#amountResult").textContent = valid ? `= ${formatMoney(total)}` : "";
@@ -273,6 +285,7 @@ function appendAmountOperator(operator) {
 
 function openEntryForm({ recordType = "actual", category = "daily", id = null } = {}) {
   entryForm.reset();
+  amountExpressionDraft = "";
   $("#entryId").value = "";
   $("#deleteEntry").hidden = true;
   $("#entryDialogTitle").textContent = recordType === "expected" ? "录入计划" : "记一笔";
@@ -285,7 +298,7 @@ function openEntryForm({ recordType = "actual", category = "daily", id = null } 
     const entry = state.entries.find((item) => item.id === id);
     if (!entry) return;
     $("#entryId").value = entry.id;
-    $("#amount").value = entry.amount;
+    $("#amount").value = entry.amountExpression || entry.amount;
     $("#category").value = entry.category;
     $("#entryDate").value = entry.date;
     $("#note").value = entry.note;
@@ -313,8 +326,10 @@ function updateFormKind() {
   $("#saveEntry").textContent = expected ? "保存月度预计" : "保存记录";
   if (expected) {
     const plans = state.entries.filter((item) => item.recordType === "expected" && item.category === $("#category").value && item.date.startsWith(selectedMonthKey()));
+    const planAmount = plans.reduce((total, item) => total + Number(item.amount), 0);
+    amountExpressionDraft = plans.length === 1 ? validAmountExpression(plans[0].amountExpression, planAmount) : "";
     $("#entryId").value = plans[0]?.id || "";
-    $("#amount").value = plans.length ? plans.reduce((total, item) => total + Number(item.amount), 0) : "";
+    $("#amount").value = plans.length ? amountExpressionDraft || planAmount : "";
     $("#deleteEntry").hidden = plans.length === 0;
     $("#entryDialogTitle").textContent = plans.length ? "修改月度预计" : "录入月度预计";
   } else {
@@ -367,18 +382,23 @@ function copyPreviousPlans() {
   const previousPlans = state.entries
     .filter((entry) => entry.recordType === "expected" && entry.date.startsWith(previousMonth))
     .reduce((plans, entry) => {
-      plans.set(entry.category, (plans.get(entry.category) || 0) + Number(entry.amount));
+      const existing = plans.get(entry.category);
+      plans.set(entry.category, {
+        amount: Number(entry.amount) + Number(existing?.amount || 0),
+        amountExpression: existing ? "" : entry.amountExpression || ""
+      });
       return plans;
     }, new Map());
   const copied = [...previousPlans]
     .filter(([category]) => !existingCategories.has(category))
-    .map(([category, amount]) => ({
+    .map(([category, plan]) => ({
       id: crypto.randomUUID(),
       date: `${currentMonth}-01`,
       category,
       recordType: "expected",
       paymentMethod: "cash",
-      amount,
+      amount: plan.amount,
+      amountExpression: plan.amountExpression,
       note: "",
       createdAt: new Date().toISOString()
     }));
@@ -449,6 +469,7 @@ $("#calculateAmount").addEventListener("click", () => {
     input.focus();
     return;
   }
+  amountExpressionDraft = validAmountExpression(expression, total);
   input.value = String(total);
   input.setCustomValidity("");
   $("#amountResult").hidden = false;
@@ -457,7 +478,8 @@ $("#calculateAmount").addEventListener("click", () => {
 });
 entryForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const amount = parseAmountExpression($("#amount").value);
+  const rawAmount = $("#amount").value.trim();
+  const amount = parseAmountExpression(rawAmount);
   if (!Number.isFinite(amount) || amount <= 0) {
     updateAmountResult();
     $("#amount").reportValidity();
@@ -474,6 +496,7 @@ entryForm.addEventListener("submit", (event) => {
   const entry = {
     id: sourceEntry?.id || crypto.randomUUID(),
     amount,
+    amountExpression: validAmountExpression(rawAmount, amount) || validAmountExpression(amountExpressionDraft, amount),
     category,
     date: expected ? `${selectedMonthKey()}-01` : $("#entryDate").value,
     note: expected ? "" : $("#note").value.trim(),
@@ -593,9 +616,37 @@ function checkForUpdate(registration) {
   });
 }
 
-function showUpdateNotice(worker) {
+function getWorkerVersion(worker) {
+  if (!worker) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    const channel = new MessageChannel();
+    const timer = window.setTimeout(() => resolve(null), 1000);
+    channel.port1.onmessage = (event) => {
+      window.clearTimeout(timer);
+      resolve(String(event.data || "") || null);
+    };
+    try {
+      worker.postMessage("GET_VERSION", [channel.port2]);
+    } catch {
+      window.clearTimeout(timer);
+      resolve(null);
+    }
+  });
+}
+
+async function showUpdateNotice(worker) {
   if (!worker || worker.state !== "installed" || !navigator.serviceWorker.controller) return;
+  const [newVersion, activeVersion] = await Promise.all([
+    getWorkerVersion(worker),
+    getWorkerVersion(navigator.serviceWorker.controller)
+  ]);
+  if (!newVersion) return;
+  if (newVersion === activeVersion || newVersion === meta.appliedUpdateVersion) {
+    worker.postMessage("SKIP_WAITING");
+    return;
+  }
   pendingUpdateWorker = worker;
+  pendingUpdateVersion = newVersion;
   $("#updateNotice").hidden = false;
 }
 
@@ -605,6 +656,10 @@ function installPendingUpdate() {
     return;
   }
   reloadForUpdate = true;
+  if (pendingUpdateVersion) {
+    meta.appliedUpdateVersion = pendingUpdateVersion;
+    saveMeta();
+  }
   $("#installUpdate").disabled = true;
   $("#installUpdate").textContent = "更新中…";
   pendingUpdateWorker.postMessage("SKIP_WAITING");
@@ -612,6 +667,7 @@ function installPendingUpdate() {
 }
 
 $("#installUpdate").addEventListener("click", installPendingUpdate);
+$("#deferUpdate").addEventListener("click", () => { $("#updateNotice").hidden = true; });
 
 $("#refreshApp").addEventListener("click", async () => {
   const button = $("#refreshApp");
@@ -628,6 +684,7 @@ $("#refreshApp").addEventListener("click", async () => {
         const readyWorker = registration.waiting || worker;
         if (readyWorker?.state === "installed" && navigator.serviceWorker.controller) {
           pendingUpdateWorker = readyWorker;
+          pendingUpdateVersion = await getWorkerVersion(readyWorker);
           installPendingUpdate();
           return;
         }

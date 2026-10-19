@@ -1,5 +1,6 @@
 const CACHE_PREFIX = "yueyu-";
-const CACHE_NAME = `${CACHE_PREFIX}v14`;
+const APP_VERSION = "15";
+const CACHE_NAME = `${CACHE_PREFIX}v${APP_VERSION}`;
 const FONT_STYLESHEET = "./assets/fonts/lxgw-wenkai-lite/lxgwwenkailite-bold.css";
 const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./ledger-core.js", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", FONT_STYLESHEET];
 
@@ -15,6 +16,7 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("message", (event) => {
+  if (event.data === "GET_VERSION") event.ports[0]?.postMessage(APP_VERSION);
   if (event.data === "SKIP_WAITING") self.skipWaiting();
 });
 
