@@ -1,8 +1,8 @@
 const CACHE_PREFIX = "yueyu-";
-const APP_VERSION = "23";
+const APP_VERSION = "24";
 const CACHE_NAME = `${CACHE_PREFIX}v${APP_VERSION}`;
 const FONT_STYLESHEET = "./assets/fonts/lxgw-wenkai-lite/lxgwwenkailite-bold.css";
-const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./ledger-core.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./assets/branding/liqing-logo.png", "./assets/branding/liqing-wordmark.png", "./assets/illustrations/horse-money.png", "./assets/illustrations/pony-ledger-peek.png", "./assets/illustrations/nav-ledger.png", "./assets/illustrations/nav-stats.png", "./assets/illustrations/categories/salary.png", "./assets/illustrations/categories/receivable.png", "./assets/illustrations/categories/repayment.png", "./assets/illustrations/categories/rent.png", "./assets/illustrations/categories/daily.png", "./assets/illustrations/categories/special.png", FONT_STYLESHEET];
+const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./ledger-core.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./assets/branding/liqing-logo.png?v=2.1", "./assets/branding/liqing-wordmark.png?v=2.1", "./assets/illustrations/horse-money.png?v=2.1", "./assets/illustrations/pony-ledger-peek.png?v=2.1", "./assets/illustrations/nav-ledger.png?v=2.1", "./assets/illustrations/nav-stats.png?v=2.1", "./assets/illustrations/categories/salary.png?v=2.1", "./assets/illustrations/categories/receivable.png?v=2.1", "./assets/illustrations/categories/repayment.png?v=2.1", "./assets/illustrations/categories/rent.png?v=2.1", "./assets/illustrations/categories/daily.png?v=2.1", "./assets/illustrations/categories/special.png?v=2.1", FONT_STYLESHEET];
 
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
