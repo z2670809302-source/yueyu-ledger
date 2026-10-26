@@ -3,29 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#f2ead9" />
+    <meta name="theme-color" content="#fff8df" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="月余" />
+    <meta name="apple-mobile-web-app-title" content="厘清" />
     <meta name="description" content="完全离线、数据由自己保管的私人月度记账本。" />
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="./icon-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
-    <title>月余 · 私人记账本</title>
+    <title>厘清 · 私人记账本</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <main class="app-shell">
       <section id="ledgerView" class="view" aria-labelledby="pageTitle">
         <header class="topbar">
-          <div>
-            <h1 id="pageTitle">月余</h1>
-            <p class="date-line" id="todayLabel"></p>
+          <div class="brand-lockup">
+            <img class="brand-wordmark" src="./assets/branding/liqing-wordmark.png" alt="厘清" />
+            <h1 class="visually-hidden" id="pageTitle">厘清</h1>
+            <div class="brand-dates">
+              <p class="date-line"><span class="date-mark" aria-hidden="true">✦</span><time id="todayLabel"></time></p>
+              <p class="lunar-date-line"><span class="date-mark" aria-hidden="true"></span><time id="todayLunarLabel"></time></p>
+            </div>
           </div>
-          <span class="offline-mark" title="数据仅保存在本机">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 11V8a4 4 0 0 1 8 0v3m-9 0h10a2 2 0 0 1 2 2v6H5v-6a2 2 0 0 1 2-2Z"/></svg>
-            本机账本
-          </span>
+          <div class="topbar-actions">
+            <button class="icon-button search-button" id="openSearch" aria-label="查询账目">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+            </button>
+            <button class="icon-button settings-button" id="calibrateBalance" aria-label="设置净资产基准">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 13.5v-3l-2-.7a7 7 0 0 0-.8-1.8l.9-1.9L15 4l-1.9.9a7 7 0 0 0-2.2 0L9 4 6.9 6.1 7.8 8a7 7 0 0 0-.8 1.8l-2 .7v3l2 .7a7 7 0 0 0 .8 1.8l-.9 1.9L9 20l1.9-.9a7 7 0 0 0 2.2 0l1.9.9 2.1-2.1-.9-1.9a7 7 0 0 0 .8-1.8l2-.7Z"/></svg>
+            </button>
+          </div>
         </header>
 
         <div class="month-switcher" aria-label="选择月份">
@@ -42,28 +50,53 @@
         </div>
 
         <section class="balance-sheet" aria-labelledby="balanceTitle">
+          <div class="balance-illustration" aria-hidden="true">
+            <img src="./assets/illustrations/horse-money.png" alt="" />
+          </div>
           <div class="balance-heading">
-            <span id="balanceTitle">月初余额</span>
-            <button class="text-button" id="calibrateBalance">设置</button>
+            <span id="balanceTitle">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z"/><circle cx="12" cy="12" r="2.3"/></svg>
+              净资产（元）
+            </span>
           </div>
-          <p class="balance-value" id="monthOpeningBalance">¥0.00</p>
-          <div class="balance-rule" aria-hidden="true"></div>
+          <p class="balance-value" id="netAssetValue">¥0.00</p>
+          <div class="asset-difference">
+            <span>较计划</span><strong id="planDifference">¥0.00</strong>
+          </div>
           <div class="balance-grid" aria-label="本月预计与实际对比">
-            <span></span><span class="grid-heading">预计</span><span class="grid-heading">实际</span>
-            <span class="grid-label">收入</span><strong id="expectedIncome">¥0.00</strong><strong id="actualIncome">¥0.00</strong>
-            <span class="grid-label">支出</span><strong id="expectedExpense">¥0.00</strong><strong id="actualExpense">¥0.00</strong>
-            <span class="grid-label">剩余</span><strong id="expectedRemaining">¥0.00</strong><strong id="actualRemaining">¥0.00</strong>
+            <div class="balance-overview-heading">
+              <strong>本月收支概览</strong>
+              <span id="overviewMonth"></span>
+            </div>
+            <div class="balance-metric income">
+              <span>总收入</span>
+              <strong id="actualIncome">¥0.00</strong>
+              <small>预计 <b id="expectedIncome">¥0.00</b></small>
+              <i><em id="incomeProgress"></em></i>
+            </div>
+            <div class="balance-metric expense">
+              <span>总支出</span>
+              <strong id="actualExpense">¥0.00</strong>
+              <small>预计 <b id="expectedExpense">¥0.00</b></small>
+              <i><em id="expenseProgress"></em></i>
+            </div>
+            <div class="balance-metric remaining">
+              <span>本月结余</span>
+              <strong id="actualMonthlyNet">¥0.00</strong>
+              <small>预计 <b id="expectedMonthlyNet">¥0.00</b></small>
+              <i><em id="remainingProgress"></em></i>
+            </div>
           </div>
-          <div class="balance-difference">
-            <span>计划差额</span>
-            <strong id="planDifference">¥0.00</strong>
-          </div>
+          <span id="monthOpeningBalance" hidden>¥0.00</span>
+          <span id="expectedRemaining" hidden>¥0.00</span>
+          <span id="actualRemaining" hidden>¥0.00</span>
         </section>
 
         <section class="section-block" aria-labelledby="categoryTitle">
           <div class="section-heading">
-            <div>
+            <div class="section-title-with-pony">
               <h2 id="categoryTitle">本月收支</h2>
+              <img class="section-pony" src="./assets/illustrations/pony-ledger-peek.png" alt="" aria-hidden="true" />
             </div>
             <div class="section-actions">
               <button class="text-button muted" id="copyPreviousPlan">沿用上月</button>
@@ -123,6 +156,68 @@
         </section>
       </section>
 
+      <section id="searchView" class="view" hidden aria-labelledby="searchTitle">
+        <header class="detail-topbar search-topbar">
+          <button class="icon-button back-button" id="searchBack" aria-label="返回月度总览">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <div>
+            <h1 id="searchTitle">查询账目</h1>
+            <p class="date-line">全部历史记录</p>
+          </div>
+          <button class="text-button" id="clearSearch" type="button">清除</button>
+        </header>
+
+        <form id="searchForm" class="search-form" role="search">
+          <label class="search-field search-keyword">
+            <span>关键词</span>
+            <div class="search-input-wrap">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+              <input id="searchKeyword" type="search" autocomplete="off" placeholder="备注、项目或算式" />
+            </div>
+          </label>
+          <label class="search-field">
+            <span>精确金额</span>
+            <input id="searchAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="不限" />
+          </label>
+          <div class="search-date-range">
+            <label class="search-field"><span>开始日期</span><input id="searchStartDate" type="date" /></label>
+            <label class="search-field"><span>结束日期</span><input id="searchEndDate" type="date" /></label>
+          </div>
+
+          <details class="search-more" id="searchMore">
+            <summary>更多条件</summary>
+            <div class="search-more-grid">
+              <label class="search-field"><span>最低金额</span><input id="searchMinAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="不限" /></label>
+              <label class="search-field"><span>最高金额</span><input id="searchMaxAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="不限" /></label>
+              <label class="search-field"><span>项目</span><select id="searchCategory"><option value="">全部项目</option></select></label>
+              <label class="search-field"><span>类型</span><select id="searchRecordType"><option value="">全部类型</option><option value="actual">实际</option><option value="expected">预计</option></select></label>
+              <label class="search-field"><span>收支</span><select id="searchDirection"><option value="">全部收支</option><option value="income">收入</option><option value="expense">支出</option></select></label>
+              <label class="search-field"><span>支付方式</span><select id="searchPayment"><option value="">全部方式</option><option value="cash">余额支付</option><option value="huabei">花呗</option></select></label>
+            </div>
+          </details>
+        </form>
+
+        <section class="search-summary" aria-label="查询结果汇总">
+          <div><span>记录</span><strong id="searchCount">0</strong></div>
+          <div><span>实际收入</span><strong class="income" id="searchIncome">¥0.00</strong></div>
+          <div><span>实际支出</span><strong class="expense" id="searchExpense">¥0.00</strong></div>
+          <div><span>花呗消费</span><strong class="expense" id="searchHuabei">¥0.00</strong></div>
+        </section>
+
+        <section class="search-results" aria-labelledby="searchResultsTitle">
+          <div class="section-heading">
+            <div><h2 id="searchResultsTitle">查询结果</h2><p id="searchResultHint">显示全部记录</p></div>
+          </div>
+          <div class="search-result-list" id="searchResultList"></div>
+          <div class="empty-state search-empty" id="searchEmpty" hidden>
+            <svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="34" cy="34" r="20"/><path d="m49 49 17 17M26 34h16"/></svg>
+            <strong>没有找到符合条件的记录</strong>
+            <span>可以减少筛选条件后再试。</span>
+          </div>
+        </section>
+      </section>
+
       <section id="statsView" class="view" hidden aria-labelledby="statsTitle">
         <header class="topbar stats-topbar">
           <div>
@@ -167,19 +262,19 @@
         <header class="topbar data-topbar">
           <div>
             <h1 id="dataTitle">数据管理</h1>
-          <p class="date-line">仅保存在本机</p>
+          <p class="date-line">仅保存在本机 · V2.0</p>
           </div>
         </header>
 
         <section class="data-section">
-          <h2>月初余额基准</h2>
+          <h2>净资产基准</h2>
           <form id="balanceForm" class="inline-form">
-            <label for="openingBalance"><span id="openingBalanceMonth"></span>月初余额</label>
+            <label for="openingBalance"><span id="openingBalanceMonth"></span>月初净资产</label>
             <div class="amount-input small">
               <span>¥</span>
               <input id="openingBalance" name="openingBalance" type="number" step="0.01" inputmode="decimal" required />
             </div>
-            <button class="secondary-button" type="submit">保存月初余额</button>
+            <button class="secondary-button" type="submit">保存净资产基准</button>
           </form>
         </section>
 
@@ -220,14 +315,14 @@
 
     <nav class="bottom-nav" aria-label="主导航">
       <button class="nav-item active" data-view="ledgerView">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg>
+        <img src="./assets/illustrations/nav-ledger.png" alt="" aria-hidden="true" />
         账本
       </button>
       <button class="add-button" id="addEntry" aria-label="记一笔">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
       </button>
       <button class="nav-item" data-view="statsView">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V9m7 10V5m7 14v-7"/></svg>
+        <img src="./assets/illustrations/nav-stats.png" alt="" aria-hidden="true" />
         统计
       </button>
     </nav>
@@ -306,6 +401,7 @@
           <label id="actualDateField">
             <span class="field-label">日期</span>
             <input id="entryDate" name="entryDate" type="date" required />
+            <small class="selected-lunar-date" id="entryLunarDate"></small>
           </label>
           <div id="planMonthField" hidden>
             <span class="field-label">计划月份</span>

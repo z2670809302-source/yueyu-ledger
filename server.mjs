@@ -21,5 +21,5 @@ createServer(async (request, response) => {
     response.end("Not found");
   }
 }).listen(port, "0.0.0.0", () => {
-  console.log(`月余已启动：http://localhost:${port}`);
+  console.log(`厘清已启动：http://localhost:${port}`);
 });

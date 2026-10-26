@@ -1,4 +1,4 @@
-import { categories, monthKey, monthOpeningBalance, offsetMonthKey, parseAmountExpression, summarize, validAmountExpression, validateBackup } from "./ledger-core.js";
+import { categories, monthKey, monthOpeningBalance, offsetMonthKey, parseAmountExpression, searchEntries, summarize, validAmountExpression, validateBackup } from "./ledger-core.js";
 
 const STORAGE_KEY = "yueyu-ledger-v1";
 const META_KEY = "yueyu-ledger-meta-v1";
@@ -6,7 +6,9 @@ const UPDATE_CHECK_TIMEOUT = 6000;
 const UPDATE_INSTALL_TIMEOUT = 4000;
 const currency = new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY" });
 const fullDate = new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "short" });
+const lunarDate = new Intl.DateTimeFormat("zh-CN-u-ca-chinese", { year: "numeric", month: "long", day: "numeric" });
 const detailDate = new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "short" });
+const searchDate = new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" });
 const state = loadState();
 const meta = loadMeta();
 let selectedDate = new Date();
@@ -23,8 +25,16 @@ const entryDialog = $("#entryDialog");
 const statsDialog = $("#statsDialog");
 const entryForm = $("#entryForm");
 const statsColors = {
-  expense: ["#b6412f", "#d66f52", "#8f2f22", "#d49a62"],
-  income: ["#176b54", "#52917d"]
+  expense: ["#f07b4f", "#f2a441", "#d85d7f", "#9370c9"],
+  income: ["#66a927", "#3aa58c"]
+};
+const categoryIcons = {
+  salary: '<img src="./assets/illustrations/categories/salary.png" alt="" />',
+  receivable: '<img src="./assets/illustrations/categories/receivable.png" alt="" />',
+  repayment: '<img src="./assets/illustrations/categories/repayment.png" alt="" />',
+  rent: '<img src="./assets/illustrations/categories/rent.png" alt="" />',
+  daily: '<img src="./assets/illustrations/categories/daily.png" alt="" />',
+  special: '<img src="./assets/illustrations/categories/special.png" alt="" />'
 };
 
 function loadState() {
@@ -76,14 +86,38 @@ function defaultDateForSelectedMonth() {
   return `${selectedMonthKey()}-${String(day).padStart(2, "0")}`;
 }
 
+function chineseDay(value) {
+  const day = Number(value);
+  const digits = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+  if (day <= 10) return `初${digits[day]}`;
+  if (day < 20) return `十${digits[day - 10]}`;
+  if (day === 20) return "二十";
+  if (day < 30) return `廿${digits[day - 20]}`;
+  return "三十";
+}
+
+function formatLunarDate(value, includeYear = false) {
+  const date = value instanceof Date ? value : new Date(`${value}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return "";
+  const parts = Object.fromEntries(lunarDate.formatToParts(date).map((part) => [part.type, part.value]));
+  const label = `农历${parts.month}${chineseDay(parts.day)}`;
+  return includeYear && parts.yearName ? `${label} · ${parts.yearName}年` : label;
+}
+
+function updateEntryLunarDate() {
+  $("#entryLunarDate").textContent = formatLunarDate($("#entryDate").value, true);
+}
+
 function render() {
   const key = selectedMonthKey();
   const openingBalance = monthOpeningBalance(state.openingBalance, state.openingMonth, state.entries, key);
   const summary = summarize(state.entries, key, openingBalance);
   const nowKey = monthKey();
   $("#todayLabel").textContent = fullDate.format(new Date());
+  $("#todayLunarLabel").textContent = formatLunarDate(new Date());
   $("#monthTitle").textContent = `${selectedDate.getFullYear()} 年 ${selectedDate.getMonth() + 1} 月`;
   $("#monthStatus").textContent = key === nowKey ? "本月" : key < nowKey ? "历史月份" : "未来计划";
+  $("#overviewMonth").textContent = `${selectedDate.getFullYear()}年${selectedDate.getMonth() + 1}月`;
   $("#monthOpeningBalance").textContent = formatMoney(openingBalance);
   $("#expectedIncome").textContent = formatMoney(summary.expectedIncome, true);
   $("#expectedExpense").textContent = formatDirectionalMoney(summary.expectedExpense, "expense");
@@ -91,6 +125,15 @@ function render() {
   $("#actualIncome").textContent = formatMoney(summary.actualIncome, true);
   $("#actualExpense").textContent = formatDirectionalMoney(summary.actualExpense, "expense");
   $("#actualRemaining").textContent = formatMoney(summary.actualRemaining, true);
+  $("#netAssetValue").textContent = formatMoney(summary.actualRemaining);
+  const expectedMonthlyNet = summary.expectedIncome - summary.expectedExpense;
+  const actualMonthlyNet = summary.actualIncome - summary.actualExpense;
+  $("#expectedMonthlyNet").textContent = formatMoney(expectedMonthlyNet, true);
+  $("#actualMonthlyNet").textContent = formatMoney(actualMonthlyNet, true);
+  const progressWidth = (actual, expected) => `${Math.min(100, expected > 0 ? actual / expected * 100 : actual > 0 ? 100 : 0)}%`;
+  $("#incomeProgress").style.width = progressWidth(summary.actualIncome, summary.expectedIncome);
+  $("#expenseProgress").style.width = progressWidth(summary.actualExpense, summary.expectedExpense);
+  $("#remainingProgress").style.width = progressWidth(Math.max(0, actualMonthlyNet), Math.max(0, expectedMonthlyNet));
   $("#planDifference").textContent = formatMoney(summary.planDifference, true);
   $("#planDifference").className = summary.planDifference < 0 ? "negative" : "positive";
   $("#openingBalanceMonth").textContent = `${selectedDate.getFullYear()} 年 ${selectedDate.getMonth() + 1} 月`;
@@ -98,7 +141,7 @@ function render() {
 
   $("#categoryRows").innerHTML = Object.entries(categories).map(([key, category]) => `
     <button class="ledger-row category-row" role="row" data-category="${key}" aria-label="查看${category.label}实际每日明细">
-      <span role="cell"><i class="direction-mark ${category.direction}"></i>${category.label}</span>
+      <span role="cell"><i class="category-icon category-${key}">${categoryIcons[key]}</i>${category.label}</span>
       <strong role="cell">${formatDirectionalMoney(summary.categories[key].expected, category.direction)}</strong>
       <div class="category-actual" role="cell">
         <strong>${formatDirectionalMoney(summary.categories[key].actual, category.direction)}</strong>
@@ -109,6 +152,7 @@ function render() {
   renderStats();
   renderBackupStatus();
   if (activeDetailCategory) renderDetail();
+  if (!$("#searchView").hidden) renderSearchResults();
 }
 
 function annualStats() {
@@ -247,10 +291,65 @@ function renderDetail() {
   `).join("");
 }
 
+function searchFilters() {
+  return {
+    keyword: $("#searchKeyword").value,
+    amount: $("#searchAmount").value,
+    startDate: $("#searchStartDate").value,
+    endDate: $("#searchEndDate").value,
+    minAmount: $("#searchMinAmount").value,
+    maxAmount: $("#searchMaxAmount").value,
+    category: $("#searchCategory").value,
+    recordType: $("#searchRecordType").value,
+    direction: $("#searchDirection").value,
+    paymentMethod: $("#searchPayment").value
+  };
+}
+
+function renderSearchResults() {
+  const filters = searchFilters();
+  const results = searchEntries(state.entries, filters);
+  const actualEntries = results.filter((entry) => entry.recordType === "actual");
+  const income = actualEntries
+    .filter((entry) => categories[entry.category].direction === "income")
+    .reduce((total, entry) => total + Number(entry.amount), 0);
+  const huabei = actualEntries
+    .filter((entry) => categories[entry.category].direction === "expense" && entry.paymentMethod === "huabei")
+    .reduce((total, entry) => total + Number(entry.amount), 0);
+  const expense = actualEntries
+    .filter((entry) => categories[entry.category].direction === "expense" && entry.paymentMethod !== "huabei")
+    .reduce((total, entry) => total + Number(entry.amount), 0);
+  const activeFilterCount = Object.values(filters).filter((value) => String(value).trim()).length;
+
+  $("#searchCount").textContent = String(results.length);
+  $("#searchIncome").textContent = formatMoney(income);
+  $("#searchExpense").textContent = formatMoney(expense);
+  $("#searchHuabei").textContent = formatMoney(huabei);
+  $("#searchResultHint").textContent = activeFilterCount ? `已应用 ${activeFilterCount} 项条件` : "显示全部记录";
+  $("#searchEmpty").hidden = results.length > 0;
+  $("#searchResultList").hidden = results.length === 0;
+  $("#searchResultList").innerHTML = results.map((entry) => {
+    const category = categories[entry.category];
+    const actual = entry.recordType === "actual";
+    const payment = actual && entry.paymentMethod === "huabei" ? "花呗" : actual ? "余额支付" : "预计";
+    const calculation = entry.amountExpression ? `${formatAmountExpression(entry.amountExpression)} = ${formatMoney(entry.amount)}` : "";
+    const title = entry.note ? escapeHtml(entry.note) : category.label;
+    return `<button class="search-result-item" type="button" data-search-entry-id="${entry.id}">
+      <time datetime="${entry.date}">${searchDate.format(new Date(`${entry.date}T12:00:00`))}</time>
+      <span class="search-result-main">
+        <strong>${title}</strong>
+        <small>${category.label} · ${payment}${calculation ? ` · ${calculation}` : ""}</small>
+      </span>
+      <strong class="search-result-amount ${category.direction}">${formatDirectionalMoney(entry.amount, category.direction)}</strong>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+    </button>`;
+  }).join("");
+}
+
 function showView(viewId) {
   document.querySelectorAll(".view").forEach((view) => { view.hidden = view.id !== viewId; });
   document.querySelectorAll(".nav-item").forEach((item) => {
-    const activeView = viewId === "detailView" ? "ledgerView" : viewId === "manageView" ? "statsView" : viewId;
+    const activeView = ["detailView", "searchView"].includes(viewId) ? "ledgerView" : viewId === "manageView" ? "statsView" : viewId;
     item.classList.toggle("active", item.dataset.view === activeView);
   });
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -292,6 +391,7 @@ function openEntryForm({ recordType = "actual", category = "daily", id = null } 
   entryForm.elements.recordType.value = recordType;
   $("#category").value = category;
   $("#entryDate").value = defaultDateForSelectedMonth();
+  updateEntryLunarDate();
   updateAmountResult();
 
   if (id) {
@@ -301,6 +401,7 @@ function openEntryForm({ recordType = "actual", category = "daily", id = null } 
     $("#amount").value = entry.amountExpression || entry.amount;
     $("#category").value = entry.category;
     $("#entryDate").value = entry.date;
+    updateEntryLunarDate();
     $("#note").value = entry.note;
     entryForm.elements.paymentMethod.value = entry.paymentMethod === "huabei" ? "huabei" : "cash";
     entryForm.elements.recordType.value = entry.recordType;
@@ -418,6 +519,8 @@ function copyPreviousPlans() {
 
 $("#category").innerHTML = Object.entries(categories)
   .map(([value, item]) => `<option value="${value}">${item.label}</option>`).join("");
+$("#searchCategory").insertAdjacentHTML("beforeend", Object.entries(categories)
+  .map(([value, item]) => `<option value="${value}">${item.label}</option>`).join(""));
 
 $("#previousMonth").addEventListener("click", () => changeMonth(-1));
 $("#nextMonth").addEventListener("click", () => changeMonth(1));
@@ -428,6 +531,19 @@ $("#statsYearPicker").addEventListener("click", () => { statsYear = new Date().g
 $("#showExpense").addEventListener("click", () => { statsDirection = "expense"; renderStats(); });
 $("#showIncome").addEventListener("click", () => { statsDirection = "income"; renderStats(); });
 $("#closeStatsDialog").addEventListener("click", () => statsDialog.close());
+$("#openSearch").addEventListener("click", () => { renderSearchResults(); showView("searchView"); });
+$("#searchBack").addEventListener("click", () => showView("ledgerView"));
+$("#clearSearch").addEventListener("click", () => {
+  $("#searchForm").reset();
+  $("#searchMore").open = false;
+  renderSearchResults();
+});
+$("#searchForm").addEventListener("input", renderSearchResults);
+$("#searchForm").addEventListener("change", renderSearchResults);
+$("#searchForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  renderSearchResults();
+});
 $("#addEntry").addEventListener("click", () => openEntryForm({ category: $("#detailView").hidden ? "daily" : activeDetailCategory }));
 $("#addExpected").addEventListener("click", () => openEntryForm({ recordType: "expected" }));
 $("#copyPreviousPlan").addEventListener("click", copyPreviousPlans);
@@ -442,6 +558,13 @@ $("#calibrateBalance").addEventListener("click", () => {
 });
 
 document.addEventListener("click", (event) => {
+  const searchEntry = event.target.closest("[data-search-entry-id]");
+  if (searchEntry) {
+    const entry = state.entries.find((item) => item.id === searchEntry.dataset.searchEntryId);
+    if (entry) selectedDate = new Date(`${entry.date}T12:00:00`);
+    openEntryForm({ id: searchEntry.dataset.searchEntryId });
+    return;
+  }
   const statsMonth = event.target.closest("[data-stats-month]");
   if (statsMonth) openStatsDetail(statsMonth.dataset.statsMonth);
   const categoryRow = event.target.closest("[data-category]");
@@ -457,6 +580,8 @@ document.addEventListener("click", (event) => {
 entryForm.elements.recordType.forEach((radio) => radio.addEventListener("change", updateFormKind));
 $("#category").addEventListener("change", updateFormKind);
 $("#amount").addEventListener("input", updateAmountResult);
+$("#entryDate").addEventListener("input", updateEntryLunarDate);
+$("#entryDate").addEventListener("change", updateEntryLunarDate);
 $("#addAmountPart").addEventListener("click", () => appendAmountOperator("+"));
 $("#subtractAmountPart").addEventListener("click", () => appendAmountOperator("-"));
 $("#calculateAmount").addEventListener("click", () => {
@@ -563,7 +688,7 @@ $("#exportData").addEventListener("click", () => {
   const blob = new Blob([JSON.stringify({ ...state, exportedAt: new Date().toISOString() }, null, 2)], { type: "application/json" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = `月余备份-${new Date().toISOString().slice(0, 10)}.json`;
+  link.download = `厘清备份-${new Date().toISOString().slice(0, 10)}.json`;
   link.click();
   URL.revokeObjectURL(link.href);
   meta.lastBackupAt = new Date().toISOString();

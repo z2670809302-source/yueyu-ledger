@@ -1,8 +1,8 @@
 const CACHE_PREFIX = "yueyu-";
-const APP_VERSION = "15";
+const APP_VERSION = "23";
 const CACHE_NAME = `${CACHE_PREFIX}v${APP_VERSION}`;
 const FONT_STYLESHEET = "./assets/fonts/lxgw-wenkai-lite/lxgwwenkailite-bold.css";
-const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./ledger-core.js", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", FONT_STYLESHEET];
+const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./ledger-core.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./assets/branding/liqing-logo.png", "./assets/branding/liqing-wordmark.png", "./assets/illustrations/horse-money.png", "./assets/illustrations/pony-ledger-peek.png", "./assets/illustrations/nav-ledger.png", "./assets/illustrations/nav-stats.png", "./assets/illustrations/categories/salary.png", "./assets/illustrations/categories/receivable.png", "./assets/illustrations/categories/repayment.png", "./assets/illustrations/categories/rent.png", "./assets/illustrations/categories/daily.png", "./assets/illustrations/categories/special.png", FONT_STYLESHEET];
 
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {

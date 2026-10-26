@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { monthOpeningBalance, parseAmountExpression, summarize, validAmountExpression, validateBackup } from "../ledger-core.js";
+import { monthOpeningBalance, parseAmountExpression, searchEntries, summarize, validAmountExpression, validateBackup } from "../ledger-core.js";
 
 const entries = [
   { id: "1", date: "2026-09-01", category: "salary", recordType: "expected", amount: 10000 },
@@ -70,4 +70,16 @@ test("backup validation preserves only matching amount expressions", () => {
     entries: [{ id: "formula", date: "2026-09-01", category: "daily", recordType: "actual", amount: 80, amountExpression: "35 + 65-20" }]
   });
   assert.equal(restored.entries[0].amountExpression, "35+65-20");
+});
+
+test("search combines keyword, amount, date, category, type and payment filters", () => {
+  const searchable = [
+    ...entries,
+    { id: "8", date: "2026-09-10", category: "daily", recordType: "actual", paymentMethod: "cash", amount: 80, amountExpression: "35+65-20", note: "午饭和地铁" }
+  ];
+  assert.deepEqual(searchEntries(searchable, { keyword: "地铁" }).map((entry) => entry.id), ["8"]);
+  assert.deepEqual(searchEntries(searchable, { keyword: "35+65", amount: 80 }).map((entry) => entry.id), ["8"]);
+  assert.deepEqual(searchEntries(searchable, { amount: 2500 }).map((entry) => entry.id), ["3", "4"]);
+  assert.deepEqual(searchEntries(searchable, { startDate: "2026-09-03", endDate: "2026-09-04", recordType: "actual", direction: "expense", paymentMethod: "huabei" }).map((entry) => entry.id), ["6"]);
+  assert.deepEqual(searchEntries(searchable, { category: "daily", minAmount: 80, maxAmount: 100, paymentMethod: "cash" }).map((entry) => entry.id), ["8", "5"]);
 });

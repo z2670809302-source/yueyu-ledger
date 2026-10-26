@@ -158,6 +158,79 @@ try {
   assert.equal(result.dialogClosed, true);
   assert.equal(result.zoomSafeInputs, true);
   await evaluate("document.querySelector('#toast').hidden = true; true");
+  const searchAll = await evaluate(`(() => {
+    document.querySelector('#openSearch').click();
+    return {
+      visible: !document.querySelector('#searchView').hidden,
+      count: document.querySelector('#searchCount').textContent,
+      results: document.querySelectorAll('#searchResultList .search-result-item').length
+    };
+  })()`);
+  assert.equal(searchAll.visible, true);
+  assert.equal(searchAll.count, "7");
+  assert.equal(searchAll.results, 7);
+  const huabeiSearch = await evaluate(`(() => {
+    const keyword = document.querySelector('#searchKeyword');
+    keyword.value = '买药';
+    keyword.dispatchEvent(new Event('input', { bubbles: true }));
+    return {
+      count: document.querySelector('#searchCount').textContent,
+      income: document.querySelector('#searchIncome').textContent,
+      expense: document.querySelector('#searchExpense').textContent,
+      huabei: document.querySelector('#searchHuabei').textContent,
+      text: document.querySelector('#searchResultList').textContent
+    };
+  })()`);
+  assert.equal(huabeiSearch.count, "1");
+  assert.equal(huabeiSearch.income, "¥0.00");
+  assert.equal(huabeiSearch.expense, "¥0.00");
+  assert.equal(huabeiSearch.huabei, "¥180.00");
+  assert.match(huabeiSearch.text, /花呗买药/);
+  const searchMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await mkdir(".impeccable/review", { recursive: true });
+  await writeFile(".impeccable/review/search-mobile.png", Buffer.from(searchMobile.data, "base64"));
+  const amountSearch = await evaluate(`(() => {
+    document.querySelector('#clearSearch').click();
+    const amount = document.querySelector('#searchAmount');
+    amount.value = '2500';
+    amount.dispatchEvent(new Event('input', { bubbles: true }));
+    return {
+      count: document.querySelector('#searchCount').textContent,
+      expense: document.querySelector('#searchExpense').textContent,
+      results: document.querySelectorAll('#searchResultList .search-result-item').length
+    };
+  })()`);
+  assert.equal(amountSearch.count, "2");
+  assert.equal(amountSearch.expense, "¥2,500.00");
+  assert.equal(amountSearch.results, 2);
+  const combinedSearch = await evaluate(`(() => {
+    document.querySelector('#clearSearch').click();
+    document.querySelector('#searchStartDate').value = '2026-09-04';
+    document.querySelector('#searchEndDate').value = '2026-09-05';
+    document.querySelector('#searchCategory').value = 'daily';
+    document.querySelector('#searchRecordType').value = 'actual';
+    document.querySelector('#searchPayment').value = 'cash';
+    document.querySelector('#searchForm').dispatchEvent(new Event('change', { bubbles: true }));
+    return {
+      count: document.querySelector('#searchCount').textContent,
+      expense: document.querySelector('#searchExpense').textContent,
+      hint: document.querySelector('#searchResultHint').textContent
+    };
+  })()`);
+  assert.equal(combinedSearch.count, "2");
+  assert.equal(combinedSearch.expense, "¥100.00");
+  assert.equal(combinedSearch.hint, "已应用 5 项条件");
+  const searchEdit = await evaluate(`(() => {
+    document.querySelector('#searchResultList .search-result-item').click();
+    const value = { open: document.querySelector('#entryDialog').open, note: document.querySelector('#note').value };
+    document.querySelector('#closeDialog').click();
+    document.querySelector('#clearSearch').click();
+    document.querySelector('#searchBack').click();
+    return value;
+  })()`);
+  assert.equal(searchEdit.open, true);
+  assert.ok(["早餐和地铁", "日用品"].includes(searchEdit.note));
+  await evaluate("document.querySelector('#toast').hidden = true; true");
   const updateNotice = await evaluate(`(() => {
     const notice = document.querySelector('#updateNotice');
     notice.hidden = false;
@@ -474,7 +547,7 @@ try {
     document.querySelector('#exportData').click();
     return window.__downloadName;
   })()`);
-  assert.match(downloadName, /^月余备份-\d{4}-\d{2}-\d{2}\.json$/);
+  assert.match(downloadName, /^厘清备份-\d{4}-\d{2}-\d{2}\.json$/);
   const backupRecorded = await evaluate(`(() => ({
     saved: Boolean(JSON.parse(localStorage.getItem('yueyu-ledger-meta-v1')).lastBackupAt),
     warning: document.querySelector('#backupStatus').classList.contains('warning'),
@@ -528,6 +601,18 @@ try {
     assert.equal(layout.amountsFit, true);
     const screenshot = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
     await writeFile(`.impeccable/review/${phone.name}.png`, Buffer.from(screenshot.data, "base64"));
+    if (phone.width === 320) {
+      const searchLayout = await evaluate(`(() => {
+        document.querySelector('#openSearch').click();
+        const form = document.querySelector('#searchForm').getBoundingClientRect();
+        return { scrollWidth: document.documentElement.scrollWidth, formFits: form.left >= 0 && form.right <= document.documentElement.clientWidth };
+      })()`);
+      assert.equal(searchLayout.scrollWidth, phone.width);
+      assert.equal(searchLayout.formFits, true);
+      const searchSmall = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+      await writeFile(".impeccable/review/search-small-320.png", Buffer.from(searchSmall.data, "base64"));
+      await evaluate("document.querySelector('#searchBack').click(); true");
+    }
     const statsLayout = await evaluate(`(() => {
       document.querySelector('[data-view="statsView"]').click();
       const card = document.querySelector('.annual-sheet').getBoundingClientRect();
@@ -579,7 +664,7 @@ try {
   await evaluate("navigator.serviceWorker.ready.then(() => true)");
   await call("Network.emulateNetworkConditions", { offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0 });
   await call("Page.reload", { ignoreCache: false });
-  await waitFor("document.readyState === 'complete' && document.title.includes('月余')");
+  await waitFor("document.readyState === 'complete' && document.title.includes('厘清')");
   assert.equal(await evaluate("JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length"), 7);
   await selectMonth(2026, 9);
   assert.equal(await evaluate("document.querySelector('[data-category=\"daily\"] .category-actual strong').textContent"), "−¥100.00");

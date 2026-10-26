@@ -40,6 +40,40 @@ export function validAmountExpression(value, amount) {
     : "";
 }
 
+export function searchEntries(entries, filters = {}) {
+  const keyword = String(filters.keyword || "").trim().toLocaleLowerCase("zh-CN");
+  const exactAmount = filters.amount === "" || filters.amount == null ? null : Number(filters.amount);
+  const minAmount = filters.minAmount === "" || filters.minAmount == null ? null : Number(filters.minAmount);
+  const maxAmount = filters.maxAmount === "" || filters.maxAmount == null ? null : Number(filters.maxAmount);
+  const amountInCents = (value) => Math.round(Number(value) * 100);
+
+  return entries.filter((entry) => {
+    const category = categories[entry.category];
+    if (!category) return false;
+    const amount = Number(entry.amount);
+    const paymentMethod = entry.paymentMethod === "huabei" ? "huabei" : "cash";
+    const searchable = [
+      entry.note,
+      category.label,
+      entry.amountExpression,
+      entry.recordType === "expected" ? "预计 计划" : "实际",
+      paymentMethod === "huabei" ? "花呗" : "余额支付"
+    ].join(" ").toLocaleLowerCase("zh-CN");
+
+    if (keyword && !searchable.includes(keyword)) return false;
+    if (Number.isFinite(exactAmount) && amountInCents(amount) !== amountInCents(exactAmount)) return false;
+    if (Number.isFinite(minAmount) && amount < minAmount) return false;
+    if (Number.isFinite(maxAmount) && amount > maxAmount) return false;
+    if (filters.startDate && entry.date < filters.startDate) return false;
+    if (filters.endDate && entry.date > filters.endDate) return false;
+    if (filters.category && entry.category !== filters.category) return false;
+    if (filters.recordType && entry.recordType !== filters.recordType) return false;
+    if (filters.direction && category.direction !== filters.direction) return false;
+    if (filters.paymentMethod && (entry.recordType !== "actual" || paymentMethod !== filters.paymentMethod)) return false;
+    return true;
+  }).sort((a, b) => b.date.localeCompare(a.date) || String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+}
+
 export function summarize(entries, selectedMonth, openingBalance = 0) {
   const summary = {
     expectedIncome: 0,
@@ -96,7 +130,7 @@ export function monthOpeningBalance(openingBalance, openingMonth, entries, selec
 
 export function validateBackup(value) {
   if (!value || value.version !== 1 || !Array.isArray(value.entries)) {
-    throw new Error("这不是可识别的月余备份文件。");
+    throw new Error("这不是可识别的厘清备份文件。");
   }
 
   const entries = value.entries.map((entry) => {

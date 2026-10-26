@@ -44,7 +44,7 @@ The product is a private monthly money sheet: current balance and the seven cate
 
 ## Brand Commitments
 
-The interface is concise, calm, and centered on “quickly record one item” and “understand this month.” The product name is “月余”, with a paper-ledger app icon.
+The interface is concise, calm, and centered on “quickly record one item” and “understand this month.” The product name is “厘清”, with a magnifying-glass and coin app icon.
 
 ## Evidence on Hand
 
