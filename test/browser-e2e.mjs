@@ -170,7 +170,8 @@ try {
       results: document.querySelectorAll('#searchResultList .search-result-item').length,
       summaryHidden: document.querySelector('#searchSummary').hidden,
       resultsHidden: document.querySelector('#searchResults').hidden,
-      subtitle: document.querySelector('#searchView .brand-dates').textContent.trim()
+      subtitle: document.querySelector('#searchView .brand-dates').textContent.trim(),
+      backCircleWidth: getComputedStyle(document.querySelector('#searchBack'), '::before').width
     };
   })()`);
   assert.equal(searchAll.visible, true);
@@ -179,6 +180,7 @@ try {
   assert.equal(searchAll.summaryHidden, true);
   assert.equal(searchAll.resultsHidden, true);
   assert.equal(searchAll.subtitle, "✦查询账目");
+  assert.equal(searchAll.backCircleWidth, "24px");
   const huabeiSearch = await evaluate(`(() => {
     const keyword = document.querySelector('#searchKeyword');
     keyword.value = '买药';
@@ -333,14 +335,18 @@ try {
       visible: !document.querySelector('#manageView').hidden,
       text: document.querySelector('#backupStatus').textContent,
       warning: document.querySelector('#backupStatus').classList.contains('warning'),
-      subtitle: document.querySelector('#manageView .brand-dates').textContent.trim()
+      subtitle: document.querySelector('#manageView .brand-dates').textContent.trim(),
+      backCircleWidth: getComputedStyle(document.querySelector('#manageBack'), '::before').width
     };
   })()`);
   assert.equal(backupPrompt.visible, true);
   assert.match(backupPrompt.text, /尚未备份/);
   assert.equal(backupPrompt.warning, true);
   assert.equal(backupPrompt.subtitle, "✦数据管理 · V2.211");
+  assert.equal(backupPrompt.backCircleWidth, "24px");
+  assert.equal(await evaluate("document.querySelector('#manageBack').click(); !document.querySelector('#statsView').hidden"), true);
   await evaluate("document.querySelector('[data-view=\"ledgerView\"]').click(); true");
+  assert.equal(await evaluate("document.querySelector('#calibrateBalance').click(); document.querySelector('#manageBack').click(); !document.querySelector('#ledgerView').hidden"), true);
   await evaluate(`(() => {
     const serviceWorkers = navigator.serviceWorker;
     const originalSetTimeout = window.setTimeout.bind(window);
@@ -362,13 +368,21 @@ try {
     document.querySelector('[data-category="salary"]').click();
     const value = {
       entries: document.querySelectorAll('#detailTimeline .entry-item').length,
-      notes: [...document.querySelectorAll('#detailTimeline .entry-main strong')].map((item) => item.textContent)
+      notes: [...document.querySelectorAll('#detailTimeline .entry-main strong')].map((item) => item.textContent),
+      monthWhiteSpace: getComputedStyle(document.querySelector('#detailMonth')).whiteSpace,
+      headerHeight: document.querySelector('.detail-topbar').getBoundingClientRect().height,
+      backCircleWidth: getComputedStyle(document.querySelector('#detailBack'), '::before').width
     };
-    document.querySelector('#detailBack').click();
     return value;
   })()`);
   assert.equal(salaryDetail.entries, 1);
   assert.deepEqual(salaryDetail.notes, ["九月工资"]);
+  assert.equal(salaryDetail.monthWhiteSpace, "nowrap");
+  assert.ok(salaryDetail.headerHeight < 90);
+  assert.equal(salaryDetail.backCircleWidth, "24px");
+  const salaryDetailMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/detail-mobile.png", Buffer.from(salaryDetailMobile.data, "base64"));
+  await evaluate("document.querySelector('#detailBack').click(); true");
 
   const previousPlanAmount = await evaluate(`(() => {
     document.querySelector('#addExpected').click();

@@ -19,6 +19,7 @@ let pendingUpdateWorker = null;
 let pendingUpdateVersion = null;
 let reloadForUpdate = false;
 let amountExpressionDraft = "";
+let manageReturnView = "statsView";
 
 const $ = (selector) => document.querySelector(selector);
 const entryDialog = $("#entryDialog");
@@ -560,12 +561,17 @@ $("#searchForm").addEventListener("submit", (event) => {
 $("#addEntry").addEventListener("click", () => openEntryForm({ category: $("#detailView").hidden ? "daily" : activeDetailCategory }));
 $("#addExpected").addEventListener("click", () => openEntryForm({ recordType: "expected" }));
 $("#copyPreviousPlan").addEventListener("click", copyPreviousPlans);
-$("#openManage").addEventListener("click", () => showView("manageView"));
+$("#openManage").addEventListener("click", () => {
+  manageReturnView = "statsView";
+  showView("manageView");
+});
+$("#manageBack").addEventListener("click", () => showView(manageReturnView));
 $("#detailAdd").addEventListener("click", () => openEntryForm({ category: activeDetailCategory }));
 $("#detailEmptyAdd").addEventListener("click", () => openEntryForm({ category: activeDetailCategory }));
 $("#detailBack").addEventListener("click", () => showView("ledgerView"));
 $("#closeDialog").addEventListener("click", closeEntryForm);
 $("#calibrateBalance").addEventListener("click", () => {
+  manageReturnView = "ledgerView";
   showView("manageView");
   $("#openingBalance").focus();
 });

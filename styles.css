@@ -508,6 +508,33 @@ button:focus-visible, input:focus-visible, select:focus-visible, label:has(input
 .add-button:active { transform: translate(-50%, 2px); }
 
 .detail-totals, .search-form, .search-summary, .annual-sheet, .data-section { border-color: rgba(255,255,255,.9); }
+.detail-topbar {
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 12px;
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,.9);
+  border-radius: 22px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+.detail-topbar .back-button { margin-left: 0; }
+.detail-topbar > div { min-width: 0; }
+.detail-topbar h1 {
+  overflow: hidden;
+  font-size: clamp(1.35rem, 6vw, 2rem);
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#detailMonth {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#detailAdd { white-space: nowrap; }
 .detail-totals {
   overflow: hidden;
   padding: 16px;
@@ -530,6 +557,33 @@ button:focus-visible, input:focus-visible, select:focus-visible, label:has(input
 }
 .search-actions .back-button { color: var(--ink); }
 .search-actions .text-button { min-width: 42px; }
+.topbar-actions .compact-back,
+.detail-topbar .compact-back {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.compact-back::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 4px 10px rgba(112, 96, 57, .09);
+  content: "";
+}
+.topbar-actions .compact-back svg,
+.detail-topbar .compact-back svg {
+  position: relative;
+  z-index: 1;
+  width: 12px;
+}
 .search-field input, .search-field select, select, input[type="date"], input[type="text"] {
   border-color: #ebe5d7;
   background: #fffefb;
