@@ -115,12 +115,15 @@ try {
     form.elements.paymentMethod.value = 'huabei';
     const dateRect = document.querySelector('#entryDate').getBoundingClientRect();
     const categoryRect = document.querySelector('#category').getBoundingClientRect();
+    const dateIcon = document.querySelector('.date-input-icon');
     return {
       operatorText: [...document.querySelectorAll('.amount-operator')].map((button) => button.textContent).join(''),
       operatorColor: getComputedStyle(document.querySelector('.amount-operator')).color,
       operatorBackground: getComputedStyle(document.querySelector('.amount-operator'), '::before').backgroundColor,
       dateWiderThanCategory: dateRect.width > categoryRect.width,
-      dateWhiteSpace: getComputedStyle(document.querySelector('#entryDate')).whiteSpace
+      dateWhiteSpace: getComputedStyle(document.querySelector('#entryDate')).whiteSpace,
+      fieldsSameHeight: Math.abs(dateRect.height - categoryRect.height) < 0.5,
+      dateIconVisible: Boolean(dateIcon) && getComputedStyle(dateIcon).display !== 'none'
     };
   })()`);
   assert.equal(entryFormLayout.operatorText, "＋－＝");
@@ -128,6 +131,8 @@ try {
   assert.equal(entryFormLayout.operatorBackground, "rgba(0, 0, 0, 0)");
   assert.equal(entryFormLayout.dateWiderThanCategory, true);
   assert.equal(entryFormLayout.dateWhiteSpace, "nowrap");
+  assert.equal(entryFormLayout.fieldsSameHeight, true);
+  assert.equal(entryFormLayout.dateIconVisible, true);
   await mkdir(".impeccable/review", { recursive: true });
   const huabeiMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/huabei-mobile.png", Buffer.from(huabeiMobile.data, "base64"));

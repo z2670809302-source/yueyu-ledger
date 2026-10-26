@@ -432,7 +432,12 @@
           </label>
           <label id="actualDateField">
             <span class="field-label">日期</span>
-            <input id="entryDate" name="entryDate" type="date" required />
+            <span class="date-input-wrap">
+              <input id="entryDate" name="entryDate" type="date" required />
+              <svg class="date-input-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 3v3M17 3v3M4.5 9h15M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
+              </svg>
+            </span>
             <small class="selected-lunar-date" id="entryLunarDate"></small>
           </label>
           <div id="planMonthField" hidden>
