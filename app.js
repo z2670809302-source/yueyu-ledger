@@ -2,7 +2,7 @@ import { categories, monthKey, monthOpeningBalance, offsetMonthKey, parseAmountE
 
 const STORAGE_KEY = "yueyu-ledger-v1";
 const META_KEY = "yueyu-ledger-meta-v1";
-const UPDATE_CHECK_TIMEOUT = 6000;
+const UPDATE_CHECK_TIMEOUT = 12000;
 const UPDATE_INSTALL_TIMEOUT = 4000;
 const currency = new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY" });
 const fullDate = new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "short" });
@@ -791,6 +791,12 @@ function installPendingUpdate() {
   window.setTimeout(() => window.location.reload(), 4000);
 }
 
+function reloadFromNetwork() {
+  const url = new URL(window.location.href);
+  url.searchParams.set("_refresh", String(Date.now()));
+  window.location.replace(url.href);
+}
+
 $("#installUpdate").addEventListener("click", installPendingUpdate);
 $("#deferUpdate").addEventListener("click", () => { $("#updateNotice").hidden = true; });
 
@@ -817,13 +823,14 @@ $("#refreshApp").addEventListener("click", async () => {
     }
     window.location.reload();
   } catch (error) {
+    if (navigator.onLine) {
+      label.textContent = "正在重新加载…";
+      reloadFromNetwork();
+      return;
+    }
     button.disabled = false;
     label.textContent = "刷新并检查更新";
-    showToast(!navigator.onLine
-      ? "当前离线，无法检查更新"
-      : error.message === "UPDATE_TIMEOUT"
-        ? "检查超时，请稍后重试"
-        : "刷新失败，请稍后再试");
+    showToast("当前离线，无法检查更新");
   }
 });
 

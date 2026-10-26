@@ -319,51 +319,21 @@ try {
   assert.match(backupPrompt.text, /尚未备份/);
   assert.equal(backupPrompt.warning, true);
   await evaluate("document.querySelector('[data-view=\"ledgerView\"]').click(); true");
-  const refreshFailure = await evaluate(`(async () => {
+  await evaluate(`(() => {
     const serviceWorkers = navigator.serviceWorker;
-    const originalGetRegistration = serviceWorkers.getRegistration.bind(serviceWorkers);
-    Object.defineProperty(serviceWorkers, 'getRegistration', {
-      configurable: true,
-      value: async () => ({ update: async () => { throw new Error('test update failure'); } })
-    });
-    document.querySelector('#refreshApp').click();
-    await new Promise((resolve) => setTimeout(resolve, 60));
-    const value = {
-      disabled: document.querySelector('#refreshApp').disabled,
-      label: document.querySelector('#refreshAppLabel').textContent,
-      storedCount: JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length
-    };
-    Object.defineProperty(serviceWorkers, 'getRegistration', { configurable: true, value: originalGetRegistration });
-    return value;
-  })()`);
-  assert.equal(refreshFailure.disabled, false);
-  assert.equal(refreshFailure.label, "刷新并检查更新");
-  assert.equal(refreshFailure.storedCount, 7);
-  const refreshTimeout = await evaluate(`(async () => {
-    const serviceWorkers = navigator.serviceWorker;
-    const originalGetRegistration = serviceWorkers.getRegistration.bind(serviceWorkers);
     const originalSetTimeout = window.setTimeout.bind(window);
     Object.defineProperty(serviceWorkers, 'getRegistration', {
       configurable: true,
       value: async () => ({ update: () => new Promise(() => {}) })
     });
-    window.setTimeout = (callback, delay, ...args) => originalSetTimeout(callback, delay === 6000 ? 20 : delay, ...args);
+    window.setTimeout = (callback, delay, ...args) => originalSetTimeout(callback, delay === 12000 ? 20 : delay, ...args);
     document.querySelector('#refreshApp').click();
-    await new Promise((resolve) => originalSetTimeout(resolve, 60));
-    const value = {
-      disabled: document.querySelector('#refreshApp').disabled,
-      label: document.querySelector('#refreshAppLabel').textContent,
-      message: document.querySelector('#toast').firstChild.textContent,
-      storedCount: JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length
-    };
-    window.setTimeout = originalSetTimeout;
-    Object.defineProperty(serviceWorkers, 'getRegistration', { configurable: true, value: originalGetRegistration });
-    return value;
+    return true;
   })()`);
-  assert.equal(refreshTimeout.disabled, false);
-  assert.equal(refreshTimeout.label, "刷新并检查更新");
-  assert.equal(refreshTimeout.message, "检查超时，请稍后重试");
-  assert.equal(refreshTimeout.storedCount, 7);
+  await delay(100);
+  await waitFor("document.readyState === 'complete' && new URL(location.href).searchParams.has('_refresh')");
+  assert.equal(await evaluate("JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length"), 7);
+  await selectMonth(2026, 9);
   assert.deepEqual(await evaluate("JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.filter((entry) => entry.recordType === 'expected').map((entry) => entry.date)"), ["2026-09-01", "2026-09-01"]);
 
   const salaryDetail = await evaluate(`(() => {
