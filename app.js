@@ -29,12 +29,12 @@ const statsColors = {
   income: ["#66a927", "#3aa58c"]
 };
 const categoryIcons = {
-  salary: '<img src="./assets/illustrations/categories/salary.png?v=2.1" alt="" />',
-  receivable: '<img src="./assets/illustrations/categories/receivable.png?v=2.1" alt="" />',
-  repayment: '<img src="./assets/illustrations/categories/repayment.png?v=2.1" alt="" />',
-  rent: '<img src="./assets/illustrations/categories/rent.png?v=2.1" alt="" />',
-  daily: '<img src="./assets/illustrations/categories/daily.png?v=2.1" alt="" />',
-  special: '<img src="./assets/illustrations/categories/special.png?v=2.1" alt="" />'
+  salary: '<img src="./assets/illustrations/categories/salary.webp?v=2.11" alt="" />',
+  receivable: '<img src="./assets/illustrations/categories/receivable.webp?v=2.11" alt="" />',
+  repayment: '<img src="./assets/illustrations/categories/repayment.webp?v=2.11" alt="" />',
+  rent: '<img src="./assets/illustrations/categories/rent.webp?v=2.11" alt="" />',
+  daily: '<img src="./assets/illustrations/categories/daily.webp?v=2.11" alt="" />',
+  special: '<img src="./assets/illustrations/categories/special.webp?v=2.11" alt="" />'
 };
 
 function loadState() {
