@@ -106,7 +106,9 @@ function formatLunarDate(value, includeYear = false) {
 }
 
 function updateEntryLunarDate() {
-  $("#entryLunarDate").textContent = formatLunarDate($("#entryDate").value, true);
+  const dateValue = $("#entryDate").value;
+  $("#entryDateDisplay").textContent = dateValue ? dateValue.replaceAll("-", "/") : "请选择日期";
+  $("#entryLunarDate").textContent = formatLunarDate(dateValue, true);
 }
 
 function render() {

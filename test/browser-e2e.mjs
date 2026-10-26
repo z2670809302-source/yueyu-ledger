@@ -111,9 +111,10 @@ try {
     document.querySelector('#amount').value = '180';
     document.querySelector('#category').value = 'daily';
     document.querySelector('#entryDate').value = '2026-09-06';
+    document.querySelector('#entryDate').dispatchEvent(new Event('input', { bubbles: true }));
     document.querySelector('#note').value = '花呗买药';
     form.elements.paymentMethod.value = 'huabei';
-    const dateRect = document.querySelector('#entryDate').getBoundingClientRect();
+    const dateRect = document.querySelector('.date-input-display').getBoundingClientRect();
     const categoryRect = document.querySelector('#category').getBoundingClientRect();
     const dateIcon = document.querySelector('.date-input-icon');
     return {
@@ -121,9 +122,10 @@ try {
       operatorColor: getComputedStyle(document.querySelector('.amount-operator')).color,
       operatorBackground: getComputedStyle(document.querySelector('.amount-operator'), '::before').backgroundColor,
       dateWiderThanCategory: dateRect.width > categoryRect.width,
-      dateWhiteSpace: getComputedStyle(document.querySelector('#entryDate')).whiteSpace,
+      dateWhiteSpace: getComputedStyle(document.querySelector('.date-input-display')).whiteSpace,
       fieldsSameHeight: Math.abs(dateRect.height - categoryRect.height) < 0.5,
-      dateIconVisible: Boolean(dateIcon) && getComputedStyle(dateIcon).display !== 'none'
+      dateIconVisible: Boolean(dateIcon) && getComputedStyle(dateIcon).display !== 'none',
+      displayedDate: document.querySelector('#entryDateDisplay').textContent
     };
   })()`);
   assert.equal(entryFormLayout.operatorText, "＋－＝");
@@ -133,6 +135,7 @@ try {
   assert.equal(entryFormLayout.dateWhiteSpace, "nowrap");
   assert.equal(entryFormLayout.fieldsSameHeight, true);
   assert.equal(entryFormLayout.dateIconVisible, true);
+  assert.equal(entryFormLayout.displayedDate, "2026/09/06");
   await mkdir(".impeccable/review", { recursive: true });
   const huabeiMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/huabei-mobile.png", Buffer.from(huabeiMobile.data, "base64"));
