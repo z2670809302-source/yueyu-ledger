@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "yueyu-";
-const APP_VERSION = "24";
+const APP_VERSION = "26";
 const CACHE_NAME = `${CACHE_PREFIX}v${APP_VERSION}`;
 const FONT_STYLESHEET = "./assets/fonts/lxgw-wenkai-lite/lxgwwenkailite-bold.css";
 const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./ledger-core.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./assets/branding/liqing-logo.png?v=2.1", "./assets/branding/liqing-wordmark.png?v=2.1", "./assets/illustrations/horse-money.png?v=2.1", "./assets/illustrations/pony-ledger-peek.png?v=2.1", "./assets/illustrations/nav-ledger.png?v=2.1", "./assets/illustrations/nav-stats.png?v=2.1", "./assets/illustrations/categories/salary.png?v=2.1", "./assets/illustrations/categories/receivable.png?v=2.1", "./assets/illustrations/categories/repayment.png?v=2.1", "./assets/illustrations/categories/rent.png?v=2.1", "./assets/illustrations/categories/daily.png?v=2.1", "./assets/illustrations/categories/special.png?v=2.1", FONT_STYLESHEET];

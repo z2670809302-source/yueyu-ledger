@@ -74,8 +74,7 @@ h2 { margin-bottom: 3px; font-size: 1.16rem; letter-spacing: -0.02em; }
 
 .section-block { margin-top: 21px; }
 .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 8px; }
-.section-title-with-pony { display: flex; align-items: end; gap: 5px; min-width: 0; }
-.section-pony { display: block; width: 50px; height: 44px; margin-bottom: -8px; object-fit: contain; object-position: center bottom; }
+.section-pony { display: block; position: absolute; z-index: 1; top: -36px; left: 22px; width: 72px; height: 64px; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 7px 5px rgba(93, 67, 35, .24)); pointer-events: none; }
 .section-actions { display: flex; align-items: center; gap: 14px; }
 .text-button.muted { color: var(--ink-soft); }
 .section-heading p { margin-bottom: 0; color: var(--ink-soft); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: 0.76rem; }
@@ -433,7 +432,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, label:has(input
   background: var(--card);
   box-shadow: var(--shadow);
 }
-.section-block { margin-top: 18px; padding: 20px 16px 12px; }
+.section-block { position: relative; margin-top: 42px; padding: 38px 16px 12px; overflow: visible; }
 .section-heading { margin-bottom: 13px; }
 .section-heading h2 { font-size: 1.32rem; }
 .section-heading p { color: var(--ink-soft); }
@@ -576,7 +575,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, label:has(input
   .category-icon { flex-basis: 34px; width: 34px; height: 34px; }
   .category-icon svg { width: 23px; height: 23px; }
   .category-icon img { width: 29px; height: 29px; }
-  .section-pony { width: 40px; height: 36px; }
+  .section-pony { top: -31px; left: 17px; width: 62px; height: 55px; }
+  .section-block { margin-top: 37px; padding-top: 33px; }
   .bottom-nav { column-gap: 9px; padding-right: 22px; padding-left: 22px; }
 }
 

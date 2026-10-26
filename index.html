@@ -93,10 +93,10 @@
         </section>
 
         <section class="section-block" aria-labelledby="categoryTitle">
+          <img class="section-pony" src="./assets/illustrations/pony-ledger-peek.png?v=2.1" alt="" aria-hidden="true" />
           <div class="section-heading">
-            <div class="section-title-with-pony">
+            <div>
               <h2 id="categoryTitle">本月收支</h2>
-              <img class="section-pony" src="./assets/illustrations/pony-ledger-peek.png?v=2.1" alt="" aria-hidden="true" />
             </div>
             <div class="section-actions">
               <button class="text-button muted" id="copyPreviousPlan">沿用上月</button>
@@ -220,9 +220,12 @@
 
       <section id="statsView" class="view" hidden aria-labelledby="statsTitle">
         <header class="topbar stats-topbar">
-          <div>
-            <h1 id="statsTitle">统计</h1>
-            <p class="date-line">年度收支</p>
+          <div class="brand-lockup">
+            <img class="brand-wordmark" src="./assets/branding/liqing-wordmark.png?v=2.1" alt="厘清" />
+            <h1 class="visually-hidden" id="statsTitle">统计</h1>
+            <div class="brand-dates">
+              <p class="date-line"><span class="date-mark" aria-hidden="true">✦</span><span>年度收支统计</span></p>
+            </div>
           </div>
           <button class="text-button manage-button" id="openManage">管理</button>
         </header>
