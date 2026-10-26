@@ -11,6 +11,17 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="preload" as="image" href="./assets/branding/liqing-wordmark.webp?v=2.211" type="image/webp" />
+    <link rel="preload" as="image" href="./assets/illustrations/horse-money.webp?v=2.211" type="image/webp" />
+    <link rel="preload" as="image" href="./assets/illustrations/pony-ledger-peek.webp?v=2.211" type="image/webp" />
+    <link rel="preload" as="image" href="./assets/illustrations/nav-ledger.webp?v=2.211" type="image/webp" />
+    <link rel="preload" as="image" href="./assets/illustrations/nav-stats.webp?v=2.211" type="image/webp" />
+    <link rel="preload" as="image" href="./assets/illustrations/categories/salary.webp?v=2.211" type="image/webp" />
+    <link rel="preload" as="image" href="./assets/illustrations/categories/receivable.webp?v=2.211" type="image/webp" />
+    <link rel="preload" as="image" href="./assets/illustrations/categories/repayment.webp?v=2.211" type="image/webp" />
+    <link rel="preload" as="image" href="./assets/illustrations/categories/rent.webp?v=2.211" type="image/webp" />
+    <link rel="preload" as="image" href="./assets/illustrations/categories/daily.webp?v=2.211" type="image/webp" />
+    <link rel="preload" as="image" href="./assets/illustrations/categories/special.webp?v=2.211" type="image/webp" />
     <title>厘清 · 私人记账本</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -19,7 +30,7 @@
       <section id="ledgerView" class="view" aria-labelledby="pageTitle">
         <header class="topbar">
           <div class="brand-lockup">
-            <img class="brand-wordmark" src="./assets/branding/liqing-wordmark.webp?v=2.11" alt="厘清" />
+            <img class="brand-wordmark" src="./assets/branding/liqing-wordmark.webp?v=2.211" alt="厘清" decoding="sync" fetchpriority="high" />
             <h1 class="visually-hidden" id="pageTitle">厘清</h1>
             <div class="brand-dates">
               <p class="date-line"><span class="date-mark" aria-hidden="true">✦</span><time id="todayLabel"></time></p>
@@ -51,7 +62,7 @@
 
         <section class="balance-sheet" aria-labelledby="balanceTitle">
           <div class="balance-illustration" aria-hidden="true">
-            <img src="./assets/illustrations/horse-money.webp?v=2.11" alt="" />
+            <img src="./assets/illustrations/horse-money.webp?v=2.211" alt="" decoding="sync" fetchpriority="high" />
           </div>
           <div class="balance-heading">
             <span id="balanceTitle">
@@ -93,7 +104,7 @@
         </section>
 
         <section class="section-block" aria-labelledby="categoryTitle">
-          <img class="section-pony" src="./assets/illustrations/pony-ledger-peek.webp?v=2.11" alt="" aria-hidden="true" />
+          <img class="section-pony" src="./assets/illustrations/pony-ledger-peek.webp?v=2.211" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" />
           <div class="section-heading">
             <div>
               <h2 id="categoryTitle">本月收支</h2>
@@ -157,15 +168,20 @@
       </section>
 
       <section id="searchView" class="view" hidden aria-labelledby="searchTitle">
-        <header class="detail-topbar search-topbar">
-          <button class="icon-button back-button" id="searchBack" aria-label="返回月度总览">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-          </button>
-          <div>
-            <h1 id="searchTitle">查询账目</h1>
-            <p class="date-line">全部历史记录</p>
+        <header class="topbar search-topbar">
+          <div class="brand-lockup">
+            <img class="brand-wordmark" src="./assets/branding/liqing-wordmark.webp?v=2.211" alt="厘清" decoding="sync" />
+            <h1 class="visually-hidden" id="searchTitle">查询账目</h1>
+            <div class="brand-dates">
+              <p class="date-line"><span class="date-mark" aria-hidden="true">✦</span><span>查询账目</span></p>
+            </div>
           </div>
-          <button class="text-button" id="clearSearch" type="button">清除</button>
+          <div class="topbar-actions search-actions">
+            <button class="icon-button back-button" id="searchBack" aria-label="返回月度总览">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button class="text-button" id="clearSearch" type="button">清除</button>
+          </div>
         </header>
 
         <form id="searchForm" class="search-form" role="search">
@@ -198,14 +214,14 @@
           </details>
         </form>
 
-        <section class="search-summary" aria-label="查询结果汇总">
+        <section class="search-summary" id="searchSummary" aria-label="查询结果汇总" hidden>
           <div><span>记录</span><strong id="searchCount">0</strong></div>
           <div><span>实际收入</span><strong class="income" id="searchIncome">¥0.00</strong></div>
           <div><span>实际支出</span><strong class="expense" id="searchExpense">¥0.00</strong></div>
           <div><span>花呗消费</span><strong class="expense" id="searchHuabei">¥0.00</strong></div>
         </section>
 
-        <section class="search-results" aria-labelledby="searchResultsTitle">
+        <section class="search-results" id="searchResults" aria-labelledby="searchResultsTitle" hidden>
           <div class="section-heading">
             <div><h2 id="searchResultsTitle">查询结果</h2><p id="searchResultHint">显示全部记录</p></div>
           </div>
@@ -221,7 +237,7 @@
       <section id="statsView" class="view" hidden aria-labelledby="statsTitle">
         <header class="topbar stats-topbar">
           <div class="brand-lockup">
-            <img class="brand-wordmark" src="./assets/branding/liqing-wordmark.webp?v=2.11" alt="厘清" />
+            <img class="brand-wordmark" src="./assets/branding/liqing-wordmark.webp?v=2.211" alt="厘清" decoding="sync" />
             <h1 class="visually-hidden" id="statsTitle">统计</h1>
             <div class="brand-dates">
               <p class="date-line"><span class="date-mark" aria-hidden="true">✦</span><span>年度收支统计</span></p>
@@ -263,9 +279,12 @@
 
       <section id="manageView" class="view" hidden aria-labelledby="dataTitle">
         <header class="topbar data-topbar">
-          <div>
-            <h1 id="dataTitle">数据管理</h1>
-          <p class="date-line">仅保存在本机 · V2.21</p>
+          <div class="brand-lockup">
+            <img class="brand-wordmark" src="./assets/branding/liqing-wordmark.webp?v=2.211" alt="厘清" decoding="sync" />
+            <h1 class="visually-hidden" id="dataTitle">数据管理</h1>
+            <div class="brand-dates">
+              <p class="date-line"><span class="date-mark" aria-hidden="true">✦</span><span>数据管理 · V2.211</span></p>
+            </div>
           </div>
         </header>
 
@@ -318,14 +337,14 @@
 
     <nav class="bottom-nav" aria-label="主导航">
       <button class="nav-item active" data-view="ledgerView">
-        <img src="./assets/illustrations/nav-ledger.webp?v=2.11" alt="" aria-hidden="true" />
+        <img src="./assets/illustrations/nav-ledger.webp?v=2.211" alt="" aria-hidden="true" decoding="sync" />
         账本
       </button>
       <button class="add-button" id="addEntry" aria-label="记一笔">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
       </button>
       <button class="nav-item" data-view="statsView">
-        <img src="./assets/illustrations/nav-stats.webp?v=2.11" alt="" aria-hidden="true" />
+        <img src="./assets/illustrations/nav-stats.webp?v=2.211" alt="" aria-hidden="true" decoding="sync" />
         统计
       </button>
     </nav>

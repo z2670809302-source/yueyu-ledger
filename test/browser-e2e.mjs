@@ -136,6 +136,7 @@ try {
     rentActual: document.querySelector('[data-category="rent"] .category-actual strong').textContent,
     width: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
+    addButtonCentered: Math.abs((document.querySelector('#addEntry').getBoundingClientRect().left + document.querySelector('#addEntry').getBoundingClientRect().width / 2) - innerWidth / 2) < 0.5,
     dialogClosed: !document.querySelector('#entryDialog').open,
     zoomSafeInputs: [...document.querySelectorAll('select, input[type="date"], input[type="text"], input[type="number"]')].every((input) => parseFloat(getComputedStyle(input).fontSize) >= 16)
   }))()`);
@@ -155,6 +156,7 @@ try {
   assert.equal(result.rentActual, "−¥2,500.00");
   assert.equal(result.width, 390);
   assert.equal(result.scrollWidth, 390);
+  assert.equal(result.addButtonCentered, true);
   assert.equal(result.dialogClosed, true);
   assert.equal(result.zoomSafeInputs, true);
   await evaluate("document.querySelector('#toast').hidden = true; true");
@@ -163,12 +165,18 @@ try {
     return {
       visible: !document.querySelector('#searchView').hidden,
       count: document.querySelector('#searchCount').textContent,
-      results: document.querySelectorAll('#searchResultList .search-result-item').length
+      results: document.querySelectorAll('#searchResultList .search-result-item').length,
+      summaryHidden: document.querySelector('#searchSummary').hidden,
+      resultsHidden: document.querySelector('#searchResults').hidden,
+      subtitle: document.querySelector('#searchView .brand-dates').textContent.trim()
     };
   })()`);
   assert.equal(searchAll.visible, true);
-  assert.equal(searchAll.count, "7");
-  assert.equal(searchAll.results, 7);
+  assert.equal(searchAll.count, "0");
+  assert.equal(searchAll.results, 0);
+  assert.equal(searchAll.summaryHidden, true);
+  assert.equal(searchAll.resultsHidden, true);
+  assert.equal(searchAll.subtitle, "✦查询账目");
   const huabeiSearch = await evaluate(`(() => {
     const keyword = document.querySelector('#searchKeyword');
     keyword.value = '买药';
@@ -178,7 +186,9 @@ try {
       income: document.querySelector('#searchIncome').textContent,
       expense: document.querySelector('#searchExpense').textContent,
       huabei: document.querySelector('#searchHuabei').textContent,
-      text: document.querySelector('#searchResultList').textContent
+      text: document.querySelector('#searchResultList').textContent,
+      summaryHidden: document.querySelector('#searchSummary').hidden,
+      resultsHidden: document.querySelector('#searchResults').hidden
     };
   })()`);
   assert.equal(huabeiSearch.count, "1");
@@ -186,6 +196,8 @@ try {
   assert.equal(huabeiSearch.expense, "¥0.00");
   assert.equal(huabeiSearch.huabei, "¥180.00");
   assert.match(huabeiSearch.text, /花呗买药/);
+  assert.equal(huabeiSearch.summaryHidden, false);
+  assert.equal(huabeiSearch.resultsHidden, false);
   const searchMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await mkdir(".impeccable/review", { recursive: true });
   await writeFile(".impeccable/review/search-mobile.png", Buffer.from(searchMobile.data, "base64"));
@@ -259,7 +271,8 @@ try {
       year: document.querySelector('#statsYearTitle').textContent,
       total: document.querySelector('#annualTotal').textContent,
       active: document.querySelector('.stats-direction .active').textContent,
-      monthsWithData: document.querySelectorAll('#annualChart .annual-month:not(:disabled)').length
+      monthsWithData: document.querySelectorAll('#annualChart .annual-month:not(:disabled)').length,
+      subtitle: document.querySelector('#statsView .brand-dates').textContent.trim()
     };
   })()`);
   assert.equal(stats.visible, true);
@@ -267,6 +280,7 @@ try {
   assert.equal(stats.total, "¥2,600.00");
   assert.equal(stats.active, "支出");
   assert.equal(stats.monthsWithData, 1);
+  assert.equal(stats.subtitle, "✦年度收支统计");
   const statsMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/stats-mobile.png", Buffer.from(statsMobile.data, "base64"));
   const expenseDetail = await evaluate(`(() => {
@@ -312,12 +326,14 @@ try {
     return {
       visible: !document.querySelector('#manageView').hidden,
       text: document.querySelector('#backupStatus').textContent,
-      warning: document.querySelector('#backupStatus').classList.contains('warning')
+      warning: document.querySelector('#backupStatus').classList.contains('warning'),
+      subtitle: document.querySelector('#manageView .brand-dates').textContent.trim()
     };
   })()`);
   assert.equal(backupPrompt.visible, true);
   assert.match(backupPrompt.text, /尚未备份/);
   assert.equal(backupPrompt.warning, true);
+  assert.equal(backupPrompt.subtitle, "✦数据管理 · V2.211");
   await evaluate("document.querySelector('[data-view=\"ledgerView\"]').click(); true");
   await evaluate(`(() => {
     const serviceWorkers = navigator.serviceWorker;

@@ -483,17 +483,24 @@ button:focus-visible, input:focus-visible, select:focus-visible, label:has(input
   background: rgba(255,255,255,.92);
   box-shadow: 0 14px 38px rgba(79, 69, 39, .16);
 }
+.bottom-nav .nav-item:first-child { grid-column: 1; }
+.bottom-nav .nav-item:last-child { grid-column: 3; }
 .nav-item { justify-self: center; justify-content: center; width: calc(100% - 10px); border-radius: 16px; }
 .nav-item.active { background: #efffb8; color: #4c7214; }
 .add-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 60px;
   height: 60px;
   border: 5px solid #fffef9;
   background: linear-gradient(145deg, #c8f43d, #9cdb1e);
   color: #263016;
   box-shadow: 0 10px 24px rgba(127, 176, 28, .3);
-  margin: 0 auto;
+  margin: 0;
+  transform: translate(-50%, -50%);
 }
+.add-button:active { transform: translate(-50%, calc(-50% + 2px)); }
 
 .detail-totals, .search-form, .search-summary, .annual-sheet, .data-section { border-color: rgba(255,255,255,.9); }
 .detail-totals {
@@ -516,6 +523,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, label:has(input
   background: var(--card);
   box-shadow: var(--shadow);
 }
+.search-actions .back-button { color: var(--ink); }
+.search-actions .text-button { min-width: 42px; }
 .search-field input, .search-field select, select, input[type="date"], input[type="text"] {
   border-color: #ebe5d7;
   background: #fffefb;

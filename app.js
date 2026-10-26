@@ -29,12 +29,12 @@ const statsColors = {
   income: ["#66a927", "#3aa58c"]
 };
 const categoryIcons = {
-  salary: '<img src="./assets/illustrations/categories/salary.webp?v=2.11" alt="" />',
-  receivable: '<img src="./assets/illustrations/categories/receivable.webp?v=2.11" alt="" />',
-  repayment: '<img src="./assets/illustrations/categories/repayment.webp?v=2.11" alt="" />',
-  rent: '<img src="./assets/illustrations/categories/rent.webp?v=2.11" alt="" />',
-  daily: '<img src="./assets/illustrations/categories/daily.webp?v=2.11" alt="" />',
-  special: '<img src="./assets/illustrations/categories/special.webp?v=2.11" alt="" />'
+  salary: '<img src="./assets/illustrations/categories/salary.webp?v=2.211" alt="" decoding="sync" />',
+  receivable: '<img src="./assets/illustrations/categories/receivable.webp?v=2.211" alt="" decoding="sync" />',
+  repayment: '<img src="./assets/illustrations/categories/repayment.webp?v=2.211" alt="" decoding="sync" />',
+  rent: '<img src="./assets/illustrations/categories/rent.webp?v=2.211" alt="" decoding="sync" />',
+  daily: '<img src="./assets/illustrations/categories/daily.webp?v=2.211" alt="" decoding="sync" />',
+  special: '<img src="./assets/illustrations/categories/special.webp?v=2.211" alt="" decoding="sync" />'
 };
 
 function loadState() {
@@ -308,6 +308,21 @@ function searchFilters() {
 
 function renderSearchResults() {
   const filters = searchFilters();
+  const activeFilterCount = Object.values(filters).filter((value) => String(value).trim()).length;
+  const hasQuery = activeFilterCount > 0;
+  $("#searchSummary").hidden = !hasQuery;
+  $("#searchResults").hidden = !hasQuery;
+  if (!hasQuery) {
+    $("#searchCount").textContent = "0";
+    $("#searchIncome").textContent = formatMoney(0);
+    $("#searchExpense").textContent = formatMoney(0);
+    $("#searchHuabei").textContent = formatMoney(0);
+    $("#searchResultHint").textContent = "";
+    $("#searchEmpty").hidden = true;
+    $("#searchResultList").hidden = true;
+    $("#searchResultList").innerHTML = "";
+    return;
+  }
   const results = searchEntries(state.entries, filters);
   const actualEntries = results.filter((entry) => entry.recordType === "actual");
   const income = actualEntries
@@ -319,13 +334,11 @@ function renderSearchResults() {
   const expense = actualEntries
     .filter((entry) => categories[entry.category].direction === "expense" && entry.paymentMethod !== "huabei")
     .reduce((total, entry) => total + Number(entry.amount), 0);
-  const activeFilterCount = Object.values(filters).filter((value) => String(value).trim()).length;
-
   $("#searchCount").textContent = String(results.length);
   $("#searchIncome").textContent = formatMoney(income);
   $("#searchExpense").textContent = formatMoney(expense);
   $("#searchHuabei").textContent = formatMoney(huabei);
-  $("#searchResultHint").textContent = activeFilterCount ? `已应用 ${activeFilterCount} 项条件` : "显示全部记录";
+  $("#searchResultHint").textContent = `已应用 ${activeFilterCount} 项条件`;
   $("#searchEmpty").hidden = results.length > 0;
   $("#searchResultList").hidden = results.length === 0;
   $("#searchResultList").innerHTML = results.map((entry) => {
