@@ -137,6 +137,8 @@ try {
     width: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
     addButtonCentered: Math.abs((document.querySelector('#addEntry').getBoundingClientRect().left + document.querySelector('#addEntry').getBoundingClientRect().width / 2) - innerWidth / 2) < 0.5,
+    addButtonLeft: document.querySelector('#addEntry').getBoundingClientRect().left,
+    addButtonTop: document.querySelector('#addEntry').getBoundingClientRect().top,
     dialogClosed: !document.querySelector('#entryDialog').open,
     zoomSafeInputs: [...document.querySelectorAll('select, input[type="date"], input[type="text"], input[type="number"]')].every((input) => parseFloat(getComputedStyle(input).fontSize) >= 16)
   }))()`);
@@ -272,7 +274,9 @@ try {
       total: document.querySelector('#annualTotal').textContent,
       active: document.querySelector('.stats-direction .active').textContent,
       monthsWithData: document.querySelectorAll('#annualChart .annual-month:not(:disabled)').length,
-      subtitle: document.querySelector('#statsView .brand-dates').textContent.trim()
+      subtitle: document.querySelector('#statsView .brand-dates').textContent.trim(),
+      addButtonLeft: document.querySelector('#addEntry').getBoundingClientRect().left,
+      addButtonTop: document.querySelector('#addEntry').getBoundingClientRect().top
     };
   })()`);
   assert.equal(stats.visible, true);
@@ -281,6 +285,8 @@ try {
   assert.equal(stats.active, "支出");
   assert.equal(stats.monthsWithData, 1);
   assert.equal(stats.subtitle, "✦年度收支统计");
+  assert.equal(stats.addButtonLeft, result.addButtonLeft);
+  assert.equal(stats.addButtonTop, result.addButtonTop);
   const statsMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/stats-mobile.png", Buffer.from(statsMobile.data, "base64"));
   const expenseDetail = await evaluate(`(() => {
