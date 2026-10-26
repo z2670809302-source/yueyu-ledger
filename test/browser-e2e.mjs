@@ -82,8 +82,8 @@ try {
   await call("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
   await call("Page.navigate", { url: "http://localhost:4174" });
   await waitFor("location.href.startsWith('http://localhost:4174') && document.readyState === 'complete'");
-  await evaluate(`localStorage.setItem('yueyu-ledger-v1', JSON.stringify({ version: 1, openingBalance: 0, openingMonth: '2026-09', entries: [] })); localStorage.removeItem('yueyu-ledger-meta-v1'); setTimeout(() => location.reload(), 0); true`);
-  await waitFor("document.readyState === 'complete' && document.querySelector('#addEntry')");
+  await evaluate(`localStorage.setItem('yueyu-ledger-v1', JSON.stringify({ version: 1, openingBalance: 0, openingMonth: '2026-09', entries: [] })); localStorage.removeItem('yueyu-ledger-meta-v1'); const url = new URL(location.href); url.searchParams.set('__e2e', Date.now()); setTimeout(() => location.replace(url.href), 0); true`);
+  await waitFor("new URL(location.href).searchParams.has('__e2e') && document.readyState === 'complete' && document.querySelector('#addEntry')");
   await selectMonth(2026, 9);
 
   const addEntry = (recordType, amount, category, date, note, paymentMethod = "cash") => evaluate(`(() => {
@@ -105,7 +105,7 @@ try {
   await addEntry("actual", 2500, "rent", "2026-09-03", "九月房租");
   await addEntry("actual", 35, "daily", "2026-09-04", "早餐和地铁");
   await addEntry("actual", 65, "daily", "2026-09-05", "日用品");
-  await evaluate(`(() => {
+  const entryFormLayout = await evaluate(`(() => {
     document.querySelector('#addEntry').click();
     const form = document.querySelector('#entryForm');
     document.querySelector('#amount').value = '180';
@@ -113,8 +113,21 @@ try {
     document.querySelector('#entryDate').value = '2026-09-06';
     document.querySelector('#note').value = '花呗买药';
     form.elements.paymentMethod.value = 'huabei';
-    return true;
+    const dateRect = document.querySelector('#entryDate').getBoundingClientRect();
+    const categoryRect = document.querySelector('#category').getBoundingClientRect();
+    return {
+      operatorText: [...document.querySelectorAll('.amount-operator')].map((button) => button.textContent).join(''),
+      operatorColor: getComputedStyle(document.querySelector('.amount-operator')).color,
+      operatorBackground: getComputedStyle(document.querySelector('.amount-operator'), '::before').backgroundColor,
+      dateWiderThanCategory: dateRect.width > categoryRect.width,
+      dateWhiteSpace: getComputedStyle(document.querySelector('#entryDate')).whiteSpace
+    };
   })()`);
+  assert.equal(entryFormLayout.operatorText, "＋－＝");
+  assert.notEqual(entryFormLayout.operatorColor, "rgba(0, 0, 0, 0)");
+  assert.equal(entryFormLayout.operatorBackground, "rgba(0, 0, 0, 0)");
+  assert.equal(entryFormLayout.dateWiderThanCategory, true);
+  assert.equal(entryFormLayout.dateWhiteSpace, "nowrap");
   await mkdir(".impeccable/review", { recursive: true });
   const huabeiMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/huabei-mobile.png", Buffer.from(huabeiMobile.data, "base64"));
