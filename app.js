@@ -251,7 +251,7 @@ function renderDetail() {
     .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
 
   $("#detailTitle").textContent = category.label;
-  $("#detailMonth").textContent = `${selectedDate.getFullYear()} 年 ${selectedDate.getMonth() + 1} 月 · 实际按日记录`;
+  $("#detailMonth").textContent = `${category.label} · ${selectedDate.getFullYear()} 年 ${selectedDate.getMonth() + 1} 月明细`;
   $("#detailExpected").textContent = formatMoney(categorySummary.expected);
   $("#detailActual").textContent = formatMoney(categorySummary.actual);
   const huabeiNotice = activeDetailCategory === "repayment" && summary.huabeiRepayment

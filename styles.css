@@ -509,31 +509,25 @@ button:focus-visible, input:focus-visible, select:focus-visible, label:has(input
 
 .detail-totals, .search-form, .search-summary, .annual-sheet, .data-section { border-color: rgba(255,255,255,.9); }
 .detail-topbar {
-  grid-template-columns: 44px minmax(0, 1fr) auto;
-  gap: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
   margin: 0 0 18px;
-  padding: 12px 14px;
-  border: 1px solid rgba(255,255,255,.9);
-  border-radius: 22px;
-  background: var(--card);
-  box-shadow: var(--shadow);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .detail-topbar .back-button { margin-left: 0; }
 .detail-topbar > div { min-width: 0; }
-.detail-topbar h1 {
-  overflow: hidden;
-  font-size: clamp(1.35rem, 6vw, 2rem);
-  line-height: 1.1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 #detailMonth {
   display: block;
-  margin-top: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.detail-actions { flex: 0 0 auto; }
 #detailAdd { white-space: nowrap; }
 .detail-totals {
   overflow: hidden;

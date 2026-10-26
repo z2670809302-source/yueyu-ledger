@@ -127,15 +127,20 @@
       </section>
 
       <section id="detailView" class="view" hidden aria-labelledby="detailTitle">
-        <header class="detail-topbar">
-          <button class="icon-button back-button compact-back" id="detailBack" aria-label="返回月度总览">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-          </button>
-          <div>
-            <h1 id="detailTitle">日常开销</h1>
-            <p class="date-line" id="detailMonth"></p>
+        <header class="topbar detail-topbar">
+          <div class="brand-lockup">
+            <img class="brand-wordmark" src="./assets/branding/liqing-wordmark.webp?v=2.211" alt="厘清" decoding="sync" />
+            <h1 class="visually-hidden" id="detailTitle">日常开销</h1>
+            <div class="brand-dates">
+              <p class="date-line"><span class="date-mark" aria-hidden="true">✦</span><span id="detailMonth"></span></p>
+            </div>
           </div>
-          <button class="text-button" id="detailAdd">记一笔</button>
+          <div class="topbar-actions detail-actions">
+            <button class="icon-button back-button compact-back" id="detailBack" aria-label="返回月度总览">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button class="text-button" id="detailAdd">记一笔</button>
+          </div>
         </header>
 
         <section class="detail-totals" aria-label="分类月度汇总">

@@ -371,7 +371,9 @@ try {
       notes: [...document.querySelectorAll('#detailTimeline .entry-main strong')].map((item) => item.textContent),
       monthWhiteSpace: getComputedStyle(document.querySelector('#detailMonth')).whiteSpace,
       headerHeight: document.querySelector('.detail-topbar').getBoundingClientRect().height,
-      backCircleWidth: getComputedStyle(document.querySelector('#detailBack'), '::before').width
+      backCircleWidth: getComputedStyle(document.querySelector('#detailBack'), '::before').width,
+      subtitle: document.querySelector('#detailMonth').textContent,
+      logoSource: document.querySelector('#detailView .brand-wordmark').getAttribute('src')
     };
     return value;
   })()`);
@@ -380,6 +382,8 @@ try {
   assert.equal(salaryDetail.monthWhiteSpace, "nowrap");
   assert.ok(salaryDetail.headerHeight < 90);
   assert.equal(salaryDetail.backCircleWidth, "24px");
+  assert.equal(salaryDetail.subtitle, "工资 · 2026 年 9 月明细");
+  assert.equal(salaryDetail.logoSource, "./assets/branding/liqing-wordmark.webp?v=2.211");
   const salaryDetailMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/detail-mobile.png", Buffer.from(salaryDetailMobile.data, "base64"));
   await evaluate("document.querySelector('#detailBack').click(); true");
