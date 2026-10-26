@@ -498,14 +498,26 @@ button:focus-visible, input:focus-visible, select:focus-visible, label:has(input
   left: 50vw;
   width: 60px;
   height: 60px;
+  padding: 0;
   border: 5px solid #fffef9;
   background: linear-gradient(145deg, #c8f43d, #9cdb1e);
   color: #263016;
   box-shadow: 0 10px 24px rgba(127, 176, 28, .3);
   margin: 0;
+  line-height: 0;
   transform: translateX(-50%);
+  appearance: none;
+  -webkit-appearance: none;
 }
 .add-button:active { transform: translate(-50%, 2px); }
+.add-button svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 27px;
+  height: 27px;
+  transform: translate(-50%, -50%);
+}
 
 .detail-totals, .search-form, .search-summary, .annual-sheet, .data-section { border-color: rgba(255,255,255,.9); }
 .detail-topbar {

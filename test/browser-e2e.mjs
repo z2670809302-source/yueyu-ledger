@@ -81,8 +81,8 @@ try {
   await call("Network.enable");
   await call("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
   await call("Page.navigate", { url: "http://localhost:4174" });
-  await waitFor("document.readyState === 'complete'");
-  await evaluate(`localStorage.setItem('yueyu-ledger-v1', JSON.stringify({ version: 1, openingBalance: 0, openingMonth: '2026-09', entries: [] })); localStorage.removeItem('yueyu-ledger-meta-v1'); location.reload(); true`);
+  await waitFor("location.href.startsWith('http://localhost:4174') && document.readyState === 'complete'");
+  await evaluate(`localStorage.setItem('yueyu-ledger-v1', JSON.stringify({ version: 1, openingBalance: 0, openingMonth: '2026-09', entries: [] })); localStorage.removeItem('yueyu-ledger-meta-v1'); setTimeout(() => location.reload(), 0); true`);
   await waitFor("document.readyState === 'complete' && document.querySelector('#addEntry')");
   await selectMonth(2026, 9);
 
@@ -137,6 +137,12 @@ try {
     width: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
     addButtonCentered: Math.abs((document.querySelector('#addEntry').getBoundingClientRect().left + document.querySelector('#addEntry').getBoundingClientRect().width / 2) - innerWidth / 2) < 0.5,
+    addGlyphCentered: (() => {
+      const button = document.querySelector('#addEntry').getBoundingClientRect();
+      const glyph = document.querySelector('#addEntry svg').getBoundingClientRect();
+      return Math.abs((button.left + button.width / 2) - (glyph.left + glyph.width / 2)) < 0.5
+        && Math.abs((button.top + button.height / 2) - (glyph.top + glyph.height / 2)) < 0.5;
+    })(),
     addButtonLeft: document.querySelector('#addEntry').getBoundingClientRect().left,
     addButtonTop: document.querySelector('#addEntry').getBoundingClientRect().top,
     dialogClosed: !document.querySelector('#entryDialog').open,
@@ -159,6 +165,7 @@ try {
   assert.equal(result.width, 390);
   assert.equal(result.scrollWidth, 390);
   assert.equal(result.addButtonCentered, true);
+  assert.equal(result.addGlyphCentered, true);
   assert.equal(result.dialogClosed, true);
   assert.equal(result.zoomSafeInputs, true);
   await evaluate("document.querySelector('#toast').hidden = true; true");
