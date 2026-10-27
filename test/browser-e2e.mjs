@@ -132,7 +132,12 @@ try {
       displayedCategory: document.querySelector('#categoryDisplay').textContent,
       subcategoryColumns: getComputedStyle(document.querySelector('#subcategorySuggestions')).gridTemplateColumns.split(' ').length,
       subcategoryWidthMatchesInput: Math.abs(suggestionsRect.width - subcategoryInputRect.width) < 0.5,
-      subcategoryLabelsFit: [...document.querySelectorAll('#subcategorySuggestions span')].every((label) => label.scrollWidth <= label.clientWidth)
+      subcategoryLabelsFit: [...document.querySelectorAll('#subcategorySuggestions span')].every((label) => label.scrollWidth <= label.clientWidth),
+      subcategoryContentAligned: (() => {
+        const icon = document.querySelector('#subcategorySuggestions i').getBoundingClientRect();
+        const label = document.querySelector('#subcategorySuggestions span').getBoundingClientRect();
+        return Math.abs((icon.top + icon.height / 2) - (label.top + label.height / 2)) < 0.5;
+      })()
     };
   })()`);
   assert.equal(entryFormLayout.operatorText, "＋－＝");
@@ -147,6 +152,7 @@ try {
   assert.equal(entryFormLayout.subcategoryColumns, 4);
   assert.equal(entryFormLayout.subcategoryWidthMatchesInput, true);
   assert.equal(entryFormLayout.subcategoryLabelsFit, true);
+  assert.equal(entryFormLayout.subcategoryContentAligned, true);
   await mkdir(".impeccable/review", { recursive: true });
   const huabeiMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/huabei-mobile.png", Buffer.from(huabeiMobile.data, "base64"));
