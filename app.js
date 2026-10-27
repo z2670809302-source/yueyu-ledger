@@ -45,6 +45,9 @@ const subcategoryPresets = {
   daily: [["吃饭", "🍚"], ["买菜", "🥬"], ["交通出行", "🚌"], ["日用品", "🛍️"], ["通讯", "📱"], ["医疗", "🩹"]],
   special: [["旅行", "🧳"], ["人情礼金", "🧧"], ["礼物", "🎁"], ["大件购物", "🛋️"], ["维修", "🧰"], ["学习提升", "📚"]]
 };
+const subcategoryIcons = Object.fromEntries(
+  Object.values(subcategoryPresets).flat().map(([label, icon]) => [label, icon])
+);
 
 function loadState() {
   try {
@@ -293,6 +296,7 @@ function renderDetail() {
           const detailLabel = [entry.note && subcategory ? subcategory : "", entry.paymentMethod === "huabei" ? "花呗 · 下月还款" : "", calculation || (!entry.paymentMethod || entry.paymentMethod === "cash" ? "实际" : "")]
             .filter(Boolean).join(" · ");
           return `<button class="entry-item detail-entry" data-entry-id="${entry.id}">
+            <i class="entry-subcategory-icon" aria-hidden="true">${subcategoryIcons[entry.subcategory] || "✏️"}</i>
             <span class="entry-main"><strong>${note}</strong><small>${detailLabel}</small></span>
             <span class="entry-amount ${category.direction}">${sign}${formatMoney(entry.amount)}</span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>

@@ -459,6 +459,7 @@ try {
       groups: document.querySelectorAll('.day-group').length,
       entries: document.querySelectorAll('#detailTimeline .entry-item').length,
       dates: [...document.querySelectorAll('.day-group h3')].map((item) => item.textContent),
+      icons: [...document.querySelectorAll('#detailTimeline .entry-subcategory-icon')].map((item) => item.textContent),
       huabeiNotice: document.querySelector('#detailHuabeiNotice').textContent,
       huabeiLabels: [...document.querySelectorAll('#detailTimeline .entry-main small')].filter((item) => item.textContent.includes('花呗')).length
     };
@@ -467,9 +468,13 @@ try {
   assert.equal(dailyDetail.total, "¥100.00");
   assert.equal(dailyDetail.groups, 3);
   assert.equal(dailyDetail.entries, 3);
+  assert.equal(dailyDetail.icons.length, 3);
+  assert.ok(dailyDetail.icons.includes('🩹'));
   assert.ok(dailyDetail.dates.some((date) => date.includes("9月5日")));
   assert.match(dailyDetail.huabeiNotice, /¥180\.00/);
   assert.equal(dailyDetail.huabeiLabels, 1);
+  const detailIconsMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/detail-icons-mobile.png", Buffer.from(detailIconsMobile.data, "base64"));
   await evaluate("document.querySelector('#detailBack').click(); true");
 
   const nextMonthRepayment = await evaluate(`(() => {

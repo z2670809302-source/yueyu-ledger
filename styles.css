@@ -115,7 +115,8 @@ h2 { margin-bottom: 3px; font-size: 1.16rem; letter-spacing: -0.02em; }
 .detail-ledger { margin-top: 30px; }
 .day-group { margin-top: 22px; }
 .day-group h3 { margin: 0 0 7px; color: var(--ink-soft); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: .78rem; font-weight: 700; }
-.detail-entry { grid-template-columns: 1fr auto 18px; }
+.detail-entry { grid-template-columns: 38px minmax(0, 1fr) auto 18px; }
+.entry-subcategory-icon { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 50%; background: linear-gradient(145deg, #fff7c9, #e5f8b9); box-shadow: 0 3px 8px rgba(104, 122, 53, .13); font-size: 1.12rem; font-style: normal; }
 .detail-entry .entry-main small { color: var(--ink-soft); }
 .search-topbar { margin-bottom: 20px; }
 .search-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; padding: 18px 0 20px; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); }
