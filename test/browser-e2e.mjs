@@ -156,6 +156,28 @@ try {
   await mkdir(".impeccable/review", { recursive: true });
   const huabeiMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/huabei-mobile.png", Buffer.from(huabeiMobile.data, "base64"));
+  await call("Emulation.setDeviceMetricsOverride", { width: 820, height: 760, deviceScaleFactor: 1, mobile: false });
+  const wideSubcategories = await evaluate(`(() => {
+    const buttons = [...document.querySelectorAll('#subcategorySuggestions button')];
+    const firstIcon = buttons[0].querySelector('i').getBoundingClientRect();
+    const firstLabel = buttons[0].querySelector('span').getBoundingClientRect();
+    return {
+      labelsFit: buttons.every((button) => button.querySelector('span').scrollWidth <= button.querySelector('span').clientWidth),
+      contentAligned: Math.abs((firstIcon.top + firstIcon.height / 2) - (firstLabel.top + firstLabel.height / 2)) < 0.5,
+      dialogWideEnough: document.querySelector('#entryDialog').getBoundingClientRect().width >= 700
+    };
+  })()`);
+  assert.equal(wideSubcategories.labelsFit, true);
+  assert.equal(wideSubcategories.contentAligned, true);
+  assert.equal(wideSubcategories.dialogWideEnough, true);
+  const subcategoriesWide = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/subcategories-wide.png", Buffer.from(subcategoriesWide.data, "base64"));
+  const subcategoryFocus = await evaluate(`(() => {
+    document.querySelector('[data-subcategory="医疗"]').click();
+    return document.activeElement?.id || '';
+  })()`);
+  assert.notEqual(subcategoryFocus, "subcategory");
+  await call("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
   await evaluate("document.querySelector('#entryForm').requestSubmit(); true");
 
   const result = await evaluate(`(() => ({

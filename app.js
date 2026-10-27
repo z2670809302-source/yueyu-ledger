@@ -623,7 +623,6 @@ $("#subcategorySuggestions").addEventListener("click", (event) => {
   const option = event.target.closest("[data-subcategory]");
   if (!option) return;
   $("#subcategory").value = option.dataset.subcategory;
-  $("#subcategory").focus();
 });
 $("#amount").addEventListener("input", updateAmountResult);
 $("#entryDate").addEventListener("input", updateEntryLunarDate);

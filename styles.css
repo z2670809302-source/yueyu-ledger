@@ -23,7 +23,7 @@ body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--paper);
 button, input, select { font: inherit; }
 button { color: inherit; }
 button, label, select { -webkit-tap-highlight-color: transparent; }
-button:focus-visible, input:focus-visible, select:focus-visible, label:has(input:focus-visible) span {
+button:focus-visible, input:focus-visible, select:focus-visible, .segmented-control label:has(input:focus-visible) > span {
   outline: 3px solid rgba(182, 65, 47, 0.28);
   outline-offset: 3px;
 }
@@ -287,6 +287,13 @@ select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; 
   .subcategory-suggestions button span { height: 40px; }
 }
 
+@media (min-width: 780px) {
+  .entry-dialog { width: min(100% - 20px, 760px); }
+  .subcategory-suggestions button { min-height: 96px; padding: 6px 4px; gap: 14px; font-size: 1.35rem; }
+  .subcategory-suggestions button i { flex-basis: 60px; width: 60px; height: 60px; font-size: 1.9rem; }
+  .subcategory-suggestions button span { height: 60px; }
+}
+
 @media (max-width: 359px) {
   .topbar { gap: 8px; }
   .brand-wordmark { width: 86px; }
@@ -353,7 +360,7 @@ body::before {
   content: "";
 }
 
-button:focus-visible, input:focus-visible, select:focus-visible, label:has(input:focus-visible) span {
+button:focus-visible, input:focus-visible, select:focus-visible, .segmented-control label:has(input:focus-visible) > span {
   outline-color: rgba(139, 197, 28, .42);
 }
 
