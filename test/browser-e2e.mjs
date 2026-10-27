@@ -115,7 +115,7 @@ try {
     document.querySelector('#note').value = '花呗买药';
     form.elements.paymentMethod.value = 'huabei';
     const dateRect = document.querySelector('.date-input-display').getBoundingClientRect();
-    const categoryRect = document.querySelector('#category').getBoundingClientRect();
+    const categoryRect = document.querySelector('.select-input-display').getBoundingClientRect();
     const dateIcon = document.querySelector('.date-input-icon');
     return {
       operatorText: [...document.querySelectorAll('.amount-operator')].map((button) => button.textContent).join(''),
@@ -125,7 +125,8 @@ try {
       dateWhiteSpace: getComputedStyle(document.querySelector('.date-input-display')).whiteSpace,
       fieldsSameHeight: Math.abs(dateRect.height - categoryRect.height) < 0.5,
       dateIconVisible: Boolean(dateIcon) && getComputedStyle(dateIcon).display !== 'none',
-      displayedDate: document.querySelector('#entryDateDisplay').textContent
+      displayedDate: document.querySelector('#entryDateDisplay').textContent,
+      displayedCategory: document.querySelector('#categoryDisplay').textContent
     };
   })()`);
   assert.equal(entryFormLayout.operatorText, "＋－＝");
@@ -136,6 +137,7 @@ try {
   assert.equal(entryFormLayout.fieldsSameHeight, true);
   assert.equal(entryFormLayout.dateIconVisible, true);
   assert.equal(entryFormLayout.displayedDate, "2026/09/06");
+  assert.equal(entryFormLayout.displayedCategory, "日常开销");
   await mkdir(".impeccable/review", { recursive: true });
   const huabeiMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/huabei-mobile.png", Buffer.from(huabeiMobile.data, "base64"));

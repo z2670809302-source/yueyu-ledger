@@ -432,6 +432,7 @@ function openEntryForm({ recordType = "actual", category = "daily", id = null } 
 
 function updateFormKind() {
   const expected = entryForm.elements.recordType.value === "expected";
+  $("#categoryDisplay").textContent = categories[$("#category").value]?.label || "";
   $("#actualDateField").hidden = expected;
   $("#actualNoteField").hidden = expected;
   $("#planMonthField").hidden = !expected;
