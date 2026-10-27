@@ -371,7 +371,9 @@ try {
       monthsWithData: document.querySelectorAll('#annualChart .annual-month:not(:disabled)').length,
       subtitle: document.querySelector('#statsView .brand-dates').textContent.trim(),
       addButtonLeft: document.querySelector('#addEntry').getBoundingClientRect().left,
-      addButtonTop: document.querySelector('#addEntry').getBoundingClientRect().top
+      addButtonTop: document.querySelector('#addEntry').getBoundingClientRect().top,
+      expenseRect: (() => { const rect = document.querySelector('#showExpense').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })(),
+      incomeRect: (() => { const rect = document.querySelector('#showIncome').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })()
     };
   })()`);
   assert.equal(stats.visible, true);
@@ -405,11 +407,15 @@ try {
   const incomeStats = await evaluate(`(() => ({
     total: document.querySelector('#annualTotal').textContent,
     active: document.querySelector('.stats-direction .active').textContent,
-    monthsWithData: document.querySelectorAll('#annualChart .annual-month:not(:disabled)').length
+    monthsWithData: document.querySelectorAll('#annualChart .annual-month:not(:disabled)').length,
+    expenseRect: (() => { const rect = document.querySelector('#showExpense').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })(),
+    incomeRect: (() => { const rect = document.querySelector('#showIncome').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })()
   }))()`);
   assert.equal(incomeStats.total, "¥9,800.00");
   assert.equal(incomeStats.active, "收入");
   assert.equal(incomeStats.monthsWithData, 1);
+  assert.deepEqual(incomeStats.expenseRect, stats.expenseRect);
+  assert.deepEqual(incomeStats.incomeRect, stats.incomeRect);
   const incomeDetail = await evaluate(`(() => {
     document.querySelector('[data-stats-month="2026-09"]').click();
     return {
