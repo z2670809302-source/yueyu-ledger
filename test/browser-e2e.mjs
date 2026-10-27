@@ -373,7 +373,9 @@ try {
       addButtonLeft: document.querySelector('#addEntry').getBoundingClientRect().left,
       addButtonTop: document.querySelector('#addEntry').getBoundingClientRect().top,
       expenseRect: (() => { const rect = document.querySelector('#showExpense').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })(),
-      incomeRect: (() => { const rect = document.querySelector('#showIncome').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })()
+      incomeRect: (() => { const rect = document.querySelector('#showIncome').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })(),
+      expenseLabelRect: (() => { const rect = document.querySelector('#showExpense span').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })(),
+      incomeLabelRect: (() => { const rect = document.querySelector('#showIncome span').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })()
     };
   })()`);
   assert.equal(stats.visible, true);
@@ -409,13 +411,17 @@ try {
     active: document.querySelector('.stats-direction .active').textContent,
     monthsWithData: document.querySelectorAll('#annualChart .annual-month:not(:disabled)').length,
     expenseRect: (() => { const rect = document.querySelector('#showExpense').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })(),
-    incomeRect: (() => { const rect = document.querySelector('#showIncome').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })()
+    incomeRect: (() => { const rect = document.querySelector('#showIncome').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })(),
+    expenseLabelRect: (() => { const rect = document.querySelector('#showExpense span').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })(),
+    incomeLabelRect: (() => { const rect = document.querySelector('#showIncome span').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })()
   }))()`);
   assert.equal(incomeStats.total, "¥9,800.00");
   assert.equal(incomeStats.active, "收入");
   assert.equal(incomeStats.monthsWithData, 1);
   assert.deepEqual(incomeStats.expenseRect, stats.expenseRect);
   assert.deepEqual(incomeStats.incomeRect, stats.incomeRect);
+  assert.deepEqual(incomeStats.expenseLabelRect, stats.expenseLabelRect);
+  assert.deepEqual(incomeStats.incomeLabelRect, stats.incomeLabelRect);
   const incomeDetail = await evaluate(`(() => {
     document.querySelector('[data-stats-month="2026-09"]').click();
     return {

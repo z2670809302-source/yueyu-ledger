@@ -191,7 +191,8 @@ h2 { margin-bottom: 3px; font-size: 1.16rem; letter-spacing: -0.02em; }
 .stats-year-switcher { margin-bottom: 22px; }
 .annual-sheet { padding: 18px 0 0; border-top: 2px solid var(--ink); }
 .stats-direction { display: grid; grid-template-columns: repeat(2, 74px); width: 154px; padding: 3px; border: 1px solid var(--rule); border-radius: 12px; box-sizing: border-box; }
-.stats-direction button { display: grid; place-items: center; width: 74px; min-width: 0; height: 36px; padding: 0; border: 0; border-radius: 9px; box-sizing: border-box; background: transparent; color: var(--ink-soft); font-size: .82rem; font-weight: 750; line-height: 1; cursor: pointer; }
+.stats-direction button { position: relative; display: block; flex: 0 0 74px; width: 74px; min-width: 74px; max-width: 74px; height: 36px; min-height: 36px; max-height: 36px; padding: 0; border: 0; border-radius: 9px; box-sizing: border-box; appearance: none; -webkit-appearance: none; background: transparent; color: var(--ink-soft); font-size: .82rem; font-weight: 750; line-height: 1; cursor: pointer; contain: layout paint; transition: none; }
+.stats-direction button span { position: absolute; inset: 0; display: grid; place-items: center; width: 100%; height: 100%; pointer-events: none; }
 .stats-direction button.active { background: var(--ink); color: #fdf7eb; }
 .annual-total { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-top: 26px; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
 .annual-total span { color: var(--ink-soft); font-size: .78rem; }
@@ -636,7 +637,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, .segmented-cont
 .stats-year-switcher { margin-bottom: 14px; }
 .annual-sheet { padding: 20px 16px 18px; }
 .stats-direction { border: 0; background: #f3f0e8; }
-.stats-direction button.active { background: var(--lime); color: #263016; box-shadow: inset 0 0 0 1px rgba(124,164,29,.12); }
+.stats-direction button.active { background: var(--lime); color: #263016; box-shadow: none; }
 .annual-chart { border-color: #ded9ca; }
 .annual-bar { border-radius: 6px 6px 2px 2px; background: linear-gradient(#ff9a72, #ed7048); }
 .annual-month.income .annual-bar { background: linear-gradient(#a9df55, #68aa2c); }
