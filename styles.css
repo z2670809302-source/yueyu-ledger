@@ -282,9 +282,9 @@ select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; 
   .entry-dialog, .stats-dialog { margin-bottom: auto; border-radius: 18px; }
   .balance-sheet { padding: 30px; }
   .section-block { margin-top: 42px; }
-  .subcategory-suggestions button { min-height: 64px; padding: 8px 10px; gap: 8px; font-size: .8rem; }
-  .subcategory-suggestions button i { flex-basis: 34px; width: 34px; height: 34px; font-size: 1.08rem; }
-  .subcategory-suggestions button span { height: 34px; }
+  .subcategory-suggestions button { min-height: 72px; padding: 9px 12px; gap: 12px; font-size: .9rem; }
+  .subcategory-suggestions button i { flex-basis: 40px; width: 40px; height: 40px; font-size: 1.28rem; }
+  .subcategory-suggestions button span { height: 40px; }
 }
 
 @media (max-width: 359px) {
