@@ -339,11 +339,14 @@ try {
     const notice = document.querySelector('#updateNotice');
     notice.hidden = false;
     const rect = notice.getBoundingClientRect();
+    const nav = document.querySelector('.bottom-nav').getBoundingClientRect();
     return {
       title: notice.querySelector('strong').textContent,
       action: document.querySelector('#installUpdate').textContent,
       later: document.querySelector('#deferUpdate').textContent,
       fits: rect.left >= 0 && rect.right <= document.documentElement.clientWidth,
+      navGap: nav.top - rect.bottom,
+      navInset: rect.left - nav.left,
       storedCount: JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.length
     };
   })()`);
@@ -351,6 +354,8 @@ try {
   assert.equal(updateNotice.action, "立即更新");
   assert.equal(updateNotice.later, "稍后");
   assert.equal(updateNotice.fits, true);
+  assert.ok(updateNotice.navGap >= 10);
+  assert.ok(updateNotice.navInset >= 10);
   assert.equal(updateNotice.storedCount, 7);
   const updateNoticeMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await mkdir(".impeccable/review", { recursive: true });
