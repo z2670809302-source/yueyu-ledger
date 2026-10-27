@@ -265,7 +265,7 @@ h2 { margin-bottom: 3px; font-size: 1.16rem; letter-spacing: -0.02em; }
 select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; padding: 0 12px; border: 1px solid var(--rule); border-radius: 10px; background: #fffcf4; color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: 1rem; }
 .selected-lunar-date { display: block; min-height: 1.1em; margin: 6px 2px 0; color: var(--ink-soft); font-size: .72rem; }
 .field-hint { margin: 7px 0 0; color: var(--ink-soft); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: .78rem; line-height: 1.55; }
-.subcategory-suggestions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; width: 100%; margin-top: 8px; }
+.subcategory-suggestions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; width: 100%; margin-top: 8px; }
 .subcategory-suggestions button { display: flex; min-width: 0; min-height: 46px; padding: 2px; align-items: center; justify-content: center; gap: 2px; border: 1px solid #d9dfbd; border-radius: 10px; background: #f8fce9; color: #66733d; font: 700 .61rem/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; cursor: pointer; }
 .subcategory-suggestions button i { display: grid; flex: 0 0 24px; width: 24px; height: 24px; place-items: center; border-radius: 50%; background: linear-gradient(145deg, #fff7c9, #e5f8b9); box-shadow: 0 3px 8px rgba(104, 122, 53, .13); font-size: .84rem; font-style: normal; }
 .subcategory-suggestions button span { display: grid; min-width: 0; height: 24px; place-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -283,7 +283,7 @@ select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; 
   .entry-dialog { width: min(100% - 8px, 810px); }
   .balance-sheet { padding: 30px; }
   .section-block { margin-top: 42px; }
-  .subcategory-suggestions { gap: 2px; }
+  .subcategory-suggestions { gap: 8px; }
   .subcategory-suggestions button { min-height: 40px; padding: 3px 4px; justify-content: flex-start; gap: 1em; font-size: .88rem; }
   .subcategory-suggestions button i { flex-basis: 34px; width: 34px; height: 34px; font-size: 1.3rem; }
   .subcategory-suggestions button span { height: 34px; place-items: center start; text-align: left; }
@@ -291,7 +291,7 @@ select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; 
 
 @media (min-width: 480px) and (max-width: 699px) {
   .entry-dialog { width: min(100% - 8px, 810px); }
-  .subcategory-suggestions { gap: 2px; }
+  .subcategory-suggestions { gap: 8px; }
   .subcategory-suggestions button { min-height: 36px; padding: 2px 4px; justify-content: flex-start; gap: 1em; font-size: .78rem; }
   .subcategory-suggestions button i { flex-basis: 30px; width: 30px; height: 30px; font-size: 1.1rem; }
   .subcategory-suggestions button span { height: 30px; place-items: center start; text-align: left; }
