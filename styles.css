@@ -288,10 +288,11 @@ select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; 
 }
 
 @media (min-width: 780px) {
-  .entry-dialog { width: min(100% - 20px, 760px); }
-  .subcategory-suggestions button { min-height: 68px; padding: 3px; gap: 14px; font-size: 1.35rem; }
-  .subcategory-suggestions button i { flex-basis: 60px; width: 60px; height: 60px; font-size: 1.9rem; }
-  .subcategory-suggestions button span { height: 60px; }
+  .entry-dialog { width: min(100% - 8px, 810px); }
+  .subcategory-suggestions { gap: 2px; }
+  .subcategory-suggestions button { min-height: 72px; padding: 2px; gap: 4px; font-size: 1.55rem; }
+  .subcategory-suggestions button i { flex-basis: 66px; width: 66px; height: 66px; font-size: 2.55rem; }
+  .subcategory-suggestions button span { height: 66px; }
 }
 
 @media (max-width: 359px) {
