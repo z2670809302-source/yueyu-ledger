@@ -164,12 +164,14 @@ try {
     return {
       labelsFit: buttons.every((button) => button.querySelector('span').scrollWidth <= button.querySelector('span').clientWidth),
       contentAligned: Math.abs((firstIcon.top + firstIcon.height / 2) - (firstLabel.top + firstLabel.height / 2)) < 0.5,
-      dialogWideEnough: document.querySelector('#entryDialog').getBoundingClientRect().width >= 700
+      dialogWideEnough: document.querySelector('#entryDialog').getBoundingClientRect().width >= 700,
+      radiusMatchesInput: getComputedStyle(buttons[0]).borderRadius === getComputedStyle(document.querySelector('#subcategory')).borderRadius
     };
   })()`);
   assert.equal(wideSubcategories.labelsFit, true);
   assert.equal(wideSubcategories.contentAligned, true);
   assert.equal(wideSubcategories.dialogWideEnough, true);
+  assert.equal(wideSubcategories.radiusMatchesInput, true);
   const subcategoriesWide = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/subcategories-wide.png", Buffer.from(subcategoriesWide.data, "base64"));
   const subcategoryFocus = await evaluate(`(() => {

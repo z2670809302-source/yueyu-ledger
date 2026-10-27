@@ -266,7 +266,7 @@ select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; 
 .selected-lunar-date { display: block; min-height: 1.1em; margin: 6px 2px 0; color: var(--ink-soft); font-size: .72rem; }
 .field-hint { margin: 7px 0 0; color: var(--ink-soft); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: .78rem; line-height: 1.55; }
 .subcategory-suggestions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; width: 100%; margin-top: 8px; }
-.subcategory-suggestions button { display: flex; min-width: 0; min-height: 50px; padding: 4px 2px; align-items: center; justify-content: center; gap: 2px; border: 1px solid #d9dfbd; border-radius: 14px; background: #f8fce9; color: #66733d; font: 700 .61rem/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; cursor: pointer; }
+.subcategory-suggestions button { display: flex; min-width: 0; min-height: 46px; padding: 2px; align-items: center; justify-content: center; gap: 2px; border: 1px solid #d9dfbd; border-radius: 10px; background: #f8fce9; color: #66733d; font: 700 .61rem/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; cursor: pointer; }
 .subcategory-suggestions button i { display: grid; flex: 0 0 24px; width: 24px; height: 24px; place-items: center; border-radius: 50%; background: linear-gradient(145deg, #fff7c9, #e5f8b9); box-shadow: 0 3px 8px rgba(104, 122, 53, .13); font-size: .84rem; font-style: normal; }
 .subcategory-suggestions button span { display: grid; min-width: 0; height: 24px; place-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .subcategory-suggestions button:active { background: #e9f9b8; }
@@ -282,14 +282,14 @@ select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; 
   .entry-dialog, .stats-dialog { margin-bottom: auto; border-radius: 18px; }
   .balance-sheet { padding: 30px; }
   .section-block { margin-top: 42px; }
-  .subcategory-suggestions button { min-height: 72px; padding: 9px 12px; gap: 12px; font-size: .9rem; }
+  .subcategory-suggestions button { min-height: 56px; padding: 4px; gap: 12px; font-size: .9rem; }
   .subcategory-suggestions button i { flex-basis: 40px; width: 40px; height: 40px; font-size: 1.28rem; }
   .subcategory-suggestions button span { height: 40px; }
 }
 
 @media (min-width: 780px) {
   .entry-dialog { width: min(100% - 20px, 760px); }
-  .subcategory-suggestions button { min-height: 96px; padding: 6px 4px; gap: 14px; font-size: 1.35rem; }
+  .subcategory-suggestions button { min-height: 68px; padding: 3px; gap: 14px; font-size: 1.35rem; }
   .subcategory-suggestions button i { flex-basis: 60px; width: 60px; height: 60px; font-size: 1.9rem; }
   .subcategory-suggestions button span { height: 60px; }
 }
