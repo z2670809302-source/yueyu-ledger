@@ -30,12 +30,12 @@ const statsColors = {
   income: ["#66a927", "#3aa58c"]
 };
 const categoryIcons = {
-  salary: '<img src="./assets/illustrations/categories/salary.webp?v=2.211" alt="" decoding="sync" />',
-  receivable: '<img src="./assets/illustrations/categories/receivable.webp?v=2.211" alt="" decoding="sync" />',
-  repayment: '<img src="./assets/illustrations/categories/repayment.webp?v=2.211" alt="" decoding="sync" />',
-  rent: '<img src="./assets/illustrations/categories/rent.webp?v=2.211" alt="" decoding="sync" />',
-  daily: '<img src="./assets/illustrations/categories/daily.webp?v=2.211" alt="" decoding="sync" />',
-  special: '<img src="./assets/illustrations/categories/special.webp?v=2.211" alt="" decoding="sync" />'
+  salary: '<img src="./assets/illustrations/categories/salary.webp?v=2.212" alt="" decoding="sync" />',
+  receivable: '<img src="./assets/illustrations/categories/receivable.webp?v=2.212" alt="" decoding="sync" />',
+  repayment: '<img src="./assets/illustrations/categories/repayment.webp?v=2.212" alt="" decoding="sync" />',
+  rent: '<img src="./assets/illustrations/categories/rent.webp?v=2.212" alt="" decoding="sync" />',
+  daily: '<img src="./assets/illustrations/categories/daily.webp?v=2.212" alt="" decoding="sync" />',
+  special: '<img src="./assets/illustrations/categories/special.webp?v=2.212" alt="" decoding="sync" />'
 };
 const subcategoryPresets = {
   salary: [["基本工资", "💵"], ["绩效奖金", "🏆"], ["津贴补贴", "🎫"], ["加班费", "⏰"], ["兼职副业", "💻"], ["其他收入", "🪙"]],

@@ -447,7 +447,7 @@ try {
   assert.equal(backupPrompt.visible, true);
   assert.match(backupPrompt.text, /尚未备份/);
   assert.equal(backupPrompt.warning, true);
-  assert.equal(backupPrompt.subtitle, "✦数据管理 · V2.211");
+  assert.equal(backupPrompt.subtitle, "✦数据管理 · V2.212");
   assert.equal(backupPrompt.backCircleWidth, "24px");
   assert.equal(await evaluate("document.querySelector('#manageBack').click(); !document.querySelector('#statsView').hidden"), true);
   await evaluate("document.querySelector('[data-view=\"ledgerView\"]').click(); true");
@@ -488,7 +488,7 @@ try {
   assert.ok(salaryDetail.headerHeight < 90);
   assert.equal(salaryDetail.backCircleWidth, "24px");
   assert.equal(salaryDetail.subtitle, "工资 · 2026 年 9 月明细");
-  assert.equal(salaryDetail.logoSource, "./assets/branding/liqing-wordmark.webp?v=2.211");
+  assert.equal(salaryDetail.logoSource, "./assets/branding/liqing-wordmark.webp?v=2.212");
   const salaryDetailMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/detail-mobile.png", Buffer.from(salaryDetailMobile.data, "base64"));
   await evaluate("document.querySelector('#detailBack').click(); true");
