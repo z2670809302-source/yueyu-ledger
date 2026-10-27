@@ -112,6 +112,7 @@ try {
     document.querySelector('#category').value = 'daily';
     document.querySelector('#entryDate').value = '2026-09-06';
     document.querySelector('#entryDate').dispatchEvent(new Event('input', { bubbles: true }));
+    document.querySelector('#subcategory').value = '医疗';
     document.querySelector('#note').value = '花呗买药';
     form.elements.paymentMethod.value = 'huabei';
     const dateRect = document.querySelector('.date-input-display').getBoundingClientRect();
@@ -157,6 +158,7 @@ try {
     dailyTotal: document.querySelector('[data-category="daily"] .category-actual strong').textContent,
     salaryActual: document.querySelector('[data-category="salary"] .category-actual strong').textContent,
     rentActual: document.querySelector('[data-category="rent"] .category-actual strong').textContent,
+    savedSubcategory: JSON.parse(localStorage.getItem('yueyu-ledger-v1')).entries.find((entry) => entry.note === '花呗买药')?.subcategory,
     width: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
     addButtonCentered: Math.abs((document.querySelector('#addEntry').getBoundingClientRect().left + document.querySelector('#addEntry').getBoundingClientRect().width / 2) - innerWidth / 2) < 0.5,
@@ -185,6 +187,7 @@ try {
   assert.equal(result.dailyTotal, "−¥100.00");
   assert.equal(result.salaryActual, "+¥9,800.00");
   assert.equal(result.rentActual, "−¥2,500.00");
+  assert.equal(result.savedSubcategory, "医疗");
   assert.equal(result.width, 390);
   assert.equal(result.scrollWidth, 390);
   assert.equal(result.addButtonCentered, true);

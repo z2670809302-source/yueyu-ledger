@@ -37,6 +37,14 @@ const categoryIcons = {
   daily: '<img src="./assets/illustrations/categories/daily.webp?v=2.211" alt="" decoding="sync" />',
   special: '<img src="./assets/illustrations/categories/special.webp?v=2.211" alt="" decoding="sync" />'
 };
+const subcategoryPresets = {
+  salary: ["基本工资", "奖金", "补贴", "兼职"],
+  receivable: ["红包", "报销", "转账", "借款归还"],
+  repayment: ["花呗", "信用卡", "房贷", "车贷"],
+  rent: ["房租", "物业费", "停车费"],
+  daily: ["吃饭", "水费", "电费", "燃气费", "交通", "购物", "医疗", "通讯"],
+  special: ["旅行", "礼物", "人情", "大件", "维修"]
+};
 
 function loadState() {
   try {
@@ -277,11 +285,12 @@ function renderDetail() {
       <div class="entry-list">
         ${dayEntries.map((entry) => {
           const sign = category.direction === "income" ? "+" : "−";
-          const note = entry.note ? escapeHtml(entry.note) : category.label;
+          const subcategory = escapeHtml(entry.subcategory || "");
+          const note = entry.note ? escapeHtml(entry.note) : subcategory || category.label;
           const calculation = entry.amountExpression
             ? `${formatAmountExpression(entry.amountExpression)} = ${formatMoney(entry.amount)}`
             : "";
-          const detailLabel = [entry.paymentMethod === "huabei" ? "花呗 · 下月还款" : "", calculation || (!entry.paymentMethod || entry.paymentMethod === "cash" ? "实际" : "")]
+          const detailLabel = [entry.note && subcategory ? subcategory : "", entry.paymentMethod === "huabei" ? "花呗 · 下月还款" : "", calculation || (!entry.paymentMethod || entry.paymentMethod === "cash" ? "实际" : "")]
             .filter(Boolean).join(" · ");
           return `<button class="entry-item detail-entry" data-entry-id="${entry.id}">
             <span class="entry-main"><strong>${note}</strong><small>${detailLabel}</small></span>
@@ -349,12 +358,13 @@ function renderSearchResults() {
     const actual = entry.recordType === "actual";
     const payment = actual && entry.paymentMethod === "huabei" ? "花呗" : actual ? "余额支付" : "预计";
     const calculation = entry.amountExpression ? `${formatAmountExpression(entry.amountExpression)} = ${formatMoney(entry.amount)}` : "";
-    const title = entry.note ? escapeHtml(entry.note) : category.label;
+    const subcategory = escapeHtml(entry.subcategory || "");
+    const title = entry.note ? escapeHtml(entry.note) : subcategory || category.label;
     return `<button class="search-result-item" type="button" data-search-entry-id="${entry.id}">
       <time datetime="${entry.date}">${searchDate.format(new Date(`${entry.date}T12:00:00`))}</time>
       <span class="search-result-main">
         <strong>${title}</strong>
-        <small>${category.label} · ${payment}${calculation ? ` · ${calculation}` : ""}</small>
+        <small>${category.label}${entry.note && subcategory ? ` · ${subcategory}` : ""} · ${payment}${calculation ? ` · ${calculation}` : ""}</small>
       </span>
       <strong class="search-result-amount ${category.direction}">${formatDirectionalMoney(entry.amount, category.direction)}</strong>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
@@ -416,6 +426,7 @@ function openEntryForm({ recordType = "actual", category = "daily", id = null } 
     $("#entryId").value = entry.id;
     $("#amount").value = entry.amountExpression || entry.amount;
     $("#category").value = entry.category;
+    $("#subcategory").value = entry.subcategory || "";
     $("#entryDate").value = entry.date;
     updateEntryLunarDate();
     $("#note").value = entry.note;
@@ -433,8 +444,11 @@ function openEntryForm({ recordType = "actual", category = "daily", id = null } 
 function updateFormKind() {
   const expected = entryForm.elements.recordType.value === "expected";
   $("#categoryDisplay").textContent = categories[$("#category").value]?.label || "";
+  $("#subcategorySuggestions").innerHTML = (subcategoryPresets[$("#category").value] || [])
+    .map((item) => `<button type="button" data-subcategory="${item}">${item}</button>`).join("");
   $("#actualDateField").hidden = expected;
   $("#actualNoteField").hidden = expected;
+  $("#actualSubcategoryField").hidden = expected;
   $("#planMonthField").hidden = !expected;
   $("#entryDate").required = !expected;
   const acceptsHuabei = !expected && categories[$("#category").value]?.direction === "expense" && $("#category").value !== "repayment";
@@ -601,6 +615,12 @@ document.addEventListener("click", (event) => {
 
 entryForm.elements.recordType.forEach((radio) => radio.addEventListener("change", updateFormKind));
 $("#category").addEventListener("change", updateFormKind);
+$("#subcategorySuggestions").addEventListener("click", (event) => {
+  const option = event.target.closest("[data-subcategory]");
+  if (!option) return;
+  $("#subcategory").value = option.dataset.subcategory;
+  $("#subcategory").focus();
+});
 $("#amount").addEventListener("input", updateAmountResult);
 $("#entryDate").addEventListener("input", updateEntryLunarDate);
 $("#entryDate").addEventListener("change", updateEntryLunarDate);
@@ -644,6 +664,7 @@ entryForm.addEventListener("submit", (event) => {
     id: sourceEntry?.id || crypto.randomUUID(),
     amount,
     amountExpression: validAmountExpression(rawAmount, amount) || validAmountExpression(amountExpressionDraft, amount),
+    subcategory: expected ? "" : $("#subcategory").value.trim(),
     category,
     date: expected ? `${selectedMonthKey()}-01` : $("#entryDate").value,
     note: expected ? "" : $("#note").value.trim(),

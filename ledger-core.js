@@ -54,6 +54,7 @@ export function searchEntries(entries, filters = {}) {
     const paymentMethod = entry.paymentMethod === "huabei" ? "huabei" : "cash";
     const searchable = [
       entry.note,
+      entry.subcategory,
       category.label,
       entry.amountExpression,
       entry.recordType === "expected" ? "预计 计划" : "实际",
@@ -149,6 +150,7 @@ export function validateBackup(value) {
       paymentMethod: entry.paymentMethod === "huabei" ? "huabei" : "cash",
       amount,
       amountExpression: validAmountExpression(entry.amountExpression, amount),
+      subcategory: String(entry.subcategory || "").trim().slice(0, 20),
       note: String(entry.note || "").slice(0, 60),
       createdAt: entry.createdAt || new Date().toISOString()
     };
