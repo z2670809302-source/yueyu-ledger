@@ -182,11 +182,13 @@ try {
   const compactSubcategories = await evaluate(`(() => ({
     labelsFit: [...document.querySelectorAll('#subcategorySuggestions span')].every((label) => label.scrollWidth <= label.clientWidth),
     iconWidth: document.querySelector('#subcategorySuggestions i').getBoundingClientRect().width,
-    fontSize: parseFloat(getComputedStyle(document.querySelector('#subcategorySuggestions button')).fontSize)
+    fontSize: parseFloat(getComputedStyle(document.querySelector('#subcategorySuggestions button')).fontSize),
+    leftAligned: getComputedStyle(document.querySelector('#subcategorySuggestions button')).justifyContent === 'flex-start',
+    gapInCharacters: parseFloat(getComputedStyle(document.querySelector('#subcategorySuggestions button')).gap) / parseFloat(getComputedStyle(document.querySelector('#subcategorySuggestions button')).fontSize)
   }))()`);
   assert.equal(compactSubcategories.labelsFit, true);
-  assert.ok(compactSubcategories.iconWidth >= 39);
-  assert.ok(compactSubcategories.fontSize >= 14);
+  assert.equal(compactSubcategories.leftAligned, true);
+  assert.ok(Math.abs(compactSubcategories.gapInCharacters - 3) < 0.05);
   const subcategoriesCompact = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/subcategories-compact.png", Buffer.from(subcategoriesCompact.data, "base64"));
   const subcategoryFocus = await evaluate(`(() => {
