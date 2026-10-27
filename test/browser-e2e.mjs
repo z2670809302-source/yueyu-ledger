@@ -174,6 +174,10 @@ try {
   assert.equal(wideSubcategories.radiusMatchesInput, true);
   const subcategoriesWide = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/subcategories-wide.png", Buffer.from(subcategoriesWide.data, "base64"));
+  await call("Emulation.setDeviceMetricsOverride", { width: 740, height: 760, deviceScaleFactor: 1, mobile: false });
+  assert.equal(await evaluate("[...document.querySelectorAll('#subcategorySuggestions span')].every((label) => label.scrollWidth <= label.clientWidth)"), true);
+  const subcategoriesMedium = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/subcategories-medium.png", Buffer.from(subcategoriesMedium.data, "base64"));
   const subcategoryFocus = await evaluate(`(() => {
     document.querySelector('[data-subcategory="医疗"]').click();
     return document.activeElement?.id || '';
