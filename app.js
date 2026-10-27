@@ -38,12 +38,12 @@ const categoryIcons = {
   special: '<img src="./assets/illustrations/categories/special.webp?v=2.211" alt="" decoding="sync" />'
 };
 const subcategoryPresets = {
-  salary: ["基本工资", "奖金", "补贴", "兼职"],
-  receivable: ["红包", "报销", "转账", "借款归还"],
-  repayment: ["花呗", "信用卡", "房贷", "车贷"],
-  rent: ["房租", "物业费", "停车费"],
-  daily: ["吃饭", "水费", "电费", "燃气费", "交通", "购物", "医疗", "通讯"],
-  special: ["旅行", "礼物", "人情", "大件", "维修"]
+  salary: [["基本工资", "💵"], ["绩效奖金", "🏆"], ["津贴补贴", "🎫"], ["加班费", "⏰"], ["兼职副业", "💻"], ["其他收入", "🪙"]],
+  receivable: [["转账收款", "📲"], ["报销到账", "🧾"], ["借款归还", "🤝"], ["红包礼金", "🧧"], ["退款返现", "↩️"], ["其他收款", "💰"]],
+  repayment: [["花呗", "🌼"], ["信用卡", "💳"], ["房贷", "🏠"], ["车贷", "🚗"], ["消费贷", "🧮"], ["其他还款", "📅"]],
+  rent: [["房租", "🏡"], ["物业费", "🏢"], ["水费", "💧"], ["电费", "💡"], ["燃气费", "🔥"], ["宽带费", "📶"]],
+  daily: [["吃饭", "🍚"], ["买菜", "🥬"], ["交通出行", "🚌"], ["日用品", "🛍️"], ["通讯", "📱"], ["医疗", "🩹"]],
+  special: [["旅行", "🧳"], ["人情礼金", "🧧"], ["礼物", "🎁"], ["大件购物", "🛋️"], ["维修", "🧰"], ["学习提升", "📚"]]
 };
 
 function loadState() {
@@ -445,7 +445,7 @@ function updateFormKind() {
   const expected = entryForm.elements.recordType.value === "expected";
   $("#categoryDisplay").textContent = categories[$("#category").value]?.label || "";
   $("#subcategorySuggestions").innerHTML = (subcategoryPresets[$("#category").value] || [])
-    .map((item) => `<button type="button" data-subcategory="${item}">${item}</button>`).join("");
+    .map(([label, icon]) => `<button type="button" data-subcategory="${label}"><i aria-hidden="true">${icon}</i><span>${label}</span></button>`).join("");
   $("#actualDateField").hidden = expected;
   $("#actualNoteField").hidden = expected;
   $("#actualSubcategoryField").hidden = expected;
