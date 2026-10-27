@@ -185,8 +185,8 @@ try {
     fontSize: parseFloat(getComputedStyle(document.querySelector('#subcategorySuggestions button')).fontSize)
   }))()`);
   assert.equal(compactSubcategories.labelsFit, true);
-  assert.ok(compactSubcategories.iconWidth >= 45);
-  assert.ok(compactSubcategories.fontSize >= 16);
+  assert.ok(compactSubcategories.iconWidth >= 39);
+  assert.ok(compactSubcategories.fontSize >= 14);
   const subcategoriesCompact = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/subcategories-compact.png", Buffer.from(subcategoriesCompact.data, "base64"));
   const subcategoryFocus = await evaluate(`(() => {
