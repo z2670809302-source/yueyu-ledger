@@ -80,6 +80,7 @@ test("search combines keyword, amount, date, category, type and payment filters"
   ];
   assert.deepEqual(searchEntries(searchable, { keyword: "地铁" }).map((entry) => entry.id), ["8"]);
   assert.deepEqual(searchEntries(searchable, { keyword: "吃饭" }).map((entry) => entry.id), ["8"]);
+  assert.deepEqual(searchEntries(searchable, { keyword: "住房开销" }).map((entry) => entry.id), ["3", "4"]);
   assert.deepEqual(searchEntries(searchable, { keyword: "35+65", amount: 80 }).map((entry) => entry.id), ["8"]);
   assert.deepEqual(searchEntries(searchable, { amount: 2500 }).map((entry) => entry.id), ["3", "4"]);
   assert.deepEqual(searchEntries(searchable, { startDate: "2026-09-03", endDate: "2026-09-04", recordType: "actual", direction: "expense", paymentMethod: "huabei" }).map((entry) => entry.id), ["6"]);

@@ -2,7 +2,7 @@ export const categories = {
   salary: { label: "工资", direction: "income" },
   receivable: { label: "收账", direction: "income" },
   repayment: { label: "当月还款", direction: "expense" },
-  rent: { label: "当月房租", direction: "expense" },
+  rent: { label: "住房开销", direction: "expense" },
   daily: { label: "日常开销", direction: "expense" },
   special: { label: "特殊开销", direction: "expense" }
 };
