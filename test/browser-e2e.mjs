@@ -794,7 +794,16 @@ try {
   await delay(500);
   assert.equal(await evaluate("document.querySelector('#updateNotice').hidden"), true);
 
-  console.log(JSON.stringify({ ...result, offlineReload: true, repeatedUpdatePrompt: false }, null, 2));
+  await call("Page.navigate", { url: "http://localhost:4174/?preview=56" });
+  await waitFor("document.readyState === 'complete' && sessionStorage.getItem('liqing-preview-reset-56') === '1'");
+  const localPreviewCacheCleared = await waitFor(`(async () => {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    const keys = await caches.keys();
+    return registrations.length === 0 && keys.every((key) => !key.startsWith('yueyu-'));
+  })()`);
+  assert.equal(localPreviewCacheCleared, true);
+
+  console.log(JSON.stringify({ ...result, offlineReload: true, repeatedUpdatePrompt: false, localPreviewCacheCleared }, null, 2));
   socket.close();
 } finally {
   chrome.kill();

@@ -888,7 +888,27 @@ statsDialog.addEventListener("click", (event) => {
   if (event.target === statsDialog) statsDialog.close();
 });
 
-if ("serviceWorker" in navigator) {
+const isLocalPreview = ["localhost", "127.0.0.1"].includes(window.location.hostname)
+  && new URLSearchParams(window.location.search).has("preview");
+
+if ("serviceWorker" in navigator && isLocalPreview) {
+  window.addEventListener("load", async () => {
+    const previewId = new URLSearchParams(window.location.search).get("preview") || "current";
+    const resetKey = `liqing-preview-reset-${previewId}`;
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    const cacheKeys = "caches" in window ? await caches.keys() : [];
+    const ledgerCaches = cacheKeys.filter((key) => key.startsWith("yueyu-"));
+    await Promise.all([
+      ...registrations.map((registration) => registration.unregister()),
+      ...ledgerCaches.map((key) => caches.delete(key))
+    ]);
+    if ((navigator.serviceWorker.controller || registrations.length || ledgerCaches.length)
+      && !sessionStorage.getItem(resetKey)) {
+      sessionStorage.setItem(resetKey, "1");
+      window.location.reload();
+    }
+  });
+} else if ("serviceWorker" in navigator) {
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (reloadForUpdate) window.location.reload();
   });
