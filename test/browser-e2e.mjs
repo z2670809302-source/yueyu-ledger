@@ -118,6 +118,8 @@ try {
     const dateRect = document.querySelector('.date-input-display').getBoundingClientRect();
     const categoryRect = document.querySelector('.select-input-display').getBoundingClientRect();
     const dateIcon = document.querySelector('.date-input-icon');
+    const suggestionsRect = document.querySelector('#subcategorySuggestions').getBoundingClientRect();
+    const subcategoryInputRect = document.querySelector('#subcategory').getBoundingClientRect();
     return {
       operatorText: [...document.querySelectorAll('.amount-operator')].map((button) => button.textContent).join(''),
       operatorColor: getComputedStyle(document.querySelector('.amount-operator')).color,
@@ -127,7 +129,9 @@ try {
       fieldsSameHeight: Math.abs(dateRect.height - categoryRect.height) < 0.5,
       dateIconVisible: Boolean(dateIcon) && getComputedStyle(dateIcon).display !== 'none',
       displayedDate: document.querySelector('#entryDateDisplay').textContent,
-      displayedCategory: document.querySelector('#categoryDisplay').textContent
+      displayedCategory: document.querySelector('#categoryDisplay').textContent,
+      subcategoryColumns: getComputedStyle(document.querySelector('#subcategorySuggestions')).gridTemplateColumns.split(' ').length,
+      subcategoryWidthMatchesInput: Math.abs(suggestionsRect.width - subcategoryInputRect.width) < 0.5
     };
   })()`);
   assert.equal(entryFormLayout.operatorText, "＋－＝");
@@ -139,6 +143,8 @@ try {
   assert.equal(entryFormLayout.dateIconVisible, true);
   assert.equal(entryFormLayout.displayedDate, "2026/09/06");
   assert.equal(entryFormLayout.displayedCategory, "日常开销");
+  assert.equal(entryFormLayout.subcategoryColumns, 4);
+  assert.equal(entryFormLayout.subcategoryWidthMatchesInput, true);
   await mkdir(".impeccable/review", { recursive: true });
   const huabeiMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/huabei-mobile.png", Buffer.from(huabeiMobile.data, "base64"));
