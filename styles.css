@@ -284,7 +284,7 @@ select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; 
   .balance-sheet { padding: 30px; }
   .section-block { margin-top: 42px; }
   .subcategory-suggestions { gap: 2px; }
-  .subcategory-suggestions button { min-height: 40px; padding: 3px 4px; justify-content: flex-start; gap: 3em; font-size: .88rem; }
+  .subcategory-suggestions button { min-height: 40px; padding: 3px 4px; justify-content: flex-start; gap: 1em; font-size: .88rem; }
   .subcategory-suggestions button i { flex-basis: 34px; width: 34px; height: 34px; font-size: 1.3rem; }
   .subcategory-suggestions button span { height: 34px; place-items: center start; text-align: left; }
 }
@@ -292,13 +292,13 @@ select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; 
 @media (min-width: 480px) and (max-width: 699px) {
   .entry-dialog { width: min(100% - 8px, 810px); }
   .subcategory-suggestions { gap: 2px; }
-  .subcategory-suggestions button { min-height: 36px; padding: 2px 4px; justify-content: flex-start; gap: 3em; font-size: .78rem; }
+  .subcategory-suggestions button { min-height: 36px; padding: 2px 4px; justify-content: flex-start; gap: 1em; font-size: .78rem; }
   .subcategory-suggestions button i { flex-basis: 30px; width: 30px; height: 30px; font-size: 1.1rem; }
   .subcategory-suggestions button span { height: 30px; place-items: center start; text-align: left; }
 }
 
 @media (min-width: 780px) {
-  .subcategory-suggestions button { min-height: 46px; padding: 3px 4px; gap: 3em; font-size: 1rem; }
+  .subcategory-suggestions button { min-height: 46px; padding: 3px 4px; gap: 1em; font-size: 1rem; }
   .subcategory-suggestions button i { flex-basis: 40px; width: 40px; height: 40px; font-size: 1.5rem; }
   .subcategory-suggestions button span { height: 40px; }
 }

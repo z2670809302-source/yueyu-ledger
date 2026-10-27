@@ -188,7 +188,7 @@ try {
   }))()`);
   assert.equal(compactSubcategories.labelsFit, true);
   assert.equal(compactSubcategories.leftAligned, true);
-  assert.ok(Math.abs(compactSubcategories.gapInCharacters - 3) < 0.05);
+  assert.ok(Math.abs(compactSubcategories.gapInCharacters - 1) < 0.05);
   const subcategoriesCompact = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/subcategories-compact.png", Buffer.from(subcategoriesCompact.data, "base64"));
   const subcategoryFocus = await evaluate(`(() => {
