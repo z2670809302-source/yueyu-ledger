@@ -266,8 +266,8 @@ select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; 
 .selected-lunar-date { display: block; min-height: 1.1em; margin: 6px 2px 0; color: var(--ink-soft); font-size: .72rem; }
 .field-hint { margin: 7px 0 0; color: var(--ink-soft); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: .78rem; line-height: 1.55; }
 .subcategory-suggestions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; width: 100%; margin-top: 8px; }
-.subcategory-suggestions button { display: grid; min-width: 0; min-height: 62px; padding: 6px 2px 5px; place-items: center; gap: 4px; border: 1px solid #d9dfbd; border-radius: 14px; background: #f8fce9; color: #66733d; font: 700 .66rem/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; cursor: pointer; }
-.subcategory-suggestions button i { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 50%; background: linear-gradient(145deg, #fff7c9, #e5f8b9); box-shadow: 0 3px 8px rgba(104, 122, 53, .13); font-size: 1rem; font-style: normal; }
+.subcategory-suggestions button { display: flex; min-width: 0; min-height: 46px; padding: 4px; align-items: center; justify-content: center; gap: 3px; border: 1px solid #d9dfbd; border-radius: 14px; background: #f8fce9; color: #66733d; font: 700 .58rem/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; cursor: pointer; }
+.subcategory-suggestions button i { display: grid; flex: 0 0 22px; width: 22px; height: 22px; place-items: center; border-radius: 50%; background: linear-gradient(145deg, #fff7c9, #e5f8b9); box-shadow: 0 3px 8px rgba(104, 122, 53, .13); font-size: .78rem; font-style: normal; }
 .subcategory-suggestions button span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .subcategory-suggestions button:active { background: #e9f9b8; }
 .dialog-actions { display: flex; gap: 10px; margin-top: 24px; }
