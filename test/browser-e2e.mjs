@@ -178,6 +178,17 @@ try {
   assert.equal(await evaluate("[...document.querySelectorAll('#subcategorySuggestions span')].every((label) => label.scrollWidth <= label.clientWidth)"), true);
   const subcategoriesMedium = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/subcategories-medium.png", Buffer.from(subcategoriesMedium.data, "base64"));
+  await call("Emulation.setDeviceMetricsOverride", { width: 632, height: 760, deviceScaleFactor: 1, mobile: false });
+  const compactSubcategories = await evaluate(`(() => ({
+    labelsFit: [...document.querySelectorAll('#subcategorySuggestions span')].every((label) => label.scrollWidth <= label.clientWidth),
+    iconWidth: document.querySelector('#subcategorySuggestions i').getBoundingClientRect().width,
+    fontSize: parseFloat(getComputedStyle(document.querySelector('#subcategorySuggestions button')).fontSize)
+  }))()`);
+  assert.equal(compactSubcategories.labelsFit, true);
+  assert.ok(compactSubcategories.iconWidth >= 45);
+  assert.ok(compactSubcategories.fontSize >= 16);
+  const subcategoriesCompact = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/subcategories-compact.png", Buffer.from(subcategoriesCompact.data, "base64"));
   const subcategoryFocus = await evaluate(`(() => {
     document.querySelector('[data-subcategory="医疗"]').click();
     return document.activeElement?.id || '';

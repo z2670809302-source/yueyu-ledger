@@ -289,6 +289,14 @@ select, input[type="date"], input[type="text"] { width: 100%; min-height: 46px; 
   .subcategory-suggestions button span { height: 56px; }
 }
 
+@media (min-width: 480px) and (max-width: 699px) {
+  .entry-dialog { width: min(100% - 8px, 810px); }
+  .subcategory-suggestions { gap: 2px; }
+  .subcategory-suggestions button { min-height: clamp(40px, 8.5vw, 52px); padding: 1px; gap: 2px; font-size: clamp(.84rem, 2.75vw, 1.08rem); }
+  .subcategory-suggestions button i { flex-basis: clamp(36px, 7.5vw, 48px); width: clamp(36px, 7.5vw, 48px); height: clamp(36px, 7.5vw, 48px); font-size: clamp(1.35rem, 4.5vw, 1.8rem); }
+  .subcategory-suggestions button span { height: clamp(36px, 7.5vw, 48px); }
+}
+
 @media (min-width: 780px) {
   .subcategory-suggestions button { min-height: 72px; padding: 2px; gap: 4px; font-size: 1.55rem; }
   .subcategory-suggestions button i { flex-basis: 66px; width: 66px; height: 66px; font-size: 2.55rem; }
