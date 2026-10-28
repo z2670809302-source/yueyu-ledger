@@ -840,8 +840,8 @@ try {
   await delay(500);
   assert.equal(await evaluate("document.querySelector('#updateNotice').hidden"), true);
 
-  await call("Page.navigate", { url: "http://localhost:4174/?preview=66" });
-  await waitFor("document.readyState === 'complete' && sessionStorage.getItem('liqing-preview-reset-66') === '1'");
+  await call("Page.navigate", { url: "http://localhost:4174/?preview=67" });
+  await waitFor("document.readyState === 'complete' && sessionStorage.getItem('liqing-preview-reset-67') === '1'");
   const localPreviewCacheCleared = await waitFor(`(async () => {
     const registrations = await navigator.serviceWorker.getRegistrations();
     const keys = await caches.keys();

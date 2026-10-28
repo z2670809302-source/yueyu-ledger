@@ -217,7 +217,7 @@ h2 { margin-bottom: 3px; font-size: 1.16rem; letter-spacing: -0.02em; }
 .balance-trend svg { display: block; overflow: visible; width: 100%; height: auto; aspect-ratio: 16 / 9; }
 .trend-grid { stroke: #ebe5d7; stroke-width: 1; }
 .trend-area { fill: url(#trendFill); }
-.trend-line { fill: none; stroke: #83b927; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.trend-line { fill: none; stroke: #83b927; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .trend-point { fill: #fffdf7; stroke: #79aa25; stroke-width: 1.6; }
 .trend-y-label { fill: #9a9589; font: 7.5px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-variant-numeric: tabular-nums; }
 .trend-label { fill: #8e8a7e; font: 8.5px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; text-anchor: middle; }
