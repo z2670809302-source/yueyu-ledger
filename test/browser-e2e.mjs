@@ -401,7 +401,7 @@ try {
   assert.equal(stats.annualPieTotal, "¥2,600.00");
   assert.equal(stats.annualPieLegend, 2);
   assert.equal(stats.summaryCards, 4);
-  assert.equal(stats.summaryColumns, 2);
+  assert.equal(stats.summaryColumns, 4);
   assert.equal(stats.annualIncome, "¥9,800.00");
   assert.equal(stats.annualExpense, "¥2,600.00");
   assert.equal(stats.annualNet, "¥7,200.00");
