@@ -23,7 +23,7 @@
     <link rel="preload" as="image" href="./assets/illustrations/categories/daily.webp?v=2.212" type="image/webp" />
     <link rel="preload" as="image" href="./assets/illustrations/categories/special.webp?v=2.212" type="image/webp" />
     <title>厘清 · 私人记账本</title>
-    <link rel="stylesheet" href="./styles.css?v=56" />
+    <link rel="stylesheet" href="./styles.css?v=57" />
   </head>
   <body>
     <main class="app-shell">
@@ -264,10 +264,51 @@
           </button>
         </div>
 
-        <section class="annual-sheet" aria-labelledby="annualTotalLabel">
-          <div class="stats-direction" role="group" aria-label="选择收支类型">
-            <button class="active" id="showExpense" type="button" aria-pressed="true"><span>支出</span></button>
-            <button id="showIncome" type="button" aria-pressed="false"><span>收入</span></button>
+        <section class="stats-summary-grid" aria-label="年度财务概览">
+          <article class="stats-summary-card income">
+            <span class="stats-summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8.5h14v9H5zM8 5.5h8M12 5.5v7m-3-3 3 3 3-3"/></svg></span>
+            <div><span>年度收入</span><strong id="statsAnnualIncome">¥0.00</strong><small>全年实际到账</small></div>
+          </article>
+          <article class="stats-summary-card expense">
+            <span class="stats-summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 5.5h12v13H6zM9 9h6m-6 3h6m-6 3h3"/></svg></span>
+            <div><span>年度支出</span><strong id="statsAnnualExpense">¥0.00</strong><small>全年实际支出</small></div>
+          </article>
+          <article class="stats-summary-card net">
+            <span class="stats-summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7h10M12 4v6m-5 7h10"/></svg></span>
+            <div><span>年度结余</span><strong id="statsAnnualNet">¥0.00</strong><small>收入减去支出</small></div>
+          </article>
+          <article class="stats-summary-card balance">
+            <span class="stats-summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.5 7.5h15v10h-15zM7 7.5v-2h9v2m0 5h3.5"/></svg></span>
+            <div><span>最新月末结余</span><strong id="statsLatestBalance">¥0.00</strong><small>截至当前月份</small></div>
+          </article>
+        </section>
+
+        <section class="stats-insight" aria-labelledby="annualExpensePieTitle">
+          <div class="stats-insight-heading">
+            <div>
+              <h2 id="annualExpensePieTitle">年度支出构成</h2>
+              <p>看看钱主要花在了哪里</p>
+            </div>
+          </div>
+          <div class="annual-pie-layout">
+            <div class="annual-expense-pie" id="annualExpensePie" role="img" aria-label="年度支出分类占比">
+              <span><small>年度支出</small><strong id="annualExpensePieTotal">¥0.00</strong></span>
+            </div>
+            <div class="annual-expense-legend" id="annualExpenseLegend"></div>
+          </div>
+          <p class="annual-empty" id="annualExpenseEmpty" hidden>这一年还没有实际支出</p>
+        </section>
+
+        <section class="annual-sheet" aria-labelledby="annualChartTitle">
+          <div class="stats-card-heading">
+            <div>
+              <h2 id="annualChartTitle">月度收支</h2>
+              <p>对比每个月的实际金额</p>
+            </div>
+            <div class="stats-direction" role="group" aria-label="选择收支类型">
+              <button class="active" id="showExpense" type="button" aria-pressed="true"><span>支出</span></button>
+              <button id="showIncome" type="button" aria-pressed="false"><span>收入</span></button>
+            </div>
           </div>
           <div class="annual-total">
             <span id="annualTotalLabel">年度支出</span>
@@ -289,22 +330,6 @@
             </div>
           </div>
           <div class="balance-trend" id="balanceTrend" role="img" aria-label="月末结余折线图"></div>
-        </section>
-
-        <section class="stats-insight" aria-labelledby="annualExpensePieTitle">
-          <div class="stats-insight-heading">
-            <div>
-              <h2 id="annualExpensePieTitle">年度支出构成</h2>
-              <p>看看钱主要花在了哪里</p>
-            </div>
-          </div>
-          <div class="annual-pie-layout">
-            <div class="annual-expense-pie" id="annualExpensePie" role="img" aria-label="年度支出分类占比">
-              <span><small>年度支出</small><strong id="annualExpensePieTotal">¥0.00</strong></span>
-            </div>
-            <div class="annual-expense-legend" id="annualExpenseLegend"></div>
-          </div>
-          <p class="annual-empty" id="annualExpenseEmpty" hidden>这一年还没有实际支出</p>
         </section>
       </section>
 
@@ -515,6 +540,6 @@
     </dialog>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script type="module" src="./app.js?v=51"></script>
+    <script type="module" src="./app.js?v=52"></script>
   </body>
 </html>

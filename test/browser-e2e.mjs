@@ -370,6 +370,18 @@ try {
       trendLabel: document.querySelector('#balanceTrend').getAttribute('aria-label'),
       annualPieTotal: document.querySelector('#annualExpensePieTotal').textContent,
       annualPieLegend: document.querySelectorAll('#annualExpenseLegend > div').length,
+      summaryCards: document.querySelectorAll('.stats-summary-card').length,
+      summaryColumns: getComputedStyle(document.querySelector('.stats-summary-grid')).gridTemplateColumns.split(' ').length,
+      annualIncome: document.querySelector('#statsAnnualIncome').textContent,
+      annualExpense: document.querySelector('#statsAnnualExpense').textContent,
+      annualNet: document.querySelector('#statsAnnualNet').textContent,
+      latestBalance: document.querySelector('#statsLatestBalance').textContent,
+      sectionOrder: [
+        document.querySelector('.stats-summary-grid'),
+        document.querySelector('#annualExpensePie').closest('.stats-insight'),
+        document.querySelector('.annual-sheet'),
+        document.querySelector('#balanceTrend').closest('.stats-insight')
+      ].map((element) => element.getBoundingClientRect().top),
       subtitle: document.querySelector('#statsView .brand-dates').textContent.trim(),
       addButtonLeft: document.querySelector('#addEntry').getBoundingClientRect().left,
       addButtonTop: document.querySelector('#addEntry').getBoundingClientRect().top,
@@ -388,6 +400,13 @@ try {
   assert.match(stats.trendLabel, /月末结余走势/);
   assert.equal(stats.annualPieTotal, "¥2,600.00");
   assert.equal(stats.annualPieLegend, 2);
+  assert.equal(stats.summaryCards, 4);
+  assert.equal(stats.summaryColumns, 2);
+  assert.equal(stats.annualIncome, "¥9,800.00");
+  assert.equal(stats.annualExpense, "¥2,600.00");
+  assert.equal(stats.annualNet, "+¥7,200.00");
+  assert.equal(stats.latestBalance, "¥7,200.00");
+  assert.deepEqual(stats.sectionOrder, [...stats.sectionOrder].sort((left, right) => left - right));
   assert.equal(stats.subtitle, "✦年度收支统计");
   assert.equal(stats.addButtonLeft, result.addButtonLeft);
   assert.equal(stats.addButtonTop, result.addButtonTop);

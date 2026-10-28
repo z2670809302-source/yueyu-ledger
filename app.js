@@ -256,11 +256,27 @@ function renderAnnualExpensePie(months) {
 function renderStats() {
   const months = annualStats();
   const annualTotal = months.reduce((total, item) => total + item.total, 0);
+  const annualIncome = months.reduce((total, item) => total + item.summary.actualIncome, 0);
+  const annualExpense = months.reduce((total, item) => total + item.summary.actualExpense, 0);
+  const annualNet = annualIncome - annualExpense;
+  const balancePoints = annualBalanceTrend();
+  const latestBalance = balancePoints.at(-1)?.balance ?? monthOpeningBalance(
+    state.openingBalance,
+    state.openingMonth,
+    state.entries,
+    `${statsYear}-01`
+  );
   const maxMonth = Math.max(1, ...months.map((item) => item.total));
   const directionLabel = statsDirection === "income" ? "收入" : "支出";
   const currentKey = monthKey();
 
   $("#statsYearTitle").textContent = `${statsYear} 年`;
+  $("#statsAnnualIncome").textContent = formatMoney(annualIncome);
+  $("#statsAnnualExpense").textContent = formatMoney(annualExpense);
+  $("#statsAnnualNet").textContent = formatMoney(annualNet, true);
+  $("#statsAnnualNet").classList.toggle("negative", annualNet < 0);
+  $("#statsLatestBalance").textContent = formatMoney(latestBalance);
+  $("#statsLatestBalance").classList.toggle("negative", latestBalance < 0);
   $("#annualTotalLabel").textContent = `年度${directionLabel}`;
   $("#annualTotal").textContent = formatMoney(annualTotal);
   $("#annualChart").setAttribute("aria-label", `每月${directionLabel}柱状图`);
