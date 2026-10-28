@@ -194,8 +194,11 @@ function renderBalanceTrend() {
   if (!points.length) {
     target.innerHTML = '<p class="annual-empty">这一年还没有月末结余</p>';
     target.setAttribute("aria-label", "这一年还没有月末结余");
+    $("#balanceTrendLatest").hidden = true;
     return;
   }
+  $("#balanceTrendLatest").hidden = false;
+  $("#balanceTrendLatest").textContent = `${points.at(-1).month}月 ${formatMoney(points.at(-1).balance)}`;
   const width = 320;
   const height = 180;
   const padding = { top: 18, right: 12, bottom: 28, left: 12 };
@@ -209,7 +212,7 @@ function renderBalanceTrend() {
   const plotHeight = height - padding.top - padding.bottom;
   const coordinates = points.map((item, index) => ({
     ...item,
-    x: padding.left + (points.length === 1 ? plotWidth / 2 : index / (points.length - 1) * plotWidth),
+    x: padding.left + (item.month - 1) / 11 * plotWidth,
     y: padding.top + (max - item.balance) / (max - min) * plotHeight
   }));
   const line = coordinates.slice(1).reduce((path, point, index) => {
@@ -218,7 +221,10 @@ function renderBalanceTrend() {
     return `${path} C ${middle.toFixed(1)} ${previous.y.toFixed(1)}, ${middle.toFixed(1)} ${point.y.toFixed(1)}, ${point.x.toFixed(1)} ${point.y.toFixed(1)}`;
   }, `M ${coordinates[0].x.toFixed(1)} ${coordinates[0].y.toFixed(1)}`);
   const area = `${line} L ${coordinates.at(-1).x.toFixed(1)} ${height - padding.bottom} L ${padding.left} ${height - padding.bottom} Z`;
-  const labels = coordinates.filter((_, index) => index === 0 || index === coordinates.length - 1 || (index + 1) % 3 === 0);
+  const labels = Array.from({ length: 12 }, (_, index) => ({
+    month: index + 1,
+    x: padding.left + index / 11 * plotWidth
+  }));
   target.setAttribute("aria-label", `${statsYear}年月末结余走势，从${formatMoney(values[0])}到${formatMoney(values.at(-1))}`);
   target.innerHTML = `
     <svg viewBox="0 0 ${width} ${height}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
@@ -227,8 +233,7 @@ function renderBalanceTrend() {
       <line class="trend-grid" x1="${padding.left}" y1="${padding.top + plotHeight * .75}" x2="${width - padding.right}" y2="${padding.top + plotHeight * .75}"/>
       <path class="trend-area" d="${area}"/>
       <path class="trend-line" d="${line}"/>
-      ${coordinates.map((point) => `<circle class="trend-point" cx="${point.x}" cy="${point.y}" r="4"><title>${point.month}月 ${formatMoney(point.balance)}</title></circle>`).join("")}
-      ${labels.map((point) => `<text class="trend-label" x="${point.x}" y="${height - 6}">${point.month}月</text>`).join("")}
+      ${labels.map((point) => `<text class="trend-label" x="${point.x}" y="${height - 7}">${point.month}月</text>`).join("")}
     </svg>`;
 }
 

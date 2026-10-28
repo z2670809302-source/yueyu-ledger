@@ -367,6 +367,7 @@ try {
       active: document.querySelector('.stats-direction .active').textContent,
       monthsWithData: document.querySelectorAll('#annualChart .annual-month:not(:disabled)').length,
       trendPoints: document.querySelectorAll('#balanceTrend .trend-point').length,
+      trendMonths: document.querySelectorAll('#balanceTrend .trend-label').length,
       trendLabel: document.querySelector('#balanceTrend').getAttribute('aria-label'),
       annualPieTotal: document.querySelector('#annualExpensePieTotal').textContent,
       annualPieLegend: document.querySelectorAll('#annualExpenseLegend > div').length,
@@ -399,7 +400,8 @@ try {
   assert.equal(stats.total, "¥2,600.00");
   assert.equal(stats.active, "支出");
   assert.equal(stats.monthsWithData, 1);
-  assert.equal(stats.trendPoints, 10);
+  assert.equal(stats.trendPoints, 0);
+  assert.equal(stats.trendMonths, 12);
   assert.match(stats.trendLabel, /月末结余走势/);
   assert.equal(stats.annualPieTotal, "¥2,600.00");
   assert.equal(stats.annualPieLegend, 2);
@@ -836,8 +838,8 @@ try {
   await delay(500);
   assert.equal(await evaluate("document.querySelector('#updateNotice').hidden"), true);
 
-  await call("Page.navigate", { url: "http://localhost:4174/?preview=62" });
-  await waitFor("document.readyState === 'complete' && sessionStorage.getItem('liqing-preview-reset-62') === '1'");
+  await call("Page.navigate", { url: "http://localhost:4174/?preview=65" });
+  await waitFor("document.readyState === 'complete' && sessionStorage.getItem('liqing-preview-reset-65') === '1'");
   const localPreviewCacheCleared = await waitFor(`(async () => {
     const registrations = await navigator.serviceWorker.getRegistrations();
     const keys = await caches.keys();
