@@ -188,6 +188,14 @@ function annualBalanceTrend() {
   });
 }
 
+function formatCompactMoney(value) {
+  const absolute = Math.abs(value);
+  const sign = value < 0 ? "−" : "";
+  if (absolute >= 10000) return `${sign}¥${(absolute / 10000).toFixed(absolute >= 100000 ? 0 : 1)}万`;
+  if (absolute >= 1000) return `${sign}¥${(absolute / 1000).toFixed(absolute >= 10000 ? 0 : 1)}千`;
+  return `${sign}¥${Math.round(absolute)}`;
+}
+
 function renderBalanceTrend() {
   const points = annualBalanceTrend();
   const target = $("#balanceTrend");
@@ -201,13 +209,15 @@ function renderBalanceTrend() {
   $("#balanceTrendLatest").textContent = `${points.at(-1).month}月 ${formatMoney(points.at(-1).balance)}`;
   const width = 320;
   const height = 180;
-  const padding = { top: 18, right: 12, bottom: 28, left: 12 };
+  const padding = { top: 18, right: 10, bottom: 28, left: 42 };
   const values = points.map((item) => item.balance);
   const rawMin = Math.min(...values);
   const rawMax = Math.max(...values);
-  const spread = Math.max(1, rawMax - rawMin);
-  const min = rawMin - spread * .12;
-  const max = rawMax + spread * .12;
+  const scaleMin = Math.min(0, rawMin);
+  const scaleMax = Math.max(0, rawMax);
+  const spread = Math.max(1, scaleMax - scaleMin);
+  const min = scaleMin - spread * .08;
+  const max = scaleMax + spread * .12;
   const plotWidth = width - padding.left - padding.right;
   const plotHeight = height - padding.top - padding.bottom;
   const coordinates = points.map((item, index) => ({
@@ -225,14 +235,21 @@ function renderBalanceTrend() {
     month: index + 1,
     x: padding.left + index / 11 * plotWidth
   }));
+  const ticks = [max, (max + min) / 2, min].map((value) => ({
+    value,
+    y: padding.top + (max - value) / (max - min) * plotHeight
+  }));
   target.setAttribute("aria-label", `${statsYear}年月末结余走势，从${formatMoney(values[0])}到${formatMoney(values.at(-1))}`);
   target.innerHTML = `
     <svg viewBox="0 0 ${width} ${height}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
       <defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9ed35" stop-opacity=".28"/><stop offset="1" stop-color="#b9ed35" stop-opacity="0"/></linearGradient></defs>
-      <line class="trend-grid" x1="${padding.left}" y1="${padding.top + plotHeight * .25}" x2="${width - padding.right}" y2="${padding.top + plotHeight * .25}"/>
-      <line class="trend-grid" x1="${padding.left}" y1="${padding.top + plotHeight * .75}" x2="${width - padding.right}" y2="${padding.top + plotHeight * .75}"/>
+      ${ticks.map((tick) => `
+        <line class="trend-grid" x1="${padding.left}" y1="${tick.y.toFixed(1)}" x2="${width - padding.right}" y2="${tick.y.toFixed(1)}"/>
+        <text class="trend-y-label" x="2" y="${(tick.y + 3).toFixed(1)}">${formatCompactMoney(tick.value)}</text>
+      `).join("")}
       <path class="trend-area" d="${area}"/>
       <path class="trend-line" d="${line}"/>
+      ${coordinates.map((point) => `<circle class="trend-point" cx="${point.x.toFixed(1)}" cy="${point.y.toFixed(1)}" r="2.8"/>`).join("")}
       ${labels.map((point) => `<text class="trend-label" x="${point.x}" y="${height - 7}">${point.month}月</text>`).join("")}
     </svg>`;
 }
