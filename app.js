@@ -197,8 +197,8 @@ function renderBalanceTrend() {
     return;
   }
   const width = 320;
-  const height = 166;
-  const padding = { top: 14, right: 10, bottom: 24, left: 10 };
+  const height = 180;
+  const padding = { top: 18, right: 12, bottom: 28, left: 12 };
   const values = points.map((item) => item.balance);
   const rawMin = Math.min(...values);
   const rawMax = Math.max(...values);
@@ -212,17 +212,21 @@ function renderBalanceTrend() {
     x: padding.left + (points.length === 1 ? plotWidth / 2 : index / (points.length - 1) * plotWidth),
     y: padding.top + (max - item.balance) / (max - min) * plotHeight
   }));
-  const line = coordinates.map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
-  const area = `${padding.left},${height - padding.bottom} ${line} ${coordinates.at(-1).x.toFixed(1)},${height - padding.bottom}`;
+  const line = coordinates.slice(1).reduce((path, point, index) => {
+    const previous = coordinates[index];
+    const middle = (previous.x + point.x) / 2;
+    return `${path} C ${middle.toFixed(1)} ${previous.y.toFixed(1)}, ${middle.toFixed(1)} ${point.y.toFixed(1)}, ${point.x.toFixed(1)} ${point.y.toFixed(1)}`;
+  }, `M ${coordinates[0].x.toFixed(1)} ${coordinates[0].y.toFixed(1)}`);
+  const area = `${line} L ${coordinates.at(-1).x.toFixed(1)} ${height - padding.bottom} L ${padding.left} ${height - padding.bottom} Z`;
   const labels = coordinates.filter((_, index) => index === 0 || index === coordinates.length - 1 || (index + 1) % 3 === 0);
   target.setAttribute("aria-label", `${statsYear}年月末结余走势，从${formatMoney(values[0])}到${formatMoney(values.at(-1))}`);
   target.innerHTML = `
-    <svg viewBox="0 0 ${width} ${height}" aria-hidden="true" preserveAspectRatio="none">
+    <svg viewBox="0 0 ${width} ${height}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
       <defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9ed35" stop-opacity=".28"/><stop offset="1" stop-color="#b9ed35" stop-opacity="0"/></linearGradient></defs>
       <line class="trend-grid" x1="${padding.left}" y1="${padding.top + plotHeight * .25}" x2="${width - padding.right}" y2="${padding.top + plotHeight * .25}"/>
       <line class="trend-grid" x1="${padding.left}" y1="${padding.top + plotHeight * .75}" x2="${width - padding.right}" y2="${padding.top + plotHeight * .75}"/>
-      <polygon class="trend-area" points="${area}"/>
-      <polyline class="trend-line" points="${line}"/>
+      <path class="trend-area" d="${area}"/>
+      <path class="trend-line" d="${line}"/>
       ${coordinates.map((point) => `<circle class="trend-point" cx="${point.x}" cy="${point.y}" r="4"><title>${point.month}月 ${formatMoney(point.balance)}</title></circle>`).join("")}
       ${labels.map((point) => `<text class="trend-label" x="${point.x}" y="${height - 6}">${point.month}月</text>`).join("")}
     </svg>`;

@@ -370,6 +370,9 @@ try {
       trendLabel: document.querySelector('#balanceTrend').getAttribute('aria-label'),
       annualPieTotal: document.querySelector('#annualExpensePieTotal').textContent,
       annualPieLegend: document.querySelectorAll('#annualExpenseLegend > div').length,
+      annualPieRound: (() => { const rect = document.querySelector('#annualExpensePie').getBoundingClientRect(); return Math.abs(rect.width - rect.height) < 1; })(),
+      chartDescriptions: document.querySelectorAll('#statsView .stats-insight-heading p, #statsView .stats-card-heading p').length,
+      trendRatio: (() => { const rect = document.querySelector('#balanceTrend svg').getBoundingClientRect(); return rect.width / rect.height; })(),
       summaryCards: document.querySelectorAll('.stats-summary-card').length,
       summaryColumns: getComputedStyle(document.querySelector('.stats-summary-grid')).gridTemplateColumns.split(' ').length,
       annualIncome: document.querySelector('#statsAnnualIncome').textContent,
@@ -400,6 +403,9 @@ try {
   assert.match(stats.trendLabel, /月末结余走势/);
   assert.equal(stats.annualPieTotal, "¥2,600.00");
   assert.equal(stats.annualPieLegend, 2);
+  assert.equal(stats.annualPieRound, true);
+  assert.equal(stats.chartDescriptions, 0);
+  assert.ok(stats.trendRatio > 1.7 && stats.trendRatio < 1.9);
   assert.equal(stats.summaryCards, 4);
   assert.equal(stats.summaryColumns, 4);
   assert.equal(stats.annualIncome, "¥9,800.00");

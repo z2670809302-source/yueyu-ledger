@@ -197,30 +197,30 @@ h2 { margin-bottom: 3px; font-size: 1.16rem; letter-spacing: -0.02em; }
 .annual-total { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-top: 26px; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
 .annual-total span { color: var(--ink-soft); font-size: .78rem; }
 .annual-total strong { font-size: clamp(1.75rem, 8vw, 2.45rem); font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
-.annual-chart { display: grid; grid-template-columns: repeat(12, minmax(0,1fr)); align-items: end; gap: 5px; height: 230px; margin-top: 20px; padding: 12px 2px 0; border-bottom: 1px solid var(--ink); }
+.annual-chart { display: grid; grid-template-columns: repeat(12, minmax(0,1fr)); align-items: end; gap: 5px; height: 176px; margin-top: 12px; padding: 12px 2px 0; border-bottom: 1px solid #dcd7ca; background: repeating-linear-gradient(to top, transparent 0, transparent calc(25% - 1px), #eee9de calc(25% - 1px), #eee9de 25%); }
 .annual-month { position: relative; display: flex; align-items: end; justify-content: center; height: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .annual-month:disabled { cursor: default; }
-.annual-bar { width: min(100%, 18px); height: max(2px, var(--bar-height)); border-radius: 4px 4px 0 0; background: var(--red); transition: height .34s cubic-bezier(.16,1,.3,1); }
+.annual-bar { position: relative; z-index: 1; width: min(100%, 14px); height: max(3px, var(--bar-height)); border-radius: 7px 7px 2px 2px; background: var(--red); box-shadow: 0 4px 10px rgba(229, 112, 72, .16); transition: height .34s cubic-bezier(.16,1,.3,1); }
 .annual-month.income .annual-bar { background: var(--green); }
 .annual-month:disabled .annual-bar { background: rgba(23,32,42,.12); }
 .annual-month.current::after { position: absolute; right: 25%; bottom: -7px; left: 25%; height: 3px; border-radius: 2px; background: var(--ink); content: ""; }
 .annual-bar-value { position: absolute; top: 0; left: 50%; overflow: hidden; width: 1px; height: 1px; clip-path: inset(50%); white-space: nowrap; }
 .annual-axis { display: grid; grid-template-columns: repeat(12, minmax(0,1fr)); gap: 5px; padding: 8px 2px 0; color: var(--ink-soft); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: .64rem; font-variant-numeric: tabular-nums; text-align: center; }
 .annual-empty { margin: 20px 0 0; color: var(--ink-soft); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: .78rem; text-align: center; }
-.stats-insight { margin-top: 18px; padding: 20px 16px 18px; border-radius: 26px; background: rgba(255,255,255,.88); box-shadow: var(--shadow); }
+.stats-insight { margin-top: 18px; padding: 18px 16px 16px; border-radius: 24px; background: rgba(255,255,255,.9); box-shadow: var(--shadow); }
 .stats-insight-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
 .stats-insight-heading h2 { margin: 0; font-size: 1.08rem; }
 .stats-insight-heading p { margin: 4px 0 0; color: var(--ink-soft); font-size: .72rem; }
-.balance-trend { min-height: 184px; margin-top: 16px; }
-.balance-trend svg { display: block; overflow: visible; width: 100%; height: 184px; }
+.balance-trend { min-height: 0; margin-top: 10px; }
+.balance-trend svg { display: block; overflow: visible; width: 100%; height: auto; aspect-ratio: 16 / 9; }
 .trend-grid { stroke: #ebe5d7; stroke-width: 1; }
 .trend-area { fill: url(#trendFill); }
-.trend-line { fill: none; stroke: #87bd23; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.trend-line { fill: none; stroke: #83b927; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
 .trend-point { fill: #b9ed35; stroke: #fffef8; stroke-width: 2; }
 .trend-label { fill: var(--ink-soft); font: 10px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; text-anchor: middle; }
-.annual-pie-layout { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 18px; margin-top: 18px; align-items: center; }
-.annual-expense-pie { display: grid; width: 132px; height: 132px; place-items: center; border-radius: 50%; background: conic-gradient(#eee9dc 0 360deg); }
-.annual-expense-pie::after { grid-area: 1 / 1; width: 82px; height: 82px; border-radius: 50%; background: #fffdf7; content: ""; }
+.annual-pie-layout { display: grid; grid-template-columns: minmax(0, 144px) minmax(0, 1fr); gap: 18px; margin-top: 14px; align-items: center; }
+.annual-expense-pie { display: grid; width: min(100%, 144px); height: auto; aspect-ratio: 1; place-items: center; justify-self: center; flex: 0 0 auto; border-radius: 50%; background: conic-gradient(#eee9dc 0 360deg); box-shadow: inset 0 0 0 1px rgba(255,255,255,.5); }
+.annual-expense-pie::after { grid-area: 1 / 1; width: 88px; height: 88px; border-radius: 50%; background: #fffdf7; box-shadow: 0 0 0 1px rgba(230,225,210,.55); content: ""; }
 .annual-expense-pie > span { z-index: 1; grid-area: 1 / 1; display: grid; max-width: 76px; gap: 3px; text-align: center; }
 .annual-expense-pie small { color: var(--ink-soft); font-size: .62rem; }
 .annual-expense-pie strong { overflow: hidden; font-size: .72rem; font-variant-numeric: tabular-nums; text-overflow: ellipsis; }
@@ -703,13 +703,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, .segmented-cont
 .stats-summary-card.net strong { color: var(--green); }
 .stats-summary-card.expense strong, .stats-summary-card strong.negative { color: var(--red-dark); }
 .stats-summary-card small { display: none; }
-.annual-sheet { margin-top: 18px; padding: 20px 16px 18px; }
+.annual-sheet { margin-top: 18px; padding: 18px 16px 16px; }
 .stats-card-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
 .stats-card-heading h2 { margin: 0; font-size: 1.08rem; }
 .stats-card-heading p { margin: 4px 0 0; color: var(--ink-soft); font-size: .72rem; }
 .annual-sheet .annual-total { align-items: center; margin-top: 18px; }
 .annual-sheet .annual-total strong { font-size: 1.45rem; }
-.annual-sheet .annual-chart { height: 216px; margin-top: 14px; }
+.annual-sheet .annual-chart { height: 176px; margin-top: 12px; }
 .stats-direction { border: 0; background: #f3f0e8; }
 .stats-direction button.active { background: var(--lime); color: #263016; box-shadow: none; }
 .annual-chart { border-color: #ded9ca; }
@@ -839,6 +839,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, .segmented-cont
   .stats-summary-icon { width: 32px; height: 32px; }
   .stats-summary-icon img { width: 26px; height: 26px; }
   .stats-card-heading { align-items: center; }
+  .annual-pie-layout { grid-template-columns: 118px minmax(0, 1fr); gap: 12px; }
+  .annual-expense-pie { width: 118px; }
+  .annual-expense-pie::after { width: 72px; height: 72px; }
 }
 
 /* Rounded type and compact asset overview */
