@@ -689,7 +689,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, .segmented-cont
   color: #4d6f25;
   background: #eaf8c9;
 }
-.stats-summary-icon svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.stats-summary-icon img { display: block; width: 32px; height: 32px; object-fit: contain; object-position: 50% 50%; }
 .stats-summary-card.expense .stats-summary-icon { color: #bd603d; background: #ffe2d5; }
 .stats-summary-card.net .stats-summary-icon { color: #71991e; background: #f0facf; }
 .stats-summary-card.balance .stats-summary-icon { color: #a67a13; background: #fff0bd; }
@@ -698,6 +698,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, .segmented-cont
 .stats-summary-card > div > span { color: var(--ink-soft); font-size: .68rem; font-weight: 650; }
 .stats-summary-card strong { overflow: hidden; margin-top: 3px; font-size: clamp(.92rem, 4.2vw, 1.18rem); font-variant-numeric: tabular-nums; letter-spacing: -.035em; line-height: 1.08; text-overflow: ellipsis; white-space: nowrap; }
 .stats-summary-card.income strong { color: var(--green); }
+.stats-summary-card.net strong { color: var(--green); }
 .stats-summary-card.expense strong, .stats-summary-card strong.negative { color: var(--red-dark); }
 .stats-summary-card small { margin-top: 4px; color: #a09b8f; font-size: .56rem; line-height: 1.2; }
 .annual-sheet { margin-top: 18px; padding: 20px 16px 18px; }
@@ -832,7 +833,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, .segmented-cont
   .stats-summary-grid { gap: 8px; }
   .stats-summary-card { grid-template-columns: 32px minmax(0, 1fr); gap: 7px; min-height: 82px; padding: 10px 8px; }
   .stats-summary-icon { width: 32px; height: 32px; }
-  .stats-summary-icon svg { width: 19px; height: 19px; }
+  .stats-summary-icon img { width: 26px; height: 26px; }
   .stats-summary-card strong { font-size: .82rem; }
   .stats-card-heading { align-items: center; }
 }

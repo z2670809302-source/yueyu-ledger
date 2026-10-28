@@ -23,7 +23,7 @@
     <link rel="preload" as="image" href="./assets/illustrations/categories/daily.webp?v=2.212" type="image/webp" />
     <link rel="preload" as="image" href="./assets/illustrations/categories/special.webp?v=2.212" type="image/webp" />
     <title>厘清 · 私人记账本</title>
-    <link rel="stylesheet" href="./styles.css?v=58" />
+    <link rel="stylesheet" href="./styles.css?v=59" />
   </head>
   <body>
     <main class="app-shell">
@@ -266,19 +266,19 @@
 
         <section class="stats-summary-grid" aria-label="年度财务概览">
           <article class="stats-summary-card income">
-            <span class="stats-summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8.5h14v9H5zM8 5.5h8M12 5.5v7m-3-3 3 3 3-3"/></svg></span>
+            <span class="stats-summary-icon" aria-hidden="true"><img src="./assets/illustrations/categories/receivable.webp?v=2.212" alt="" /></span>
             <div><span>年度收入</span><strong id="statsAnnualIncome">¥0.00</strong><small>全年实际到账</small></div>
           </article>
           <article class="stats-summary-card expense">
-            <span class="stats-summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 5.5h12v13H6zM9 9h6m-6 3h6m-6 3h3"/></svg></span>
+            <span class="stats-summary-icon" aria-hidden="true"><img src="./assets/illustrations/categories/daily.webp?v=2.212" alt="" /></span>
             <div><span>年度支出</span><strong id="statsAnnualExpense">¥0.00</strong><small>全年实际支出</small></div>
           </article>
           <article class="stats-summary-card net">
-            <span class="stats-summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7h10M12 4v6m-5 7h10"/></svg></span>
+            <span class="stats-summary-icon" aria-hidden="true"><img src="./assets/illustrations/nav-stats.webp?v=2.212" alt="" /></span>
             <div><span>年度结余</span><strong id="statsAnnualNet">¥0.00</strong><small>收入减去支出</small></div>
           </article>
           <article class="stats-summary-card balance">
-            <span class="stats-summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.5 7.5h15v10h-15zM7 7.5v-2h9v2m0 5h3.5"/></svg></span>
+            <span class="stats-summary-icon" aria-hidden="true"><img src="./assets/illustrations/nav-ledger.webp?v=2.212" alt="" /></span>
             <div><span>最新月末结余</span><strong id="statsLatestBalance">¥0.00</strong><small>截至当前月份</small></div>
           </article>
         </section>
@@ -540,6 +540,6 @@
     </dialog>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script type="module" src="./app.js?v=52"></script>
+    <script type="module" src="./app.js?v=53"></script>
   </body>
 </html>

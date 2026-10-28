@@ -404,7 +404,7 @@ try {
   assert.equal(stats.summaryColumns, 2);
   assert.equal(stats.annualIncome, "¥9,800.00");
   assert.equal(stats.annualExpense, "¥2,600.00");
-  assert.equal(stats.annualNet, "+¥7,200.00");
+  assert.equal(stats.annualNet, "¥7,200.00");
   assert.equal(stats.latestBalance, "¥7,200.00");
   assert.deepEqual(stats.sectionOrder, [...stats.sectionOrder].sort((left, right) => left - right));
   assert.equal(stats.subtitle, "✦年度收支统计");

@@ -273,7 +273,7 @@ function renderStats() {
   $("#statsYearTitle").textContent = `${statsYear} 年`;
   $("#statsAnnualIncome").textContent = formatMoney(annualIncome);
   $("#statsAnnualExpense").textContent = formatMoney(annualExpense);
-  $("#statsAnnualNet").textContent = formatMoney(annualNet, true);
+  $("#statsAnnualNet").textContent = formatMoney(annualNet);
   $("#statsAnnualNet").classList.toggle("negative", annualNet < 0);
   $("#statsLatestBalance").textContent = formatMoney(latestBalance);
   $("#statsLatestBalance").classList.toggle("negative", latestBalance < 0);
