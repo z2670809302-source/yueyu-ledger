@@ -797,7 +797,12 @@ try {
   }
   await call("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
 
-  await evaluate("document.querySelector('[data-category=\"daily\"]').click(); true");
+  const detailStartsAtTop = await evaluate(`(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight);
+    document.querySelector('[data-category="daily"]').click();
+    return window.scrollY === 0;
+  })()`);
+  assert.equal(detailStartsAtTop, true);
   const detailMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/detail-mobile.png", Buffer.from(detailMobile.data, "base64"));
   await evaluate("document.querySelector('#detailBack').click(); true");
@@ -825,8 +830,8 @@ try {
   await delay(500);
   assert.equal(await evaluate("document.querySelector('#updateNotice').hidden"), true);
 
-  await call("Page.navigate", { url: "http://localhost:4174/?preview=56" });
-  await waitFor("document.readyState === 'complete' && sessionStorage.getItem('liqing-preview-reset-56') === '1'");
+  await call("Page.navigate", { url: "http://localhost:4174/?preview=62" });
+  await waitFor("document.readyState === 'complete' && sessionStorage.getItem('liqing-preview-reset-62') === '1'");
   const localPreviewCacheCleared = await waitFor(`(async () => {
     const registrations = await navigator.serviceWorker.getRegistrations();
     const keys = await caches.keys();

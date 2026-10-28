@@ -475,7 +475,7 @@ function showView(viewId) {
     const activeView = ["detailView", "searchView"].includes(viewId) ? "ledgerView" : viewId === "manageView" ? "statsView" : viewId;
     item.classList.toggle("active", item.dataset.view === activeView);
   });
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: "auto" });
 }
 
 function escapeHtml(value) {
