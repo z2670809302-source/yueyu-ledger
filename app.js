@@ -38,16 +38,16 @@ const categoryIcons = {
   special: '<img src="./assets/illustrations/categories/special.webp?v=2.212" alt="" decoding="sync" />'
 };
 const subcategoryPresets = {
-  salary: [["基本工资", "💵"], ["绩效奖金", "🏆"], ["津贴补贴", "🎫"], ["加班费", "⏰"], ["兼职副业", "💻"], ["其他收入", "🪙"]],
-  receivable: [["转账收款", "📲"], ["报销到账", "🧾"], ["借款归还", "🤝"], ["红包礼金", "🧧"], ["退款返现", "↩️"], ["其他收款", "💰"]],
-  repayment: [["花呗", "🌼"], ["信用卡", "💳"], ["房贷", "🏠"], ["车贷", "🚗"], ["消费贷", "🧮"], ["其他还款", "📅"]],
-  rent: [["房租", "🏡"], ["物业费", "🏢"], ["水费", "💧"], ["电费", "💡"], ["燃气费", "🔥"], ["宽带费", "📶"]],
-  daily: [["吃饭", "🍚"], ["买菜", "🥬"], ["交通出行", "🚌"], ["日用品", "🛍️"], ["通讯", "📱"], ["医疗", "🩹"]],
-  special: [["旅行", "🧳"], ["人情礼金", "🧧"], ["礼物", "🎁"], ["大件购物", "🛋️"], ["维修", "🧰"], ["学习提升", "📚"]]
+  salary: [["基本工资", "💵"], ["绩效奖金", "🏆"], ["津贴补贴", "🎫"], ["加班费", "⏰"], ["兼职副业", "💻"], ["年终奖", "🧨"], ["提成佣金", "📈"], ["其他", "🪙"]],
+  receivable: [["转账收款", "📲"], ["报销到账", "🧾"], ["借款归还", "🤝"], ["红包礼金", "🧧"], ["退款返现", "↩️"], ["利息收入", "🏦"], ["二手转卖", "♻️"], ["其他", "💰"]],
+  repayment: [["花呗", "🌼"], ["信用卡", "💳"], ["房贷", "🏠"], ["车贷", "🚗"], ["消费贷", "🧮"], ["借款归还", "🤝"], ["分期付款", "🗓️"], ["其他", "📅"]],
+  rent: [["房租", "🏡"], ["物业费", "🏢"], ["水费", "💧"], ["电费", "💡"], ["燃气费", "🔥"], ["宽带费", "📶"], ["家居维修", "🧰"], ["其他", "🗝️"]],
+  daily: [["吃饭", "🍚"], ["零食", "🍪"], ["买菜", "🥬"], ["交通出行", "🚌"], ["日用品", "🛍️"], ["通讯", "📱"], ["医疗", "🩹"], ["娱乐", "🎬"], ["服饰", "👕"], ["其他", "🧺"]],
+  special: [["旅行", "🧳"], ["人情礼金", "🧧"], ["礼物", "🎁"], ["大件购物", "🛋️"], ["维修", "🧰"], ["学习提升", "📚"], ["宠物", "🐾"], ["保险", "🛡️"], ["其他", "✨"]]
 };
-const subcategoryIcons = Object.fromEntries(
-  Object.values(subcategoryPresets).flat().map(([label, icon]) => [label, icon])
-);
+function subcategoryIcon(category, label) {
+  return subcategoryPresets[category]?.find(([name]) => name === label)?.[1] || "✏️";
+}
 
 function loadState() {
   try {
@@ -178,6 +178,81 @@ function annualStats() {
   });
 }
 
+function annualBalanceTrend() {
+  const now = new Date();
+  const monthCount = statsYear < now.getFullYear() ? 12 : statsYear === now.getFullYear() ? now.getMonth() + 1 : 0;
+  return Array.from({ length: monthCount }, (_, index) => {
+    const key = `${statsYear}-${String(index + 1).padStart(2, "0")}`;
+    const balance = monthOpeningBalance(state.openingBalance, state.openingMonth, state.entries, offsetMonthKey(key, 1));
+    return { month: index + 1, balance };
+  });
+}
+
+function renderBalanceTrend() {
+  const points = annualBalanceTrend();
+  const target = $("#balanceTrend");
+  if (!points.length) {
+    target.innerHTML = '<p class="annual-empty">这一年还没有月末结余</p>';
+    target.setAttribute("aria-label", "这一年还没有月末结余");
+    return;
+  }
+  const width = 320;
+  const height = 166;
+  const padding = { top: 14, right: 10, bottom: 24, left: 10 };
+  const values = points.map((item) => item.balance);
+  const rawMin = Math.min(...values);
+  const rawMax = Math.max(...values);
+  const spread = Math.max(1, rawMax - rawMin);
+  const min = rawMin - spread * .12;
+  const max = rawMax + spread * .12;
+  const plotWidth = width - padding.left - padding.right;
+  const plotHeight = height - padding.top - padding.bottom;
+  const coordinates = points.map((item, index) => ({
+    ...item,
+    x: padding.left + (points.length === 1 ? plotWidth / 2 : index / (points.length - 1) * plotWidth),
+    y: padding.top + (max - item.balance) / (max - min) * plotHeight
+  }));
+  const line = coordinates.map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
+  const area = `${padding.left},${height - padding.bottom} ${line} ${coordinates.at(-1).x.toFixed(1)},${height - padding.bottom}`;
+  const labels = coordinates.filter((_, index) => index === 0 || index === coordinates.length - 1 || (index + 1) % 3 === 0);
+  target.setAttribute("aria-label", `${statsYear}年月末结余走势，从${formatMoney(values[0])}到${formatMoney(values.at(-1))}`);
+  target.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" aria-hidden="true" preserveAspectRatio="none">
+      <defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9ed35" stop-opacity=".28"/><stop offset="1" stop-color="#b9ed35" stop-opacity="0"/></linearGradient></defs>
+      <line class="trend-grid" x1="${padding.left}" y1="${padding.top + plotHeight * .25}" x2="${width - padding.right}" y2="${padding.top + plotHeight * .25}"/>
+      <line class="trend-grid" x1="${padding.left}" y1="${padding.top + plotHeight * .75}" x2="${width - padding.right}" y2="${padding.top + plotHeight * .75}"/>
+      <polygon class="trend-area" points="${area}"/>
+      <polyline class="trend-line" points="${line}"/>
+      ${coordinates.map((point) => `<circle class="trend-point" cx="${point.x}" cy="${point.y}" r="4"><title>${point.month}月 ${formatMoney(point.balance)}</title></circle>`).join("")}
+      ${labels.map((point) => `<text class="trend-label" x="${point.x}" y="${height - 6}">${point.month}月</text>`).join("")}
+    </svg>`;
+}
+
+function renderAnnualExpensePie(months) {
+  const items = Object.entries(categories)
+    .filter(([, category]) => category.direction === "expense")
+    .map(([key, category], index) => ({
+      label: category.label,
+      color: statsColors.expense[index],
+      amount: months.reduce((total, month) => total + month.summary.categories[key].actual, 0)
+    }))
+    .filter((item) => item.amount > 0);
+  const total = items.reduce((sum, item) => sum + item.amount, 0);
+  let angle = 0;
+  const stops = items.map((item) => {
+    const start = angle;
+    angle += item.amount / total * 360;
+    return `${item.color} ${start}deg ${angle}deg`;
+  });
+  $("#annualExpensePie").style.background = total ? `conic-gradient(${stops.join(",")})` : "conic-gradient(#eee9dc 0 360deg)";
+  $("#annualExpensePie").setAttribute("aria-label", total ? `${statsYear}年支出分类占比` : `${statsYear}年没有实际支出`);
+  $("#annualExpensePieTotal").textContent = formatMoney(total);
+  $("#annualExpenseLegend").innerHTML = items.map((item) => `
+    <div><i style="--legend-color:${item.color}"></i><span>${item.label}</span><strong>${Math.round(item.amount / total * 100)}%</strong></div>
+  `).join("");
+  $("#annualExpenseEmpty").hidden = total > 0;
+}
+
 function renderStats() {
   const months = annualStats();
   const annualTotal = months.reduce((total, item) => total + item.total, 0);
@@ -203,6 +278,8 @@ function renderStats() {
   $("#showExpense").setAttribute("aria-pressed", String(statsDirection === "expense"));
   $("#showIncome").classList.toggle("active", statsDirection === "income");
   $("#showIncome").setAttribute("aria-pressed", String(statsDirection === "income"));
+  renderBalanceTrend();
+  renderAnnualExpensePie(months);
 }
 
 function openStatsDetail(key) {
@@ -296,7 +373,7 @@ function renderDetail() {
           const detailLabel = [entry.note && subcategory ? subcategory : "", entry.paymentMethod === "huabei" ? "花呗 · 下月还款" : "", calculation || (!entry.paymentMethod || entry.paymentMethod === "cash" ? "实际" : "")]
             .filter(Boolean).join(" · ");
           return `<button class="entry-item detail-entry" data-entry-id="${entry.id}">
-            <i class="entry-subcategory-icon" aria-hidden="true">${subcategoryIcons[entry.subcategory] || "✏️"}</i>
+            <i class="entry-subcategory-icon" aria-hidden="true">${subcategoryIcon(entry.category, entry.subcategory)}</i>
             <span class="entry-main"><strong>${note}</strong><small>${detailLabel}</small></span>
             <span class="entry-amount ${category.direction}">${sign}${formatMoney(entry.amount)}</span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
@@ -412,8 +489,49 @@ function appendAmountOperator(operator) {
   input.focus();
 }
 
+function setSubcategoryMenu(open) {
+  const menu = $("#subcategorySuggestions");
+  menu.hidden = !open;
+  $("#subcategoryToggle").setAttribute("aria-expanded", String(open));
+}
+
+function setSubcategory(value, { custom = false } = {}) {
+  const category = $("#category").value;
+  const normalized = String(value || "").trim().slice(0, 20);
+  $("#subcategory").value = normalized;
+  const display = $("#subcategoryValue");
+  display.classList.toggle("placeholder", !normalized);
+  display.innerHTML = normalized
+    ? `<i aria-hidden="true">${custom ? "✏️" : subcategoryIcon(category, normalized)}</i><span>${escapeHtml(normalized)}</span>`
+    : "<span>选择小分类</span>";
+  $("#subcategoryCustomField").hidden = !custom;
+  if (custom && $("#subcategoryCustom").value !== normalized) $("#subcategoryCustom").value = normalized;
+  if (!custom) $("#subcategoryCustom").value = "";
+  $("#subcategorySuggestions").querySelectorAll("[data-subcategory]").forEach((option) => {
+    option.setAttribute("aria-selected", String(option.dataset.subcategory === normalized));
+  });
+}
+
+function renderSubcategoryPicker() {
+  const category = $("#category").value;
+  const presets = subcategoryPresets[category] || [];
+  const current = $("#subcategory").value.trim();
+  $("#subcategorySuggestions").innerHTML = `${presets.map(([label, icon]) => `
+    <button type="button" role="option" data-subcategory="${escapeHtml(label)}" aria-selected="${label === current}">
+      <i aria-hidden="true">${icon}</i><span>${escapeHtml(label)}</span><b aria-hidden="true">✓</b>
+    </button>`).join("")}
+    <button class="custom-subcategory-option" type="button" role="option" data-subcategory-custom aria-selected="false">
+      <i aria-hidden="true">✏️</i><span>自己输入</span><b aria-hidden="true">›</b>
+    </button>`;
+  const custom = Boolean(current) && !presets.some(([label]) => label === current);
+  setSubcategory(current, { custom });
+  setSubcategoryMenu(false);
+}
+
 function openEntryForm({ recordType = "actual", category = "daily", id = null } = {}) {
   entryForm.reset();
+  setSubcategory("");
+  setSubcategoryMenu(false);
   amountExpressionDraft = "";
   $("#entryId").value = "";
   $("#deleteEntry").hidden = true;
@@ -448,8 +566,7 @@ function openEntryForm({ recordType = "actual", category = "daily", id = null } 
 function updateFormKind() {
   const expected = entryForm.elements.recordType.value === "expected";
   $("#categoryDisplay").textContent = categories[$("#category").value]?.label || "";
-  $("#subcategorySuggestions").innerHTML = (subcategoryPresets[$("#category").value] || [])
-    .map(([label, icon]) => `<button type="button" data-subcategory="${label}"><i aria-hidden="true">${icon}</i><span>${label}</span></button>`).join("");
+  renderSubcategoryPicker();
   $("#actualDateField").hidden = expected;
   $("#actualNoteField").hidden = expected;
   $("#actualSubcategoryField").hidden = expected;
@@ -481,6 +598,7 @@ function updateFormKind() {
 }
 
 function closeEntryForm() {
+  setSubcategoryMenu(false);
   entryDialog.close();
 }
 
@@ -598,6 +716,7 @@ $("#calibrateBalance").addEventListener("click", () => {
 });
 
 document.addEventListener("click", (event) => {
+  if (!event.target.closest("#actualSubcategoryField")) setSubcategoryMenu(false);
   const searchEntry = event.target.closest("[data-search-entry-id]");
   if (searchEntry) {
     const entry = state.entries.find((item) => item.id === searchEntry.dataset.searchEntryId);
@@ -618,12 +737,27 @@ document.addEventListener("click", (event) => {
 });
 
 entryForm.elements.recordType.forEach((radio) => radio.addEventListener("change", updateFormKind));
-$("#category").addEventListener("change", updateFormKind);
+$("#category").addEventListener("change", () => {
+  setSubcategory("");
+  updateFormKind();
+});
+$("#subcategoryToggle").addEventListener("click", () => {
+  setSubcategoryMenu($("#subcategorySuggestions").hidden);
+});
 $("#subcategorySuggestions").addEventListener("click", (event) => {
+  const customOption = event.target.closest("[data-subcategory-custom]");
+  if (customOption) {
+    setSubcategory("", { custom: true });
+    setSubcategoryMenu(false);
+    window.setTimeout(() => $("#subcategoryCustom").focus(), 0);
+    return;
+  }
   const option = event.target.closest("[data-subcategory]");
   if (!option) return;
-  $("#subcategory").value = option.dataset.subcategory;
+  setSubcategory(option.dataset.subcategory);
+  setSubcategoryMenu(false);
 });
+$("#subcategoryCustom").addEventListener("input", (event) => setSubcategory(event.target.value, { custom: true }));
 $("#amount").addEventListener("input", updateAmountResult);
 $("#entryDate").addEventListener("input", updateEntryLunarDate);
 $("#entryDate").addEventListener("change", updateEntryLunarDate);

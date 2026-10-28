@@ -112,14 +112,18 @@ try {
     document.querySelector('#category').value = 'daily';
     document.querySelector('#entryDate').value = '2026-09-06';
     document.querySelector('#entryDate').dispatchEvent(new Event('input', { bubbles: true }));
-    document.querySelector('#subcategory').value = '医疗';
     document.querySelector('#note').value = '花呗买药';
     form.elements.paymentMethod.value = 'huabei';
     const dateRect = document.querySelector('.date-input-display').getBoundingClientRect();
     const categoryRect = document.querySelector('.select-input-display').getBoundingClientRect();
     const dateIcon = document.querySelector('.date-input-icon');
-    const suggestionsRect = document.querySelector('#subcategorySuggestions').getBoundingClientRect();
-    const subcategoryInputRect = document.querySelector('#subcategory').getBoundingClientRect();
+    const toggle = document.querySelector('#subcategoryToggle');
+    toggle.click();
+    const suggestions = document.querySelector('#subcategorySuggestions');
+    const suggestionsRect = suggestions.getBoundingClientRect();
+    const toggleRect = toggle.getBoundingClientRect();
+    const snack = document.querySelector('[data-subcategory="零食"]');
+    const other = document.querySelector('[data-subcategory="其他"]');
     return {
       operatorText: [...document.querySelectorAll('.amount-operator')].map((button) => button.textContent).join(''),
       operatorColor: getComputedStyle(document.querySelector('.amount-operator')).color,
@@ -130,14 +134,14 @@ try {
       dateIconVisible: Boolean(dateIcon) && getComputedStyle(dateIcon).display !== 'none',
       displayedDate: document.querySelector('#entryDateDisplay').textContent,
       displayedCategory: document.querySelector('#categoryDisplay').textContent,
-      subcategoryColumns: getComputedStyle(document.querySelector('#subcategorySuggestions')).gridTemplateColumns.split(' ').length,
-      subcategoryWidthMatchesInput: Math.abs(suggestionsRect.width - subcategoryInputRect.width) < 0.5,
-      subcategoryLabelsFit: [...document.querySelectorAll('#subcategorySuggestions span')].every((label) => label.scrollWidth <= label.clientWidth),
-      subcategoryContentAligned: (() => {
-        const icon = document.querySelector('#subcategorySuggestions i').getBoundingClientRect();
-        const label = document.querySelector('#subcategorySuggestions span').getBoundingClientRect();
-        return Math.abs((icon.top + icon.height / 2) - (label.top + label.height / 2)) < 0.5;
-      })()
+      subcategoryInitiallyClosed: false,
+      subcategoryMenuVisible: !suggestions.hidden,
+      subcategoryMenuScrollable: suggestions.scrollHeight > suggestions.clientHeight,
+      subcategoryWidthMatchesToggle: Math.abs(suggestionsRect.width - toggleRect.width) < 0.5,
+      subcategoryOptionCount: suggestions.querySelectorAll('[data-subcategory]').length,
+      snackIcon: snack?.querySelector('i')?.textContent,
+      hasOther: Boolean(other),
+      hasCustom: Boolean(suggestions.querySelector('[data-subcategory-custom]'))
     };
   })()`);
   assert.equal(entryFormLayout.operatorText, "＋－＝");
@@ -149,54 +153,47 @@ try {
   assert.equal(entryFormLayout.dateIconVisible, true);
   assert.equal(entryFormLayout.displayedDate, "2026/09/06");
   assert.equal(entryFormLayout.displayedCategory, "日常开销");
-  assert.equal(entryFormLayout.subcategoryColumns, 4);
-  assert.equal(entryFormLayout.subcategoryWidthMatchesInput, true);
-  assert.equal(entryFormLayout.subcategoryLabelsFit, true);
-  assert.equal(entryFormLayout.subcategoryContentAligned, true);
+  assert.equal(entryFormLayout.subcategoryMenuVisible, true);
+  assert.equal(entryFormLayout.subcategoryMenuScrollable, true);
+  assert.equal(entryFormLayout.subcategoryWidthMatchesToggle, true);
+  assert.ok(entryFormLayout.subcategoryOptionCount >= 10);
+  assert.equal(entryFormLayout.snackIcon, "🍪");
+  assert.equal(entryFormLayout.hasOther, true);
+  assert.equal(entryFormLayout.hasCustom, true);
   await mkdir(".impeccable/review", { recursive: true });
   const huabeiMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/huabei-mobile.png", Buffer.from(huabeiMobile.data, "base64"));
-  await call("Emulation.setDeviceMetricsOverride", { width: 820, height: 760, deviceScaleFactor: 1, mobile: false });
-  const wideSubcategories = await evaluate(`(() => {
-    const buttons = [...document.querySelectorAll('#subcategorySuggestions button')];
-    const firstIcon = buttons[0].querySelector('i').getBoundingClientRect();
-    const firstLabel = buttons[0].querySelector('span').getBoundingClientRect();
-    return {
-      labelsFit: buttons.every((button) => button.querySelector('span').scrollWidth <= button.querySelector('span').clientWidth),
-      contentAligned: Math.abs((firstIcon.top + firstIcon.height / 2) - (firstLabel.top + firstLabel.height / 2)) < 0.5,
-      dialogWideEnough: document.querySelector('#entryDialog').getBoundingClientRect().width >= 700,
-      radiusMatchesInput: getComputedStyle(buttons[0]).borderRadius === getComputedStyle(document.querySelector('#subcategory')).borderRadius
-    };
-  })()`);
-  assert.equal(wideSubcategories.labelsFit, true);
-  assert.equal(wideSubcategories.contentAligned, true);
-  assert.equal(wideSubcategories.dialogWideEnough, true);
-  assert.equal(wideSubcategories.radiusMatchesInput, true);
-  const subcategoriesWide = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
-  await writeFile(".impeccable/review/subcategories-wide.png", Buffer.from(subcategoriesWide.data, "base64"));
-  await call("Emulation.setDeviceMetricsOverride", { width: 740, height: 760, deviceScaleFactor: 1, mobile: false });
-  assert.equal(await evaluate("[...document.querySelectorAll('#subcategorySuggestions span')].every((label) => label.scrollWidth <= label.clientWidth)"), true);
-  const subcategoriesMedium = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
-  await writeFile(".impeccable/review/subcategories-medium.png", Buffer.from(subcategoriesMedium.data, "base64"));
-  await call("Emulation.setDeviceMetricsOverride", { width: 632, height: 760, deviceScaleFactor: 1, mobile: false });
-  const compactSubcategories = await evaluate(`(() => ({
-    labelsFit: [...document.querySelectorAll('#subcategorySuggestions span')].every((label) => label.scrollWidth <= label.clientWidth),
-    iconWidth: document.querySelector('#subcategorySuggestions i').getBoundingClientRect().width,
-    fontSize: parseFloat(getComputedStyle(document.querySelector('#subcategorySuggestions button')).fontSize),
-    leftAligned: getComputedStyle(document.querySelector('#subcategorySuggestions button')).justifyContent === 'flex-start',
-    gapInCharacters: parseFloat(getComputedStyle(document.querySelector('#subcategorySuggestions button')).gap) / parseFloat(getComputedStyle(document.querySelector('#subcategorySuggestions button')).fontSize)
-  }))()`);
-  assert.equal(compactSubcategories.labelsFit, true);
-  assert.equal(compactSubcategories.leftAligned, true);
-  assert.ok(Math.abs(compactSubcategories.gapInCharacters - 1) < 0.05);
-  const subcategoriesCompact = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
-  await writeFile(".impeccable/review/subcategories-compact.png", Buffer.from(subcategoriesCompact.data, "base64"));
-  const subcategoryFocus = await evaluate(`(() => {
+  const subcategorySelection = await evaluate(`(() => {
     document.querySelector('[data-subcategory="医疗"]').click();
-    return document.activeElement?.id || '';
+    const selected = document.querySelector('#subcategory').value;
+    document.querySelector('#subcategoryToggle').click();
+    document.querySelector('[data-subcategory-custom]').click();
+    const custom = document.querySelector('#subcategoryCustom');
+    custom.value = '咖啡';
+    custom.dispatchEvent(new Event('input', { bubbles: true }));
+    const customValue = document.querySelector('#subcategory').value;
+    const categorySelect = document.querySelector('#category');
+    const coverage = {};
+    for (const category of ['salary', 'receivable', 'repayment', 'rent', 'daily', 'special']) {
+      categorySelect.value = category;
+      categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
+      coverage[category] = {
+        count: document.querySelectorAll('#subcategorySuggestions [data-subcategory]').length,
+        hasOther: Boolean(document.querySelector('#subcategorySuggestions [data-subcategory="其他"]'))
+      };
+    }
+    categorySelect.value = 'daily';
+    categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
+    document.querySelector('#subcategoryToggle').click();
+    document.querySelector('[data-subcategory="医疗"]').click();
+    document.querySelector('#entryForm').elements.paymentMethod.value = 'huabei';
+    return { selected, customValue, coverage, finalValue: document.querySelector('#subcategory').value, menuClosed: document.querySelector('#subcategorySuggestions').hidden };
   })()`);
-  assert.notEqual(subcategoryFocus, "subcategory");
-  await call("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
+  assert.equal(subcategorySelection.selected, "医疗");
+  assert.equal(subcategorySelection.customValue, "咖啡");
+  assert.equal(Object.values(subcategorySelection.coverage).every((item) => item.count >= 8 && item.hasOther), true);
+  assert.equal(subcategorySelection.finalValue, "医疗");
+  assert.equal(subcategorySelection.menuClosed, true);
   await evaluate("document.querySelector('#entryForm').requestSubmit(); true");
 
   const result = await evaluate(`(() => ({
@@ -369,13 +366,17 @@ try {
       total: document.querySelector('#annualTotal').textContent,
       active: document.querySelector('.stats-direction .active').textContent,
       monthsWithData: document.querySelectorAll('#annualChart .annual-month:not(:disabled)').length,
+      trendPoints: document.querySelectorAll('#balanceTrend .trend-point').length,
+      trendLabel: document.querySelector('#balanceTrend').getAttribute('aria-label'),
+      annualPieTotal: document.querySelector('#annualExpensePieTotal').textContent,
+      annualPieLegend: document.querySelectorAll('#annualExpenseLegend > div').length,
       subtitle: document.querySelector('#statsView .brand-dates').textContent.trim(),
       addButtonLeft: document.querySelector('#addEntry').getBoundingClientRect().left,
       addButtonTop: document.querySelector('#addEntry').getBoundingClientRect().top,
-      expenseRect: (() => { const rect = document.querySelector('#showExpense').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })(),
-      incomeRect: (() => { const rect = document.querySelector('#showIncome').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })(),
-      expenseLabelRect: (() => { const rect = document.querySelector('#showExpense span').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })(),
-      incomeLabelRect: (() => { const rect = document.querySelector('#showIncome span').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })()
+      expenseRect: (() => { const parent = document.querySelector('.stats-direction').getBoundingClientRect(); const rect = document.querySelector('#showExpense').getBoundingClientRect(); return { left: rect.left - parent.left, top: rect.top - parent.top, width: rect.width, height: rect.height }; })(),
+      incomeRect: (() => { const parent = document.querySelector('.stats-direction').getBoundingClientRect(); const rect = document.querySelector('#showIncome').getBoundingClientRect(); return { left: rect.left - parent.left, top: rect.top - parent.top, width: rect.width, height: rect.height }; })(),
+      expenseLabelRect: (() => { const parent = document.querySelector('#showExpense').getBoundingClientRect(); const rect = document.querySelector('#showExpense span').getBoundingClientRect(); return { left: rect.left - parent.left, top: rect.top - parent.top, width: rect.width, height: rect.height }; })(),
+      incomeLabelRect: (() => { const parent = document.querySelector('#showIncome').getBoundingClientRect(); const rect = document.querySelector('#showIncome span').getBoundingClientRect(); return { left: rect.left - parent.left, top: rect.top - parent.top, width: rect.width, height: rect.height }; })()
     };
   })()`);
   assert.equal(stats.visible, true);
@@ -383,11 +384,22 @@ try {
   assert.equal(stats.total, "¥2,600.00");
   assert.equal(stats.active, "支出");
   assert.equal(stats.monthsWithData, 1);
+  assert.equal(stats.trendPoints, 10);
+  assert.match(stats.trendLabel, /月末结余走势/);
+  assert.equal(stats.annualPieTotal, "¥2,600.00");
+  assert.equal(stats.annualPieLegend, 2);
   assert.equal(stats.subtitle, "✦年度收支统计");
   assert.equal(stats.addButtonLeft, result.addButtonLeft);
   assert.equal(stats.addButtonTop, result.addButtonTop);
   const statsMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/stats-mobile.png", Buffer.from(statsMobile.data, "base64"));
+  await evaluate("document.querySelector('#balanceTrend').scrollIntoView({block: 'center'}); true");
+  const statsInsightsMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/stats-insights-mobile.png", Buffer.from(statsInsightsMobile.data, "base64"));
+  await evaluate("document.querySelector('#annualExpensePie').scrollIntoView({block: 'center'}); true");
+  const statsPieMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/stats-pie-mobile.png", Buffer.from(statsPieMobile.data, "base64"));
+  await evaluate("document.documentElement.scrollTop = 0; document.body.scrollTop = 0; true");
   const expenseDetail = await evaluate(`(() => {
     document.querySelector('[data-stats-month="2026-09"]').click();
     return {
@@ -410,10 +422,10 @@ try {
     total: document.querySelector('#annualTotal').textContent,
     active: document.querySelector('.stats-direction .active').textContent,
     monthsWithData: document.querySelectorAll('#annualChart .annual-month:not(:disabled)').length,
-    expenseRect: (() => { const rect = document.querySelector('#showExpense').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })(),
-    incomeRect: (() => { const rect = document.querySelector('#showIncome').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })(),
-    expenseLabelRect: (() => { const rect = document.querySelector('#showExpense span').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })(),
-    incomeLabelRect: (() => { const rect = document.querySelector('#showIncome span').getBoundingClientRect(); return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }; })()
+    expenseRect: (() => { const parent = document.querySelector('.stats-direction').getBoundingClientRect(); const rect = document.querySelector('#showExpense').getBoundingClientRect(); return { left: rect.left - parent.left, top: rect.top - parent.top, width: rect.width, height: rect.height }; })(),
+    incomeRect: (() => { const parent = document.querySelector('.stats-direction').getBoundingClientRect(); const rect = document.querySelector('#showIncome').getBoundingClientRect(); return { left: rect.left - parent.left, top: rect.top - parent.top, width: rect.width, height: rect.height }; })(),
+    expenseLabelRect: (() => { const parent = document.querySelector('#showExpense').getBoundingClientRect(); const rect = document.querySelector('#showExpense span').getBoundingClientRect(); return { left: rect.left - parent.left, top: rect.top - parent.top, width: rect.width, height: rect.height }; })(),
+    incomeLabelRect: (() => { const parent = document.querySelector('#showIncome').getBoundingClientRect(); const rect = document.querySelector('#showIncome span').getBoundingClientRect(); return { left: rect.left - parent.left, top: rect.top - parent.top, width: rect.width, height: rect.height }; })()
   }))()`);
   assert.equal(incomeStats.total, "¥9,800.00");
   assert.equal(incomeStats.active, "收入");

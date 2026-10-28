@@ -23,7 +23,7 @@
     <link rel="preload" as="image" href="./assets/illustrations/categories/daily.webp?v=2.212" type="image/webp" />
     <link rel="preload" as="image" href="./assets/illustrations/categories/special.webp?v=2.212" type="image/webp" />
     <title>厘清 · 私人记账本</title>
-    <link rel="stylesheet" href="./styles.css?v=55" />
+    <link rel="stylesheet" href="./styles.css?v=56" />
   </head>
   <body>
     <main class="app-shell">
@@ -280,6 +280,32 @@
           </div>
           <p class="annual-empty" id="annualEmpty" hidden>这一年还没有实际支出</p>
         </section>
+
+        <section class="stats-insight" aria-labelledby="balanceTrendTitle">
+          <div class="stats-insight-heading">
+            <div>
+              <h2 id="balanceTrendTitle">月末结余走势</h2>
+              <p>看这一年余额是增加还是减少</p>
+            </div>
+          </div>
+          <div class="balance-trend" id="balanceTrend" role="img" aria-label="月末结余折线图"></div>
+        </section>
+
+        <section class="stats-insight" aria-labelledby="annualExpensePieTitle">
+          <div class="stats-insight-heading">
+            <div>
+              <h2 id="annualExpensePieTitle">年度支出构成</h2>
+              <p>看看钱主要花在了哪里</p>
+            </div>
+          </div>
+          <div class="annual-pie-layout">
+            <div class="annual-expense-pie" id="annualExpensePie" role="img" aria-label="年度支出分类占比">
+              <span><small>年度支出</small><strong id="annualExpensePieTotal">¥0.00</strong></span>
+            </div>
+            <div class="annual-expense-legend" id="annualExpenseLegend"></div>
+          </div>
+          <p class="annual-empty" id="annualExpenseEmpty" hidden>这一年还没有实际支出</p>
+        </section>
       </section>
 
       <section id="manageView" class="view" hidden aria-labelledby="dataTitle">
@@ -453,11 +479,19 @@
           </div>
         </div>
 
-        <label id="actualSubcategoryField">
+        <div class="subcategory-field" id="actualSubcategoryField">
           <span class="field-label">小分类（可选）</span>
-          <input id="subcategory" name="subcategory" type="text" maxlength="20" autocomplete="off" placeholder="选择常用分类或自己输入" />
-          <span class="subcategory-suggestions" id="subcategorySuggestions" aria-label="常用小分类"></span>
-        </label>
+          <input id="subcategory" name="subcategory" type="hidden" />
+          <button class="subcategory-toggle" id="subcategoryToggle" type="button" aria-expanded="false" aria-haspopup="listbox" aria-controls="subcategorySuggestions">
+            <span class="subcategory-value" id="subcategoryValue"><span>选择小分类</span></span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5" /></svg>
+          </button>
+          <div class="subcategory-suggestions" id="subcategorySuggestions" role="listbox" aria-label="常用小分类" hidden></div>
+          <label class="subcategory-custom" id="subcategoryCustomField" hidden>
+            <span>自定义小分类</span>
+            <input id="subcategoryCustom" type="text" maxlength="20" autocomplete="off" placeholder="输入自己的小分类" />
+          </label>
+        </div>
 
         <div id="paymentMethodField">
           <span class="field-label">支付方式</span>
@@ -481,6 +515,6 @@
     </dialog>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script type="module" src="./app.js?v=50"></script>
+    <script type="module" src="./app.js?v=51"></script>
   </body>
 </html>
