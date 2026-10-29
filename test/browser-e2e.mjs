@@ -364,11 +364,7 @@ try {
       visible: !document.querySelector('#statsView').hidden,
       year: document.querySelector('#statsYearTitle').textContent,
       total: document.querySelector('#annualTotal').textContent,
-      chartTitle: document.querySelector('#annualChartTitle').textContent,
       totalLabel: document.querySelector('#annualTotalLabel').textContent,
-      chartLabel: document.querySelector('#annualChart').getAttribute('aria-label'),
-      dayColumns: document.querySelectorAll('#annualChart .annual-month').length,
-      dayAxisColumns: document.querySelectorAll('#annualAxis span').length,
       active: document.querySelector('.stats-direction .active').textContent,
       monthsWithData: document.querySelectorAll('#annualChart .annual-month:not(:disabled)').length,
       trendPoints: document.querySelectorAll('#balanceTrend .trend-point').length,
@@ -404,13 +400,9 @@ try {
   assert.equal(stats.visible, true);
   assert.equal(stats.year, "2026 年");
   assert.equal(stats.total, "¥2,600.00");
-  assert.equal(stats.chartTitle, "9月收支");
-  assert.equal(stats.totalLabel, "本月支出");
-  assert.match(stats.chartLabel, /9月每日支出柱状图/);
-  assert.equal(stats.dayColumns, 30);
-  assert.equal(stats.dayAxisColumns, 30);
+  assert.equal(stats.totalLabel, "9月支出");
   assert.equal(stats.active, "支出");
-  assert.equal(stats.monthsWithData, 3);
+  assert.equal(stats.monthsWithData, 1);
   assert.equal(stats.trendPoints, 10);
   assert.equal(stats.trendMonths, 12);
   assert.equal(stats.trendYLabels, 3);
@@ -438,9 +430,6 @@ try {
   await evaluate("document.querySelector('#annualExpensePie').scrollIntoView({block: 'center'}); true");
   const statsPieMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/stats-pie-mobile.png", Buffer.from(statsPieMobile.data, "base64"));
-  await evaluate("document.querySelector('#annualChart').scrollIntoView({block: 'center'}); true");
-  const statsDailyMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
-  await writeFile(".impeccable/review/stats-daily-mobile.png", Buffer.from(statsDailyMobile.data, "base64"));
   await evaluate("document.documentElement.scrollTop = 0; document.body.scrollTop = 0; true");
   const expenseDetail = await evaluate(`(() => {
     document.querySelector('[data-stats-month="2026-09"]').click();
@@ -798,14 +787,6 @@ try {
     assert.equal(statsLayout.scrollWidth, phone.width);
     assert.equal(statsLayout.cardFits, true);
     if (phone.width === 320) {
-      await evaluate(`(() => {
-        if (!document.querySelector('[data-stats-month]')) {
-          document.querySelector('[data-view="ledgerView"]').click();
-          document.querySelector('#previousMonth').click();
-          document.querySelector('[data-view="statsView"]').click();
-        }
-        return true;
-      })()`);
       const statsScreenshot = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
       await writeFile(".impeccable/review/stats-small-320.png", Buffer.from(statsScreenshot.data, "base64"));
       const detailFits = await evaluate(`(() => {
@@ -861,8 +842,8 @@ try {
   await delay(500);
   assert.equal(await evaluate("document.querySelector('#updateNotice').hidden"), true);
 
-  await call("Page.navigate", { url: "http://localhost:4174/?preview=68" });
-  await waitFor("document.readyState === 'complete' && sessionStorage.getItem('liqing-preview-reset-68') === '1'");
+  await call("Page.navigate", { url: "http://localhost:4174/?preview=69" });
+  await waitFor("document.readyState === 'complete' && sessionStorage.getItem('liqing-preview-reset-69') === '1'");
   const localPreviewCacheCleared = await waitFor(`(async () => {
     const registrations = await navigator.serviceWorker.getRegistrations();
     const keys = await caches.keys();

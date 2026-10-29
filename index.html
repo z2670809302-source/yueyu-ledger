@@ -23,7 +23,7 @@
     <link rel="preload" as="image" href="./assets/illustrations/categories/daily.webp?v=2.2.2" type="image/webp" />
     <link rel="preload" as="image" href="./assets/illustrations/categories/special.webp?v=2.2.2" type="image/webp" />
     <title>厘清 · 私人记账本</title>
-    <link rel="stylesheet" href="./styles.css?v=67" />
+    <link rel="stylesheet" href="./styles.css?v=2.2.2" />
   </head>
   <body>
     <main class="app-shell">
@@ -311,7 +311,7 @@
         <section class="annual-sheet" aria-labelledby="annualChartTitle">
           <div class="stats-card-heading">
             <div>
-              <h2 id="annualChartTitle">本月收支</h2>
+              <h2 id="annualChartTitle">月度收支</h2>
             </div>
             <div class="stats-direction" role="group" aria-label="选择收支类型">
               <button class="active" id="showExpense" type="button" aria-pressed="true"><span>支出</span></button>
@@ -319,12 +319,15 @@
             </div>
           </div>
           <div class="annual-total">
-            <span id="annualTotalLabel">本月支出</span>
+            <span id="annualTotalLabel">月度支出</span>
             <strong id="annualTotal">¥0.00</strong>
           </div>
-          <div class="annual-chart" id="annualChart" aria-label="每日支出柱状图"></div>
-          <div class="annual-axis" id="annualAxis" aria-hidden="true"></div>
-          <p class="annual-empty" id="annualEmpty" hidden>这个月还没有实际支出</p>
+          <div class="annual-chart" id="annualChart" aria-label="每月支出柱状图"></div>
+          <div class="annual-axis" aria-hidden="true">
+            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>
+            <span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span>
+          </div>
+          <p class="annual-empty" id="annualEmpty" hidden>这一年还没有实际支出</p>
         </section>
 
       </section>

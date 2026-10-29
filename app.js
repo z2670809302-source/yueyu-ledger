@@ -178,27 +178,6 @@ function annualStats() {
   });
 }
 
-function monthlyDailyStats() {
-  const month = selectedDate.getMonth() + 1;
-  const key = `${statsYear}-${String(month).padStart(2, "0")}`;
-  const dayCount = new Date(statsYear, month, 0).getDate();
-  const totals = state.entries
-    .filter((entry) => entry.recordType === "actual"
-      && entry.date.startsWith(key)
-      && categories[entry.category]?.direction === statsDirection
-      && !(statsDirection === "expense" && entry.paymentMethod === "huabei"))
-    .reduce((result, entry) => {
-      const day = Number(entry.date.slice(8, 10));
-      result[day] = (result[day] || 0) + Number(entry.amount || 0);
-      return result;
-    }, {});
-  return {
-    key,
-    month,
-    days: Array.from({ length: dayCount }, (_, index) => ({ day: index + 1, total: totals[index + 1] || 0 }))
-  };
-}
-
 function annualBalanceTrend() {
   const now = new Date();
   const monthCount = statsYear < now.getFullYear() ? 12 : statsYear === now.getFullYear() ? now.getMonth() + 1 : 0;
@@ -302,6 +281,7 @@ function renderAnnualExpensePie(months) {
 
 function renderStats() {
   const months = annualStats();
+  const annualTotal = months.reduce((total, item) => total + item.total, 0);
   const annualIncome = months.reduce((total, item) => total + item.summary.actualIncome, 0);
   const annualExpense = months.reduce((total, item) => total + item.summary.actualExpense, 0);
   const annualNet = annualIncome - annualExpense;
@@ -312,12 +292,12 @@ function renderStats() {
     state.entries,
     `${statsYear}-01`
   );
-  const dailyStats = monthlyDailyStats();
-  const monthlyTotal = dailyStats.days.reduce((total, item) => total + item.total, 0);
-  const maxDay = Math.max(1, ...dailyStats.days.map((item) => item.total));
+  const maxMonth = Math.max(1, ...months.map((item) => item.total));
   const directionLabel = statsDirection === "income" ? "收入" : "支出";
-  const today = new Date();
-  const currentKey = monthKey(today);
+  const selectedStatsMonth = selectedDate.getMonth() + 1;
+  const selectedStatsKey = `${statsYear}-${String(selectedStatsMonth).padStart(2, "0")}`;
+  const selectedMonthTotal = months.find((item) => item.key === selectedStatsKey)?.total || 0;
+  const currentKey = monthKey();
 
   $("#statsYearTitle").textContent = `${statsYear} 年`;
   $("#statsAnnualIncome").textContent = formatMoney(annualIncome);
@@ -326,23 +306,19 @@ function renderStats() {
   $("#statsAnnualNet").classList.toggle("negative", annualNet < 0);
   $("#statsLatestBalance").textContent = formatMoney(latestBalance);
   $("#statsLatestBalance").classList.toggle("negative", latestBalance < 0);
-  $("#annualChartTitle").textContent = `${dailyStats.month}月收支`;
-  $("#annualTotalLabel").textContent = `本月${directionLabel}`;
-  $("#annualTotal").textContent = formatMoney(monthlyTotal);
-  $("#annualChart").style.setProperty("--day-count", dailyStats.days.length);
-  $("#annualAxis").style.setProperty("--day-count", dailyStats.days.length);
-  $("#annualChart").setAttribute("aria-label", `${statsYear}年${dailyStats.month}月每日${directionLabel}柱状图`);
-  $("#annualChart").innerHTML = dailyStats.days.map((item) => `
-    <button class="annual-month ${statsDirection}${dailyStats.key === currentKey && item.day === today.getDate() ? " current" : ""}" type="button"
-      ${item.total ? `data-stats-month="${dailyStats.key}"` : "disabled"}
-      aria-label="${dailyStats.month}月${item.day}日${directionLabel} ${formatMoney(item.total)}">
+  $("#annualTotalLabel").textContent = `${selectedStatsMonth}月${directionLabel}`;
+  $("#annualTotal").textContent = formatMoney(selectedMonthTotal);
+  $("#annualChart").setAttribute("aria-label", `每月${directionLabel}柱状图`);
+  $("#annualChart").innerHTML = months.map((item) => `
+    <button class="annual-month ${statsDirection}${item.key === currentKey ? " current" : ""}" type="button"
+      data-stats-month="${item.key}" ${item.total ? "" : "disabled"}
+      aria-label="${item.month}月${directionLabel} ${formatMoney(item.total)}">
       <span class="annual-bar-value">${item.total ? formatMoney(item.total) : ""}</span>
-      <span class="annual-bar" style="--bar-height:${item.total / maxDay * 100}%"></span>
+      <span class="annual-bar" style="--bar-height:${item.total / maxMonth * 100}%"></span>
     </button>
   `).join("");
-  $("#annualAxis").innerHTML = dailyStats.days.map((item) => `<span>${item.day === 1 || item.day % 5 === 0 || item.day === dailyStats.days.length ? item.day : ""}</span>`).join("");
-  $("#annualEmpty").hidden = monthlyTotal > 0;
-  $("#annualEmpty").textContent = `这个月还没有实际${directionLabel}`;
+  $("#annualEmpty").hidden = annualTotal > 0;
+  $("#annualEmpty").textContent = `这一年还没有实际${directionLabel}`;
   $("#showExpense").classList.toggle("active", statsDirection === "expense");
   $("#showExpense").setAttribute("aria-pressed", String(statsDirection === "expense"));
   $("#showIncome").classList.toggle("active", statsDirection === "income");
