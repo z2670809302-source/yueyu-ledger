@@ -15,6 +15,7 @@ let selectedDate = new Date();
 let activeDetailCategory = null;
 let statsYear = new Date().getFullYear();
 let statsDirection = "expense";
+let subcategoryStatsRange = "month";
 let pendingUpdateWorker = null;
 let pendingUpdateVersion = null;
 let reloadForUpdate = false;
@@ -42,7 +43,7 @@ const subcategoryPresets = {
   receivable: [["转账收款", "📲"], ["报销到账", "🧾"], ["借款归还", "🤝"], ["红包礼金", "🧧"], ["退款返现", "↩️"], ["利息收入", "🏦"], ["二手转卖", "♻️"], ["其他", "💰"]],
   repayment: [["花呗", "🌼"], ["信用卡", "💳"], ["房贷", "🏠"], ["车贷", "🚗"], ["消费贷", "🧮"], ["借款归还", "🤝"], ["分期付款", "🗓️"], ["其他", "📅"]],
   rent: [["房租", "🏡"], ["物业费", "🏢"], ["水费", "💧"], ["电费", "💡"], ["燃气费", "🔥"], ["宽带费", "📶"], ["家居维修", "🧰"], ["其他", "🗝️"]],
-  daily: [["吃饭", "🍚"], ["零食", "🍪"], ["买菜", "🥬"], ["交通出行", "🚌"], ["日用品", "🛍️"], ["通讯", "📱"], ["医疗", "🩹"], ["娱乐", "🎬"], ["服饰", "👕"], ["其他", "🧺"]],
+  daily: [["吃饭", "🍚"], ["零食", "🍪"], ["买菜", "🥬"], ["交通出行", "🚌"], ["日用品", "🛍️"], ["通讯", "📱"], ["话费", "☎️"], ["医疗", "🩹"], ["娱乐", "🎬"], ["服饰", "👕"], ["其他", "🧺"]],
   special: [["旅行", "🧳"], ["人情礼金", "🧧"], ["礼物", "🎁"], ["大件购物", "🛋️"], ["维修", "🧰"], ["学习提升", "📚"], ["宠物", "🐾"], ["保险", "🛡️"], ["其他", "✨"]]
 };
 function subcategoryIcon(category, label) {
@@ -279,6 +280,44 @@ function renderAnnualExpensePie(months) {
   $("#annualExpenseEmpty").hidden = total > 0;
 }
 
+function renderDailySubcategoryStats() {
+  const selectedMonth = selectedDate.getMonth() + 1;
+  const prefix = subcategoryStatsRange === "year"
+    ? `${statsYear}-`
+    : `${statsYear}-${String(selectedMonth).padStart(2, "0")}`;
+  const items = state.entries
+    .filter((entry) => entry.recordType === "actual" && entry.category === "daily" && entry.date.startsWith(prefix))
+    .reduce((result, entry) => {
+      const label = entry.subcategory || "其他";
+      result.set(label, (result.get(label) || 0) + Number(entry.amount || 0));
+      return result;
+    }, new Map());
+  const rows = [...items.entries()]
+    .map(([label, amount]) => ({ label, amount }))
+    .sort((left, right) => right.amount - left.amount);
+  const total = rows.reduce((sum, item) => sum + item.amount, 0);
+  const max = Math.max(1, ...rows.map((item) => item.amount));
+  const period = subcategoryStatsRange === "year" ? `${statsYear}年` : `${statsYear}年${selectedMonth}月`;
+
+  $("#subcategoryStatsPeriod").textContent = period;
+  $("#subcategoryStatsTotal").textContent = formatMoney(total);
+  $("#subcategoryStatsList").innerHTML = rows.map((item) => `
+    <div class="subcategory-stats-row">
+      <i aria-hidden="true">${subcategoryIcon("daily", item.label)}</i>
+      <div class="subcategory-stats-main">
+        <div><span>${escapeHtml(item.label)}</span><small>${Math.round(item.amount / total * 100)}%</small></div>
+        <span class="subcategory-stats-track"><b style="--subcategory-width:${item.amount / max * 100}%"></b></span>
+      </div>
+      <strong>${formatMoney(item.amount)}</strong>
+    </div>
+  `).join("");
+  $("#subcategoryStatsEmpty").hidden = rows.length > 0;
+  $("#subcategoryStatsMonth").classList.toggle("active", subcategoryStatsRange === "month");
+  $("#subcategoryStatsMonth").setAttribute("aria-pressed", String(subcategoryStatsRange === "month"));
+  $("#subcategoryStatsYear").classList.toggle("active", subcategoryStatsRange === "year");
+  $("#subcategoryStatsYear").setAttribute("aria-pressed", String(subcategoryStatsRange === "year"));
+}
+
 function renderStats() {
   const months = annualStats();
   const annualTotal = months.reduce((total, item) => total + item.total, 0);
@@ -325,6 +364,7 @@ function renderStats() {
   $("#showIncome").setAttribute("aria-pressed", String(statsDirection === "income"));
   renderBalanceTrend();
   renderAnnualExpensePie(months);
+  renderDailySubcategoryStats();
 }
 
 function openStatsDetail(key) {
@@ -728,6 +768,8 @@ $("#statsNextYear").addEventListener("click", () => { statsYear += 1; renderStat
 $("#statsYearPicker").addEventListener("click", () => { statsYear = new Date().getFullYear(); renderStats(); });
 $("#showExpense").addEventListener("click", () => { statsDirection = "expense"; renderStats(); });
 $("#showIncome").addEventListener("click", () => { statsDirection = "income"; renderStats(); });
+$("#subcategoryStatsMonth").addEventListener("click", () => { subcategoryStatsRange = "month"; renderDailySubcategoryStats(); });
+$("#subcategoryStatsYear").addEventListener("click", () => { subcategoryStatsRange = "year"; renderDailySubcategoryStats(); });
 $("#closeStatsDialog").addEventListener("click", () => statsDialog.close());
 $("#openSearch").addEventListener("click", () => { renderSearchResults(); showView("searchView"); });
 $("#searchBack").addEventListener("click", () => showView("ledgerView"));

@@ -23,7 +23,7 @@
     <link rel="preload" as="image" href="./assets/illustrations/categories/daily.webp?v=2.2.2" type="image/webp" />
     <link rel="preload" as="image" href="./assets/illustrations/categories/special.webp?v=2.2.2" type="image/webp" />
     <title>厘清 · 私人记账本</title>
-    <link rel="stylesheet" href="./styles.css?v=2.2.2" />
+    <link rel="stylesheet" href="./styles.css?v=68" />
   </head>
   <body>
     <main class="app-shell">
@@ -308,6 +308,21 @@
           <p class="annual-empty" id="annualExpenseEmpty" hidden>这一年还没有实际支出</p>
         </section>
 
+        <section class="stats-insight" aria-labelledby="subcategoryStatsTitle">
+          <div class="stats-insight-heading subcategory-stats-heading">
+            <div>
+              <h2 id="subcategoryStatsTitle">日常开销小分类</h2>
+              <div class="subcategory-stats-meta"><span id="subcategoryStatsPeriod"></span> · 合计 <strong id="subcategoryStatsTotal">¥0.00</strong></div>
+            </div>
+            <div class="subcategory-stats-range" role="group" aria-label="选择小分类统计范围">
+              <button class="active" id="subcategoryStatsMonth" type="button" aria-pressed="true">月度</button>
+              <button id="subcategoryStatsYear" type="button" aria-pressed="false">年度</button>
+            </div>
+          </div>
+          <div class="subcategory-stats-list" id="subcategoryStatsList"></div>
+          <p class="annual-empty" id="subcategoryStatsEmpty" hidden>这段时间还没有日常开销记录</p>
+        </section>
+
         <section class="annual-sheet" aria-labelledby="annualChartTitle">
           <div class="stats-card-heading">
             <div>
@@ -539,6 +554,6 @@
     </dialog>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script type="module" src="./app.js?v=59"></script>
+    <script type="module" src="./app.js?v=60"></script>
   </body>
 </html>

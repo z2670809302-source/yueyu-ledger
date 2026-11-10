@@ -86,12 +86,13 @@ try {
   await waitFor("new URL(location.href).searchParams.has('__e2e') && document.readyState === 'complete' && document.querySelector('#addEntry')");
   await selectMonth(2026, 9);
 
-  const addEntry = (recordType, amount, category, date, note, paymentMethod = "cash") => evaluate(`(() => {
+  const addEntry = (recordType, amount, category, date, note, paymentMethod = "cash", subcategory = "") => evaluate(`(() => {
     document.querySelector('#addEntry').click();
     const form = document.querySelector('#entryForm');
     form.elements.recordType.value = ${JSON.stringify(recordType)};
     document.querySelector('#amount').value = ${JSON.stringify(amount)};
     document.querySelector('#category').value = ${JSON.stringify(category)};
+    document.querySelector('#subcategory').value = ${JSON.stringify(subcategory)};
     document.querySelector('#entryDate').value = ${JSON.stringify(date)};
     document.querySelector('#note').value = ${JSON.stringify(note)};
     form.elements.paymentMethod.value = ${JSON.stringify(paymentMethod)};
@@ -103,8 +104,8 @@ try {
   await addEntry("actual", 9800, "salary", "2026-09-02", "九月工资");
   await addEntry("expected", 2500, "rent", "2026-09-03", "九月房租计划");
   await addEntry("actual", 2500, "rent", "2026-09-03", "九月房租");
-  await addEntry("actual", 35, "daily", "2026-09-04", "早餐和地铁");
-  await addEntry("actual", 65, "daily", "2026-09-05", "日用品");
+  await addEntry("actual", 35, "daily", "2026-09-04", "早餐和地铁", "cash", "吃饭");
+  await addEntry("actual", 65, "daily", "2026-09-05", "日用品", "cash", "日用品");
   const entryFormLayout = await evaluate(`(() => {
     document.querySelector('#addEntry').click();
     const form = document.querySelector('#entryForm');
@@ -123,6 +124,7 @@ try {
     const suggestionsRect = suggestions.getBoundingClientRect();
     const toggleRect = toggle.getBoundingClientRect();
     const snack = document.querySelector('[data-subcategory="零食"]');
+    const phoneBill = document.querySelector('[data-subcategory="话费"]');
     const other = document.querySelector('[data-subcategory="其他"]');
     return {
       operatorText: [...document.querySelectorAll('.amount-operator')].map((button) => button.textContent).join(''),
@@ -140,6 +142,7 @@ try {
       subcategoryWidthMatchesToggle: Math.abs(suggestionsRect.width - toggleRect.width) < 0.5,
       subcategoryOptionCount: suggestions.querySelectorAll('[data-subcategory]').length,
       snackIcon: snack?.querySelector('i')?.textContent,
+      phoneBillIcon: phoneBill?.querySelector('i')?.textContent,
       hasOther: Boolean(other),
       hasCustom: Boolean(suggestions.querySelector('[data-subcategory-custom]'))
     };
@@ -158,6 +161,7 @@ try {
   assert.equal(entryFormLayout.subcategoryWidthMatchesToggle, true);
   assert.ok(entryFormLayout.subcategoryOptionCount >= 10);
   assert.equal(entryFormLayout.snackIcon, "🍪");
+  assert.equal(entryFormLayout.phoneBillIcon, "☎️");
   assert.equal(entryFormLayout.hasOther, true);
   assert.equal(entryFormLayout.hasCustom, true);
   await mkdir(".impeccable/review", { recursive: true });
@@ -382,6 +386,11 @@ try {
       annualExpense: document.querySelector('#statsAnnualExpense').textContent,
       annualNet: document.querySelector('#statsAnnualNet').textContent,
       latestBalance: document.querySelector('#statsLatestBalance').textContent,
+      subcategoryPeriod: document.querySelector('#subcategoryStatsPeriod').textContent,
+      subcategoryTotal: document.querySelector('#subcategoryStatsTotal').textContent,
+      subcategoryLabels: [...document.querySelectorAll('#subcategoryStatsList .subcategory-stats-main span:first-child')].map((item) => item.textContent),
+      subcategoryAmounts: [...document.querySelectorAll('#subcategoryStatsList > .subcategory-stats-row > strong')].map((item) => item.textContent),
+      subcategoryRange: document.querySelector('.subcategory-stats-range .active').textContent,
       sectionOrder: [
         document.querySelector('.stats-summary-grid'),
         document.querySelector('#balanceTrend').closest('.stats-insight'),
@@ -403,7 +412,7 @@ try {
   assert.equal(stats.totalLabel, "9月支出");
   assert.equal(stats.active, "支出");
   assert.equal(stats.monthsWithData, 1);
-  assert.equal(stats.trendPoints, 10);
+  assert.equal(stats.trendPoints, new Date().getMonth() + 1);
   assert.equal(stats.trendMonths, 12);
   assert.equal(stats.trendYLabels, 3);
   assert.match(stats.trendLabel, /月末结余走势/);
@@ -418,6 +427,11 @@ try {
   assert.equal(stats.annualExpense, "¥2,600.00");
   assert.equal(stats.annualNet, "¥7,200.00");
   assert.equal(stats.latestBalance, "¥7,200.00");
+  assert.equal(stats.subcategoryPeriod, "2026年9月");
+  assert.equal(stats.subcategoryTotal, "¥280.00");
+  assert.deepEqual(stats.subcategoryLabels, ["医疗", "日用品", "吃饭"]);
+  assert.deepEqual(stats.subcategoryAmounts, ["¥180.00", "¥65.00", "¥35.00"]);
+  assert.equal(stats.subcategoryRange, "月度");
   assert.deepEqual(stats.sectionOrder, [...stats.sectionOrder].sort((left, right) => left - right));
   assert.equal(stats.subtitle, "✦年度收支统计");
   assert.equal(stats.addButtonLeft, result.addButtonLeft);
@@ -430,6 +444,20 @@ try {
   await evaluate("document.querySelector('#annualExpensePie').scrollIntoView({block: 'center'}); true");
   const statsPieMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/stats-pie-mobile.png", Buffer.from(statsPieMobile.data, "base64"));
+  const subcategoryStats = await evaluate(`(() => {
+    document.querySelector('#subcategoryStatsYear').click();
+    document.querySelector('#subcategoryStatsList').scrollIntoView({block: 'center'});
+    return {
+      period: document.querySelector('#subcategoryStatsPeriod').textContent,
+      total: document.querySelector('#subcategoryStatsTotal').textContent,
+      range: document.querySelector('.subcategory-stats-range .active').textContent,
+      rows: document.querySelectorAll('#subcategoryStatsList .subcategory-stats-row').length
+    };
+  })()`);
+  assert.deepEqual(subcategoryStats, { period: "2026年", total: "¥280.00", range: "年度", rows: 3 });
+  const statsSubcategoryMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/stats-subcategory-mobile.png", Buffer.from(statsSubcategoryMobile.data, "base64"));
+  await evaluate("document.querySelector('#subcategoryStatsMonth').click(); true");
   await evaluate("document.documentElement.scrollTop = 0; document.body.scrollTop = 0; true");
   const expenseDetail = await evaluate(`(() => {
     document.querySelector('[data-stats-month="2026-09"]').click();
@@ -842,8 +870,8 @@ try {
   await delay(500);
   assert.equal(await evaluate("document.querySelector('#updateNotice').hidden"), true);
 
-  await call("Page.navigate", { url: "http://localhost:4174/?preview=69" });
-  await waitFor("document.readyState === 'complete' && sessionStorage.getItem('liqing-preview-reset-69') === '1'");
+  await call("Page.navigate", { url: "http://localhost:4174/?preview=70" });
+  await waitFor("document.readyState === 'complete' && sessionStorage.getItem('liqing-preview-reset-70') === '1'");
   const localPreviewCacheCleared = await waitFor(`(async () => {
     const registrations = await navigator.serviceWorker.getRegistrations();
     const keys = await caches.keys();
