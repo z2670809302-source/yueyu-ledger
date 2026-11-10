@@ -281,10 +281,11 @@ function renderAnnualExpensePie(months) {
 }
 
 function renderDailySubcategoryStats() {
+  const analysisYear = selectedDate.getFullYear();
   const selectedMonth = selectedDate.getMonth() + 1;
   const prefix = subcategoryStatsRange === "year"
-    ? `${statsYear}-`
-    : `${statsYear}-${String(selectedMonth).padStart(2, "0")}`;
+    ? `${analysisYear}-`
+    : `${analysisYear}-${String(selectedMonth).padStart(2, "0")}`;
   const items = state.entries
     .filter((entry) => entry.recordType === "actual" && entry.category === "daily" && entry.date.startsWith(prefix))
     .reduce((result, entry) => {
@@ -297,7 +298,7 @@ function renderDailySubcategoryStats() {
     .sort((left, right) => right.amount - left.amount);
   const total = rows.reduce((sum, item) => sum + item.amount, 0);
   const max = Math.max(1, ...rows.map((item) => item.amount));
-  const period = subcategoryStatsRange === "year" ? `${statsYear}年` : `${statsYear}年${selectedMonth}月`;
+  const period = subcategoryStatsRange === "year" ? `${analysisYear}年` : `${analysisYear}年${selectedMonth}月`;
 
   $("#subcategoryStatsPeriod").textContent = period;
   $("#subcategoryStatsTotal").textContent = formatMoney(total);
@@ -438,6 +439,7 @@ function renderDetail() {
   $("#detailHuabeiNotice").hidden = !huabeiNotice;
   $("#detailCount").textContent = entries.length ? `${entries.length} 条记录` : "还没有记录";
   $("#detailEmpty").hidden = entries.length > 0;
+  $("#openConsumptionAnalysis").hidden = activeDetailCategory !== "daily";
 
   const groups = entries.reduce((result, entry) => {
     if (!result.has(entry.date)) result.set(entry.date, []);
@@ -541,7 +543,7 @@ function renderSearchResults() {
 function showView(viewId) {
   document.querySelectorAll(".view").forEach((view) => { view.hidden = view.id !== viewId; });
   document.querySelectorAll(".nav-item").forEach((item) => {
-    const activeView = ["detailView", "searchView"].includes(viewId) ? "ledgerView" : viewId === "manageView" ? "statsView" : viewId;
+    const activeView = ["detailView", "analysisView", "searchView"].includes(viewId) ? "ledgerView" : viewId === "manageView" ? "statsView" : viewId;
     item.classList.toggle("active", item.dataset.view === activeView);
   });
   window.scrollTo({ top: 0, behavior: "auto" });
@@ -795,6 +797,12 @@ $("#manageBack").addEventListener("click", () => showView(manageReturnView));
 $("#detailAdd").addEventListener("click", () => openEntryForm({ category: activeDetailCategory }));
 $("#detailEmptyAdd").addEventListener("click", () => openEntryForm({ category: activeDetailCategory }));
 $("#detailBack").addEventListener("click", () => showView("ledgerView"));
+$("#openConsumptionAnalysis").addEventListener("click", () => {
+  subcategoryStatsRange = "month";
+  renderDailySubcategoryStats();
+  showView("analysisView");
+});
+$("#analysisBack").addEventListener("click", () => showView("detailView"));
 $("#closeDialog").addEventListener("click", closeEntryForm);
 $("#calibrateBalance").addEventListener("click", () => {
   manageReturnView = "ledgerView";

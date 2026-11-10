@@ -386,11 +386,7 @@ try {
       annualExpense: document.querySelector('#statsAnnualExpense').textContent,
       annualNet: document.querySelector('#statsAnnualNet').textContent,
       latestBalance: document.querySelector('#statsLatestBalance').textContent,
-      subcategoryPeriod: document.querySelector('#subcategoryStatsPeriod').textContent,
-      subcategoryTotal: document.querySelector('#subcategoryStatsTotal').textContent,
-      subcategoryLabels: [...document.querySelectorAll('#subcategoryStatsList .subcategory-stats-main span:first-child')].map((item) => item.textContent),
-      subcategoryAmounts: [...document.querySelectorAll('#subcategoryStatsList > .subcategory-stats-row > strong')].map((item) => item.textContent),
-      subcategoryRange: document.querySelector('.subcategory-stats-range .active').textContent,
+      subcategoryInStats: Boolean(document.querySelector('#statsView #subcategoryStatsList')),
       sectionOrder: [
         document.querySelector('.stats-summary-grid'),
         document.querySelector('#balanceTrend').closest('.stats-insight'),
@@ -427,11 +423,7 @@ try {
   assert.equal(stats.annualExpense, "¥2,600.00");
   assert.equal(stats.annualNet, "¥7,200.00");
   assert.equal(stats.latestBalance, "¥7,200.00");
-  assert.equal(stats.subcategoryPeriod, "2026年9月");
-  assert.equal(stats.subcategoryTotal, "¥280.00");
-  assert.deepEqual(stats.subcategoryLabels, ["医疗", "日用品", "吃饭"]);
-  assert.deepEqual(stats.subcategoryAmounts, ["¥180.00", "¥65.00", "¥35.00"]);
-  assert.equal(stats.subcategoryRange, "月度");
+  assert.equal(stats.subcategoryInStats, false);
   assert.deepEqual(stats.sectionOrder, [...stats.sectionOrder].sort((left, right) => left - right));
   assert.equal(stats.subtitle, "✦年度收支统计");
   assert.equal(stats.addButtonLeft, result.addButtonLeft);
@@ -444,20 +436,6 @@ try {
   await evaluate("document.querySelector('#annualExpensePie').scrollIntoView({block: 'center'}); true");
   const statsPieMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/stats-pie-mobile.png", Buffer.from(statsPieMobile.data, "base64"));
-  const subcategoryStats = await evaluate(`(() => {
-    document.querySelector('#subcategoryStatsYear').click();
-    document.querySelector('#subcategoryStatsList').scrollIntoView({block: 'center'});
-    return {
-      period: document.querySelector('#subcategoryStatsPeriod').textContent,
-      total: document.querySelector('#subcategoryStatsTotal').textContent,
-      range: document.querySelector('.subcategory-stats-range .active').textContent,
-      rows: document.querySelectorAll('#subcategoryStatsList .subcategory-stats-row').length
-    };
-  })()`);
-  assert.deepEqual(subcategoryStats, { period: "2026年", total: "¥280.00", range: "年度", rows: 3 });
-  const statsSubcategoryMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
-  await writeFile(".impeccable/review/stats-subcategory-mobile.png", Buffer.from(statsSubcategoryMobile.data, "base64"));
-  await evaluate("document.querySelector('#subcategoryStatsMonth').click(); true");
   await evaluate("document.documentElement.scrollTop = 0; document.body.scrollTop = 0; true");
   const expenseDetail = await evaluate(`(() => {
     document.querySelector('[data-stats-month="2026-09"]').click();
@@ -549,7 +527,8 @@ try {
       headerHeight: document.querySelector('.detail-topbar').getBoundingClientRect().height,
       backCircleWidth: getComputedStyle(document.querySelector('#detailBack'), '::before').width,
       subtitle: document.querySelector('#detailMonth').textContent,
-      logoSource: document.querySelector('#detailView .brand-wordmark').getAttribute('src')
+      logoSource: document.querySelector('#detailView .brand-wordmark').getAttribute('src'),
+      analysisButtonHidden: document.querySelector('#openConsumptionAnalysis').hidden
     };
     return value;
   })()`);
@@ -560,6 +539,7 @@ try {
   assert.equal(salaryDetail.backCircleWidth, "24px");
   assert.equal(salaryDetail.subtitle, "工资 · 2026 年 9 月明细");
   assert.equal(salaryDetail.logoSource, "./assets/branding/liqing-wordmark.webp?v=2.2.2");
+  assert.equal(salaryDetail.analysisButtonHidden, true);
   const salaryDetailMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/detail-mobile.png", Buffer.from(salaryDetailMobile.data, "base64"));
   await evaluate("document.querySelector('#detailBack').click(); true");
@@ -598,7 +578,8 @@ try {
       dates: [...document.querySelectorAll('.day-group h3')].map((item) => item.textContent),
       icons: [...document.querySelectorAll('#detailTimeline .entry-subcategory-icon')].map((item) => item.textContent),
       huabeiNotice: document.querySelector('#detailHuabeiNotice').textContent,
-      huabeiLabels: [...document.querySelectorAll('#detailTimeline .entry-main small')].filter((item) => item.textContent.includes('花呗')).length
+      huabeiLabels: [...document.querySelectorAll('#detailTimeline .entry-main small')].filter((item) => item.textContent.includes('花呗')).length,
+      analysisButtonVisible: !document.querySelector('#openConsumptionAnalysis').hidden
     };
   })()`);
   assert.equal(dailyDetail.title, "日常开销");
@@ -610,8 +591,43 @@ try {
   assert.ok(dailyDetail.dates.some((date) => date.includes("9月5日")));
   assert.match(dailyDetail.huabeiNotice, /¥180\.00/);
   assert.equal(dailyDetail.huabeiLabels, 1);
+  assert.equal(dailyDetail.analysisButtonVisible, true);
   const detailIconsMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
   await writeFile(".impeccable/review/detail-icons-mobile.png", Buffer.from(detailIconsMobile.data, "base64"));
+  const consumptionAnalysis = await evaluate(`(() => {
+    document.querySelector('#openConsumptionAnalysis').click();
+    return {
+      visible: !document.querySelector('#analysisView').hidden,
+      statsHidden: document.querySelector('#statsView').hidden,
+      period: document.querySelector('#subcategoryStatsPeriod').textContent,
+      total: document.querySelector('#subcategoryStatsTotal').textContent,
+      range: document.querySelector('.subcategory-stats-range .active').textContent,
+      labels: [...document.querySelectorAll('#subcategoryStatsList .subcategory-stats-main span:first-child')].map((item) => item.textContent),
+      amounts: [...document.querySelectorAll('#subcategoryStatsList > .subcategory-stats-row > strong')].map((item) => item.textContent),
+      ledgerNavActive: document.querySelector('[data-view="ledgerView"]').classList.contains('active')
+    };
+  })()`);
+  assert.equal(consumptionAnalysis.visible, true);
+  assert.equal(consumptionAnalysis.statsHidden, true);
+  assert.equal(consumptionAnalysis.period, "2026年9月");
+  assert.equal(consumptionAnalysis.total, "¥280.00");
+  assert.equal(consumptionAnalysis.range, "月度");
+  assert.deepEqual(consumptionAnalysis.labels, ["医疗", "日用品", "吃饭"]);
+  assert.deepEqual(consumptionAnalysis.amounts, ["¥180.00", "¥65.00", "¥35.00"]);
+  assert.equal(consumptionAnalysis.ledgerNavActive, true);
+  const annualConsumptionAnalysis = await evaluate(`(() => {
+    document.querySelector('#subcategoryStatsYear').click();
+    return {
+      period: document.querySelector('#subcategoryStatsPeriod').textContent,
+      total: document.querySelector('#subcategoryStatsTotal').textContent,
+      range: document.querySelector('.subcategory-stats-range .active').textContent,
+      rows: document.querySelectorAll('#subcategoryStatsList .subcategory-stats-row').length
+    };
+  })()`);
+  assert.deepEqual(annualConsumptionAnalysis, { period: "2026年", total: "¥280.00", range: "年度", rows: 3 });
+  const consumptionAnalysisMobile = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+  await writeFile(".impeccable/review/consumption-analysis-mobile.png", Buffer.from(consumptionAnalysisMobile.data, "base64"));
+  assert.equal(await evaluate("document.querySelector('#analysisBack').click(); !document.querySelector('#detailView').hidden"), true);
   await evaluate("document.querySelector('#detailBack').click(); true");
 
   const nextMonthRepayment = await evaluate(`(() => {
@@ -870,8 +886,8 @@ try {
   await delay(500);
   assert.equal(await evaluate("document.querySelector('#updateNotice').hidden"), true);
 
-  await call("Page.navigate", { url: "http://localhost:4174/?preview=70" });
-  await waitFor("document.readyState === 'complete' && sessionStorage.getItem('liqing-preview-reset-70') === '1'");
+  await call("Page.navigate", { url: "http://localhost:4174/?preview=71" });
+  await waitFor("document.readyState === 'complete' && sessionStorage.getItem('liqing-preview-reset-71') === '1'");
   const localPreviewCacheCleared = await waitFor(`(async () => {
     const registrations = await navigator.serviceWorker.getRegistrations();
     const keys = await caches.keys();
